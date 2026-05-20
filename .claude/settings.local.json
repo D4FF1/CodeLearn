@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''content/html.json'', ''utf8''\\)\\); console.log\\(''html.json: OK''\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''content/css.json'', ''utf8''\\)\\); console.log\\(''css.json: OK''\\)\")",
+      "Bash(python3 -c \"import json; json.load\\(open\\(''content/css.json''\\)\\); print\\(''css.json: OK''\\)\")",
+      "Bash(python -c \"import json; json.load\\(open\\(''content/css.json''\\)\\); print\\(''css.json: OK''\\)\")",
+      "Bash(python3 -c \"import json; json.load\\(open\\(''content/js.json''\\)\\); print\\(''js.json: OK''\\)\")",
+      "Bash(python -c \"import json; json.load\\(open\\(''content/js.json''\\)\\); print\\(''js.json: OK''\\)\")",
+      "Bash('/c/Users/daffi/Downloads/belajar/content/js.html')",
+      "Bash(wc -l /c/Users/daffi/Downloads/belajar/content/*.html)",
+      "Bash(echo ':*)",
+      "Bash(\"c:\\\\Users\\\\daffi\\\\Downloads\\\\belajar\\\\content\\\\html.html\")",
+      "Bash(perl -i -pe 'BEGIN{undef $/;} s/\\\\n  <script>\\\\n.*?const themeToggle.*?<\\\\/html>\\\\n\\(?=<!-- LESSON\\)/\\\\n/sg' \"c:\\\\Users\\\\daffi\\\\Downloads\\\\belajar\\\\content\\\\css.html\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(awk '/^  <script>/ { skip=1 } /^<\\\\/html>/ && skip { skip=0; next } !skip' \"c:\\\\Users\\\\daffi\\\\Downloads\\\\belajar\\\\content\\\\css.html\")",
+      "Bash(\"c:\\\\Users\\\\daffi\\\\Downloads\\\\belajar\\\\content\\\\css_clean.html\")"
+    ]
+  }
+}

@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deployment - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #06b6d4;
+      --accent-secondary: #0891b2;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(6, 182, 212, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { font-family: var(--font-display); background: var(--bg); color: var(--fg); line-height: 1.7; overflow-x: hidden; }
+
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.5s ease, visibility 0.5s ease; }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; color: var(--fg-muted); }
+
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .grid-pattern { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+
+            /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    /* Navigation Links Container */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Arrow */
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Divider */
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* Dropdown Section Label */
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Nav Actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .page-hero { min-height: 50vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 60px; position: relative; }
+    .page-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; }
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 100px; font-size: 0.85rem; color: var(--accent); margin-bottom: 24px; }
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .lesson-grid { display: grid; gap: 16px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; }
+    .lesson-toggle { color: var(--fg-muted); transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 3500px; }
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+
+    .explanation { margin-bottom: 1rem; background: rgba(6, 182, 212, 0.05); padding: 12px 16px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.95rem; line-height: 1.6; }
+    .explanation strong { color: var(--accent); }
+
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; }
+    .code-copy:hover { background: var(--accent); color: #000; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+
+    .info-box { background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul { margin: 8px 0 0 20px; }
+
+    .keyword { color: #ff7b54; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .number { color: #f0883e; }
+    .function { color: #d2a8ff; }
+    .cmd { color: #7ee787; }
+    .flag { color: #ffa657; }
+
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+    .comparison-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .comparison-card h4 { color: var(--accent); margin-bottom: 8px; font-size: 1rem; }
+    .comparison-card ul { list-style: none; }
+    .comparison-card li { padding: 4px 0; color: var(--fg-muted); font-size: 0.9rem; }
+
+    .diagram { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; overflow-x: auto; }
+    .diagram pre { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.4; color: var(--fg); }
+
+    .checklist { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 16px 0; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; }
+    .checklist-item::before { content: '✓'; color: var(--success); font-weight: bold; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Memuat materi Deployment...</div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+  </div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <!-- Dropdown: Frontend -->
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: Backend -->
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: DevOps -->
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">18 Lessons</div>
+      <h1>Belajar <span class="highlight">Deployment</span></h1>
+      <p>Pelajari cara membawa aplikasi dari localhost ke production: hosting, CI/CD, Docker, cloud platforms, dan best practices.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1: Pengenalan -->
+<div data-topic="deploy-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">1</div><h3 class="lesson-title">Apa itu Deployment?</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Deployment adalah proses memindahkan aplikasi dari environment development ke environment production agar bisa diakses oleh user.</p>
+          <div class="diagram">
+            <pre>
+DEVELOPMENT               STAGING                  PRODUCTION
+─────────────             ────────                 ──────────
+┌───────────┐             ┌───────────┐            ┌───────────┐
+│  Localhost│             │  Test     │            │  Live     │
+│  laptop   │────────────►│  Server   │───────────►│  Server   │
+│           │             │           │            │           │
+│  .env.dev │             │  .env.stg │            │  .env.prod│
+└───────────┘             └───────────┘            └───────────┘
+    │                          │                        │
+    ▼                          ▼                        ▼
+ localhost:3000           staging.app.com          app.com
+            </pre>
+          </div>
+          <div class="explanation">
+            <strong>Environment dalam Development:</strong><br>
+            1. <strong>Development</strong> — Di komputer lokal, untuk coding dan testing awal<br>
+            2. <strong>Staging</strong> — Server testing, mirip production untuk final testing<br>
+            3. <strong>Production</strong> — Server live yang diakses user
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2: Deployment Options -->
+<div data-topic="deploy-options">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">Deployment Options: Static vs Server</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Cara deployment berbeda tergantung jenis aplikasi. Static sites lebih mudah dan murah, sedangkan server-side apps membutuhkan lebih banyak resource.</p>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>Static Sites</h4>
+              <ul>
+                <li>HTML, CSS, JS files only</li>
+                <li>No server-side processing</li>
+                <li>Cheap or free hosting</li>
+                <li>CDN delivery</li>
+                <li>Vercel, Netlify, GitHub Pages</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Server-Side Apps</h4>
+              <ul>
+                <li>Node.js, Python, PHP, etc</li>
+                <li>Need runtime environment</li>
+                <li>Higher cost</li>
+                <li>More configuration</li>
+                <li>Heroku, Railway, DigitalOcean, AWS</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3: Vercel -->
+<div data-topic="deploy-vercel">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">Deploy ke Vercel</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Vercel adalah platform deployment terbaik untuk frontend frameworks (Next.js, React, Vue, dll) dengan fitur auto-deploy dari Git.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Install Vercel CLI</span>
+npm install <span class="flag">-g</span> vercel
+
+<span class="comment"># Login</span>
+vercel login
+
+<span class="comment"># Deploy dari local</span>
+vercel
+
+<span class="comment"># Deploy to production</span>
+vercel <span class="flag">--prod</span>
+
+<span class="comment"># Untuk Next.js, build otomatis!</span>
+<span class="comment"># Vercel detect framework secara otomatis</span></code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">vercel.json (optional config)</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code>{
+  <span class="property">"version"</span>: <span class="number">2</span>,
+  <span class="property">"builds"</span>: [
+    { <span class="property">"src"</span>: <span class="string">"package.json"</span>, <span class="property">"use"</span>: <span class="string">"@vercel/next"</span> }
+  ],
+  <span class="property">"routes"</span>: [
+    { <span class="property">"src"</span>: <span class="string">"/(.*)"</span>, <span class="property">"dest"</span>: <span class="string">"/"</span> }
+  ],
+  <span class="property">"env"</span>: {
+    <span class="property">"NEXT_PUBLIC_API_URL"</span>: <span class="string">"https://api.example.com"</span>
+  }
+}</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Kelebihan Vercel:</strong><br>
+            - Free tier generous<br>
+            - Auto-deploy dari Git push<br>
+            - Preview deployment untuk setiap branch<br>
+            - Built-in SSL/HTTPS<br>
+            - Global CDN<br>
+            - Perfect untuk Next.js
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4: Netlify -->
+<div data-topic="deploy-netlify">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Deploy ke Netlify</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Netlify adalah alternatif Vercel dengan fitur serupa, bagus untuk static sites dan JAMstack applications.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Install Netlify CLI</span>
+npm install <span class="flag">-g</span> netlify-cli
+
+<span class="comment"># Login</span>
+netlify login
+
+<span class="comment"># Initialize project</span>
+netlify init
+
+<span class="comment"># Deploy preview</span>
+netlify deploy
+
+<span class="comment"># Deploy to production</span>
+netlify deploy <span class="flag">--prod</span></code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">netlify.toml</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code>[build]
+  <span class="property">command</span> = <span class="string">"npm run build"</span>
+  <span class="property">publish</span> = <span class="string">"dist"</span>
+
+[build.environment]
+  <span class="property">NODE_VERSION</span> = <span class="string">"18"</span>
+
+[[redirects]]
+  <span class="property">from</span> = <span class="string">"/*"</span>
+  <span class="property">to</span> = <span class="string">"/index.html"</span>
+  <span class="property">status</span> = <span class="number">200</span>
+
+[[headers]]
+  <span class="keyword">for</span> = <span class="string">"/*"</span>
+  [headers.values]
+    <span class="property">X-Frame-Options</span> = <span class="string">"DENY"</span>
+    <span class="property">X-Content-Type-Options</span> = <span class="string">"nosniff"</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5: GitHub Pages -->
+<div data-topic="deploy-github-pages">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Deploy ke GitHub Pages</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">GitHub Pages adalah hosting gratis dari GitHub untuk static sites. Cocok untuk portfolio, documentation, dan project pages.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Method 1: Manual - push ke branch gh-pages</span>
+git checkout <span class="flag">-b</span> gh-pages
+git push origin gh-pages
+
+<span class="comment"># Method 2: GitHub Actions (recommended)</span>
+<span class="comment"># .github/workflows/deploy.yml</span>
+
+<span class="keyword">name</span>: Deploy to GitHub Pages
+
+<span class="keyword">on</span>:
+  <span class="property">push</span>:
+    <span class="property">branches</span>: [ main ]
+
+<span class="property">jobs</span>:
+  <span class="property">deploy</span>:
+    <span class="property">runs-on</span>: ubuntu-latest
+    <span class="property">steps</span>:
+      <span class="keyword">-</span> uses: actions/checkout@v3
+      <span class="keyword">-</span> uses: actions/setup-node@v3
+        <span class="keyword">with</span>:
+          <span class="property">node-version</span>: <span class="string">'18'</span>
+      <span class="keyword">-</span> run: npm ci
+      <span class="keyword">-</span> run: npm run build
+      <span class="keyword">-</span> uses: peaceiris/actions-gh-pages@v3
+        <span class="keyword">with</span>:
+          <span class="property">github_token</span>: ${{ secrets.GITHUB_TOKEN }}
+          <span class="property">publish_dir</span>: ./dist</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>GitHub Pages URL:</strong><br>
+            - User site: <code>username.github.io</code><br>
+            - Project site: <code>username.github.io/repo-name</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6: Railway/Render -->
+<div data-topic="deploy-paas">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">Backend Deployment: Railway & Render</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Untuk aplikasi backend (Node.js, Python, dll), Railway dan Render adalah PaaS (Platform as a Service) yang mudah digunakan.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal - Railway</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Install Railway CLI</span>
+npm install <span class="flag">-g</span> @railway/cli
+
+<span class="comment"># Login</span>
+railway login
+
+<span class="comment"># Initialize project</span>
+railway init
+
+<span class="comment"># Deploy</span>
+railway up
+
+<span class="comment"># Add database</span>
+railway add <span class="flag">--plugin</span> postgres
+
+<span class="comment"># Set environment variables</span>
+railway variables set JWT_SECRET=your-secret
+
+<span class="comment"># Open deployed app</span>
+railway open</code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">render.yaml</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="property">services</span>:
+  <span class="keyword">-</span> <span class="property">type</span>: web
+    <span class="property">name</span>: my-api
+    <span class="property">env</span>: node
+    <span class="property">buildCommand</span>: npm install
+    <span class="property">startCommand</span>: npm start
+    <span class="property">envVars</span>:
+      <span class="keyword">-</span> <span class="property">key</span>: NODE_ENV
+        <span class="property">value</span>: production
+      <span class="keyword">-</span> <span class="property">key</span>: DATABASE_URL
+        <span class="property">fromDatabase</span>:
+          <span class="property">name</span>: my-db
+          <span class="property">property</span>: connectionString
+
+<span class="property">databases</span>:
+  <span class="keyword">-</span> <span class="property">name</span>: my-db
+    <span class="property">plan</span>: free</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7: Environment Variables -->
+<div data-topic="deploy-env">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Environment Variables di Production</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Environment variables berbeda di setiap environment. Jangan hardcode sensitive values!</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Config Pattern</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// config.js - Centralized config</span>
+<span class="keyword">const</span> config = {
+  <span class="property">development</span>: {
+    <span class="property">apiUrl</span>: <span class="string">'http://localhost:3000/api'</span>,
+    <span class="property">dbUrl</span>: <span class="string">'mongodb://localhost:27017/dev'</span>
+  },
+  <span class="property">production</span>: {
+    <span class="property">apiUrl</span>: process.env.<span class="property">API_URL</span>,
+    <span class="property">dbUrl</span>: process.env.<span class="property">DATABASE_URL</span>
+  }
+};
+
+<span class="keyword">const</span> env = process.env.<span class="property">NODE_ENV</span> || <span class="string">'development'</span>;
+<span class="keyword">export default</span> config[env];
+
+<span class="comment">// Di hosting platform, set via dashboard:</span>
+<span class="comment">// Vercel: Settings → Environment Variables</span>
+<span class="comment">// Railway: Variables tab</span>
+<span class="comment">// Render: Environment section</span>
+
+<span class="comment">// Validasi env vars saat startup</span>
+<span class="keyword">const</span> requiredEnvVars = [
+  <span class="string">'DATABASE_URL'</span>,
+  <span class="string">'JWT_SECRET'</span>,
+  <span class="string">'API_KEY'</span>
+];
+
+requiredEnvVars.<span class="function">forEach</span>(envVar => {
+  <span class="keyword">if</span> (!process.env[envVar]) {
+    <span class="keyword">throw new</span> <span class="function">Error</span>(<span class="string">`Missing required env var: ${envVar}`</span>);
+  }
+});</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Best Practices:</strong><br>
+            - Jangan commit .env ke Git<br>
+            - Gunakan different values untuk setiap environment<br>
+            - Rotate secrets secara berkala<br>
+            - Gunakan secrets manager untuk production besar
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8: Build Process -->
+<div data-topic="deploy-build">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Build Process & Optimization</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Build process mengubah source code menjadi file yang optimal untuk production.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">package.json</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code>{
+  <span class="property">"scripts"</span>: {
+    <span class="string">"dev"</span>: <span class="string">"vite"</span>,
+    <span class="string">"build"</span>: <span class="string">"vite build"</span>,
+    <span class="string">"preview"</span>: <span class="string">"vite preview"</span>,
+    <span class="string">"lint"</span>: <span class="string">"eslint src --ext .js,.jsx"</span>,
+    <span class="string">"test"</span>: <span class="string">"vitest"</span>
+  }
+}
+
+<span class="comment"># Typical deployment commands</span>
+npm ci            <span class="comment"># Clean install (faster, uses lock file)</span>
+npm run build     <span class="comment"># Generate production build</span>
+npm run preview   <span class="comment"># Test build locally</span></code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">vite.config.js</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">import</span> { defineConfig } <span class="keyword">from</span> <span class="string">'vite'</span>;
+<span class="keyword">import</span> react <span class="keyword">from</span> <span class="string">'@vitejs/plugin-react'</span>;
+
+<span class="keyword">export default</span> <span class="function">defineConfig</span>({
+  <span class="property">plugins</span>: [<span class="function">react</span>()],
+  <span class="property">build</span>: {
+    <span class="property">outDir</span>: <span class="string">'dist'</span>,
+    <span class="property">sourcemap</span>: <span class="keyword">false</span>,  <span class="comment">// Disable for production</span>
+    <span class="property">minify</span>: <span class="string">'terser'</span>,
+    <span class="property">rollupOptions</span>: {
+      <span class="property">output</span>: {
+        <span class="property">manualChunks</span>: {
+          <span class="string">'vendor'</span>: [<span class="string">'react'</span>, <span class="string">'react-dom'</span>],
+          <span class="string">'utils'</span>: [<span class="string">'lodash'</span>, <span class="string">'axios'</span>]
+        }
+      }
+    }
+  }
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9: CI/CD -->
+<div data-topic="deploy-cicd">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">CI/CD Pipeline</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">CI/CD (Continuous Integration/Continuous Deployment) mengotomatiskan proses testing dan deployment setiap ada perubahan kode.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">.github/workflows/ci.yml</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">name</span>: CI/CD Pipeline
+
+<span class="keyword">on</span>:
+  <span class="property">push</span>:
+    <span class="property">branches</span>: [ main ]
+  <span class="property">pull_request</span>:
+    <span class="property">branches</span>: [ main ]
+
+<span class="property">jobs</span>:
+  <span class="property">test</span>:
+    <span class="property">runs-on</span>: ubuntu-latest
+    <span class="property">steps</span>:
+      <span class="keyword">-</span> uses: actions/checkout@v3
+      
+      <span class="keyword">-</span> name: Setup Node.js
+        uses: actions/setup-node@v3
+        <span class="keyword">with</span>:
+          <span class="property">node-version</span>: <span class="string">'18'</span>
+          <span class="property">cache</span>: <span class="string">'npm'</span>
+      
+      <span class="keyword">-</span> name: Install dependencies
+        run: npm ci
+      
+      <span class="keyword">-</span> name: Run linter
+        run: npm run lint
+      
+      <span class="keyword">-</span> name: Run tests
+        run: npm test
+      
+      <span class="keyword">-</span> name: Build
+        run: npm run build
+
+  <span class="property">deploy</span>:
+    <span class="property">needs</span>: test
+    <span class="property">runs-on</span>: ubuntu-latest
+    <span class="property">if</span>: github.ref == <span class="string">'refs/heads/main'</span>
+    <span class="property">steps</span>:
+      <span class="keyword">-</span> uses: actions/checkout@v3
+      
+      <span class="keyword">-</span> name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        <span class="keyword">with</span>:
+          <span class="property">vercel-token</span>: ${{ secrets.VERCEL_TOKEN }}
+          <span class="property">vercel-org-id</span>: ${{ secrets.ORG_ID }}
+          <span class="property">vercel-project-id</span>: ${{ secrets.PROJECT_ID }}
+          <span class="property">vercel-args</span>: <span class="string">'--prod'</span></code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+CI/CD FLOW:
+───────────
+
+    Push to Main
+         │
+         ▼
+┌─────────────────┐
+│   Code Checkout │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  npm ci / build │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   Lint & Test   │──── FAIL ───► Notify Team
+└────────┬────────┘
+         │ PASS
+         ▼
+┌─────────────────┐
+│ Deploy to Staging│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Auto/Manual    │
+│  Deploy to Prod │
+└─────────────────┘
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 10: Docker Basics -->
+<div data-topic="deploy-docker">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Docker: Containerization</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Docker memungkinkan package aplikasi dengan semua dependencies dalam container yang konsisten di semua environment.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Dockerfile</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Node.js application Dockerfile</span>
+<span class="keyword">FROM</span> node:18-alpine
+
+<span class="comment"># Set working directory</span>
+<span class="keyword">WORKDIR</span> /app
+
+<span class="comment"># Copy package files</span>
+<span class="keyword">COPY</span> package*.json ./
+
+<span class="comment"># Install dependencies</span>
+<span class="keyword">RUN</span> npm ci <span class="flag">--only=production</span>
+
+<span class="comment"># Copy source code</span>
+<span class="keyword">COPY</span> . .
+
+<span class="comment"># Expose port</span>
+<span class="keyword">EXPOSE</span> 3000
+
+<span class="comment"># Start command</span>
+<span class="keyword">CMD</span> [<span class="string">"node"</span>, <span class="string">"server.js"</span>]
+
+<span class="comment"># Multi-stage build (smaller image)</span>
+<span class="keyword">FROM</span> node:18-alpine <span class="keyword">AS</span> builder
+<span class="keyword">WORKDIR</span> /app
+<span class="keyword">COPY</span> . .
+<span class="keyword">RUN</span> npm install && npm run build
+
+<span class="keyword">FROM</span> node:18-alpine
+<span class="keyword">WORKDIR</span> /app
+<span class="keyword">COPY</span> <span class="flag">--from=builder</span> /app/dist ./dist
+<span class="keyword">CMD</span> [<span class="string">"node"</span>, <span class="string">"dist/server.js"</span>]</code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Build image</span>
+docker build <span class="flag">-t</span> myapp:latest .
+
+<span class="comment"># Run container</span>
+docker run <span class="flag">-p</span> <span class="number">3000</span>:<span class="number">3000</span> <span class="flag">--env-file</span> .env myapp:latest
+
+<span class="comment"># Run in background</span>
+docker run <span class="flag">-d</span> <span class="flag">-p</span> <span class="number">3000</span>:<span class="number">3000</span> <span class="flag">--name</span> myapp myapp:latest
+
+<span class="comment"># View logs</span>
+docker logs myapp <span class="flag">-f</span>
+
+<span class="comment"># Stop & remove</span>
+docker stop myapp
+docker rm myapp</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11: Docker Compose -->
+<div data-topic="deploy-docker-compose">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Docker Compose: Multi-Container</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Docker Compose memudahkan menjalankan aplikasi multi-container (app + database + redis, dll).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">docker-compose.yml</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="property">version</span>: <span class="string">'3.8'</span>
+
+<span class="property">services</span>:
+  <span class="property">app</span>:
+    <span class="property">build</span>: .
+    <span class="property">ports</span>:
+      <span class="keyword">-</span> <span class="string">"3000:3000"</span>
+    <span class="property">environment</span>:
+      <span class="property">DATABASE_URL</span>: postgres://user:pass@db:5432/myapp
+      <span class="property">REDIS_URL</span>: redis://redis:6379
+    <span class="property">depends_on</span>:
+      <span class="keyword">-</span> db
+      <span class="keyword">-</span> redis
+
+  <span class="property">db</span>:
+    <span class="property">image</span>: postgres:15-alpine
+    <span class="property">volumes</span>:
+      <span class="keyword">-</span> postgres_data:/var/lib/postgresql/data
+    <span class="property">environment</span>:
+      <span class="property">POSTGRES_USER</span>: user
+      <span class="property">POSTGRES_PASSWORD</span>: pass
+      <span class="property">POSTGRES_DB</span>: myapp
+
+  <span class="property">redis</span>:
+    <span class="property">image</span>: redis:7-alpine
+    <span class="property">volumes</span>:
+      <span class="keyword">-</span> redis_data:/data
+
+<span class="property">volumes</span>:
+  postgres_data:
+  redis_data:</code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Start all services</span>
+docker-compose up <span class="flag">-d</span>
+
+<span class="comment"># View logs</span>
+docker-compose logs <span class="flag">-f</span>
+
+<span class="comment"># Stop all</span>
+docker-compose down
+
+<span class="comment"># Stop & remove volumes</span>
+docker-compose down <span class="flag">-v</span>
+
+<span class="comment"># Rebuild after code changes</span>
+docker-compose up <span class="flag">--build</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12: Domain & DNS -->
+<div data-topic="deploy-domain">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">Custom Domain & DNS</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Custom domain membuat aplikasi terlihat profesional. DNS menghubungkan domain dengan server.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">DNS Records</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Common DNS Record Types</span>
+
+<span class="property">A Record</span>      <span class="comment"># Domain → IP Address</span>
+example.com     →  192.168.1.1
+
+<span class="property">CNAME</span>         <span class="comment"># Domain → Another Domain</span>
+www.example.com →  example.com
+app.example.com →  myapp.vercel.app
+
+<span class="property">TXT</span>           <span class="comment"># Text records (verification, SPF)</span>
+example.com     →  "v=spf1 include:_spf.google.com ~all"
+
+<span class="property">MX</span>             <span class="comment"># Mail server</span>
+example.com     →  mail.example.com
+
+<span class="comment"># Setup custom domain di Vercel/Netlify:</span>
+<span class="comment"># 1. Add domain di dashboard</span>
+<span class="comment"># 2. Copy DNS records</span>
+<span class="comment"># 3. Add records di domain registrar</span>
+<span class="comment"># 4. Wait for propagation (minutes to 48 hours)</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Domain Registrar Populer:</strong><br>
+            - Namecheap (recommended)<br>
+            - Google Domains<br>
+            - Cloudflare (free, dengan proxy)<br>
+            - GoDaddy
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13: SSL/HTTPS -->
+<div data-topic="deploy-ssl">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">SSL/HTTPS Configuration</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">HTTPS adalah keharusan untuk production. SSL certificate mengenkripsi data antara browser dan server.</p>
+          <div class="explanation">
+            <strong>SSL di Platform Modern:</strong><br>
+            - <strong>Vercel/Netlify</strong> — Auto SSL via Let's Encrypt, tinggal add domain<br>
+            - <strong>Cloudflare</strong> — Free SSL dengan proxy<br>
+            - <strong>Certbot</strong> — Manual SSL untuk VPS
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal (Certbot di VPS)</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Install Certbot</span>
+sudo apt update
+sudo apt install certbot python3-certbot-nginx
+
+<span class="comment"># Get certificate</span>
+sudo certbot <span class="flag">--nginx</span> <span class="flag">-d</span> example.com <span class="flag">-d</span> www.example.com
+
+<span class="comment"># Auto-renewal test</span>
+sudo certbot renew <span class="flag">--dry-run</span>
+
+<span class="comment"># Nginx config dengan SSL</span>
+server {
+    listen <span class="number">443</span> ssl;
+    server_name example.com;
+    
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+}
+
+server {
+    listen <span class="number">80</span>;
+    server_name example.com;
+    return <span class="number">301</span> https://$server_name$request_uri;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14: Monitoring -->
+<div data-topic="deploy-monitoring">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Monitoring & Logging</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Monitoring membantu mengetahui kesehatan aplikasi, sedangkan logging penting untuk debugging.</p>
+          <div class="info-box">
+            <strong>Monitoring Tools:</strong><br>
+            - <strong>Sentry</strong> — Error tracking & performance<br>
+            - <strong>Datadog</strong> — Full observability<br>
+            - <strong>New Relic</strong> — APM & monitoring<br>
+            - <strong>Uptime Robot</strong> — Free uptime monitoring<br>
+            - <strong>Grafana + Prometheus</strong> — Self-hosted monitoring
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript (Sentry)</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install @sentry/node</span>
+<span class="keyword">const</span> Sentry = <span class="function">require</span>(<span class="string">'@sentry/node'</span>);
+
+Sentry.<span class="function">init</span>({
+  <span class="property">dsn</span>: process.env.<span class="property">SENTRY_DSN</span>,
+  <span class="property">environment</span>: process.env.<span class="property">NODE_ENV</span>,
+  <span class="property">tracesSampleRate</span>: <span class="number">0.1</span>
+});
+
+<span class="comment">// Error tracking</span>
+<span class="keyword">try</span> {
+  <span class="comment">// Code that might fail</span>
+} <span class="keyword">catch</span> (error) {
+  Sentry.<span class="function">captureException</span>(error);
+  <span class="keyword">throw</span> error;
+}
+
+<span class="comment">// Performance monitoring</span>
+<span class="keyword">const</span> transaction = Sentry.<span class="function">startTransaction</span>({
+  <span class="property">op</span>: <span class="string">"db.query"</span>,
+  <span class="property">name</span>: <span class="string">"Get Users"</span>
+});
+<span class="comment">// ... query code</span>
+transaction.<span class="function">finish</span>();</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15: Performance -->
+<div data-topic="deploy-performance">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Performance Optimization</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Optimasi performa membuat aplikasi lebih cepat dan menghemat resource.</p>
+          <div class="checklist">
+            <div class="checklist-item">Minify & compress assets (JS, CSS, images)</div>
+            <div class="checklist-item">Enable gzip/brotli compression</div>
+            <div class="checklist-item">Use CDN for static files</div>
+            <div class="checklist-item">Implement caching headers</div>
+            <div class="checklist-item">Lazy load images</div>
+            <div class="checklist-item">Code splitting for JS bundles</div>
+            <div class="checklist-item">Database query optimization</div>
+            <div class="checklist-item">Connection pooling</div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Nginx Config</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Enable gzip</span>
+gzip <span class="keyword">on</span>;
+gzip_types text/plain text/css application/json application/javascript text/xml;
+gzip_min_length <span class="number">1000</span>;
+
+<span class="comment"># Cache static files</span>
+location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+    expires <span class="number">1y</span>;
+    add_header Cache-Control <span class="string">"public, immutable"</span>;
+}
+
+<span class="comment"># Security headers</span>
+add_header X-Frame-Options <span class="string">"SAMEORIGIN"</span>;
+add_header X-Content-Type-Options <span class="string">"nosniff"</span>;
+add_header X-XSS-Protection <span class="string">"1; mode=block"</span>;</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 16: Security -->
+<div data-topic="deploy-security">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">Production Security Checklist</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="checklist">
+            <div class="checklist-item">HTTPS enabled (SSL certificate)</div>
+            <div class="checklist-item">Environment variables for secrets</div>
+            <div class="checklist-item">Rate limiting implemented</div>
+            <div class="checklist-item">CORS configured properly</div>
+            <div class="checklist-item">Input validation on all endpoints</div>
+            <div class="checklist-item">SQL injection prevention</div>
+            <div class="checklist-item">XSS protection headers</div>
+            <div class="checklist-item">Authentication & authorization</div>
+            <div class="checklist-item">Regular dependency updates</div>
+            <div class="checklist-item">Backup strategy in place</div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Express Security Middleware</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">const</span> helmet = <span class="function">require</span>(<span class="string">'helmet'</span>);
+<span class="keyword">const</span> rateLimit = <span class="function">require</span>(<span class="string">'express-rate-limit'</span>);
+
+<span class="comment">// Security headers</span>
+app.<span class="function">use</span>(<span class="function">helmet</span>());
+
+<span class="comment">// Rate limiting</span>
+app.<span class="function">use</span>(<span class="function">rateLimit</span>({
+  <span class="property">windowMs</span>: <span class="number">15</span> * <span class="number">60</span> * <span class="number">1000</span>,
+  <span class="property">max</span>: <span class="number">100</span>
+}));
+
+<span class="comment">// CORS</span>
+app.<span class="function">use</span>(<span class="function">cors</span>({
+  <span class="property">origin</span>: [<span class="string">'https://yourdomain.com'</span>],
+  <span class="property">credentials</span>: <span class="keyword">true</span>
+}));
+
+<span class="comment">// Disable x-powered-by header</span>
+app.<span class="function">disable</span>(<span class="string">'x-powered-by'</span>);</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 17: Choosing Platform -->
+<div data-topic="deploy-choose">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Memilih Platform Deployment</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>Vercel</h4>
+              <ul>
+                <li>Best for: Next.js, React</li>
+                <li>Free tier generous</li>
+                <li>Auto-deploy from Git</li>
+                <li>Edge functions</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Netlify</h4>
+              <ul>
+                <li>Best for: Static sites</li>
+                <li>Free tier available</li>
+                <li>Forms, Functions</li>
+                <li>Great for JAMstack</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Railway</h4>
+              <ul>
+                <li>Best for: Full-stack apps</li>
+                <li>$5 free credits/month</li>
+                <li>Database included</li>
+                <li>Easy Docker deploy</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>DigitalOcean</h4>
+              <ul>
+                <li>Best for: VPS control</li>
+                <li>Starts $4/month</li>
+                <li>Full server access</li>
+                <li>Docker/K8s support</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>AWS</h4>
+              <ul>
+                <li>Best for: Enterprise</li>
+                <li>Pay per use</li>
+                <li>Most features</li>
+                <li>Steeper learning curve</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Cloudflare Pages</h4>
+              <ul>
+                <li>Best for: Static + Workers</li>
+                <li>Free tier generous</li>
+                <li>Global CDN</li>
+                <li>Workers for backend</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 18: Mini Project -->
+<div data-topic="deploy-mini-project">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">Praktik: Deploy Full-Stack App</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Step-by-step deploy aplikasi full-stack (Frontend + Backend + Database) menggunakan Vercel dan Railway.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Deployment Steps</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/*===============================*/</span>
+<span class="comment">/*  FULL-STACK DEPLOYMENT GUIDE  */</span>
+<span class="comment">/*===============================*/</span>
+
+<span class="comment">// 1. PREPARE YOUR CODE</span>
+<span class="comment">// Ensure:</span>
+<span class="comment">// - package.json has correct scripts</span>
+<span class="comment">// - .env.example provided</span>
+<span class="comment">// - README with setup instructions</span>
+
+<span class="comment">// 2. BACKEND (Railway)</span>
+<span class="comment">// - Create Railway account</span>
+<span class="comment">// - Connect GitHub repo</span>
+<span class="comment">// - Add PostgreSQL database</span>
+<span class="comment">// - Set environment variables</span>
+<span class="comment">// - Deploy!</span>
+
+<span class="comment">// 3. FRONTEND (Vercel)</span>
+<span class="comment">// - Create Vercel account</span>
+<span class="comment">// - Import project from GitHub</span>
+<span class="comment">// - Set API URL env var</span>
+<span class="comment">// - Deploy!</span>
+
+<span class="comment">// 4. CUSTOM DOMAIN (Optional)</span>
+<span class="comment">// - Buy domain</span>
+<span class="comment">// - Add to Vercel</span>
+<span class="comment">// - Update DNS records</span>
+
+<span class="comment">// 5. MONITORING</span>
+<span class="comment">// - Add Sentry for error tracking</span>
+<span class="comment">// - Setup uptime monitoring</span>
+<span class="comment">// - Check logs regularly</span>
+
+<span class="comment">/*===============================*/</span>
+<span class="comment">/*  CHECKLIST BEFORE GO LIVE     */</span>
+<span class="comment">/*===============================*/</span>
+<span class="comment">// [ ] Environment variables set</span>
+<span class="comment">// [ ] Database migrations run</span>
+<span class="comment">// [ ] SSL enabled</span>
+<span class="comment">// [ ] Custom domain configured</span>
+<span class="comment">// [ ] Error tracking enabled</span>
+<span class="comment">// [ ] Performance monitored</span>
+<span class="comment">// [ ] Backup strategy ready</span>
+<span class="comment">// [ ] Team access configured</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Congratulations!</strong> Kamu telah menyelesaikan seluruh materi CodeLearn dari HTML, CSS, JavaScript, Responsive Design, Framework Frontend, API, Backend, Database, hingga Deployment. Sekarang kamu siap membangun aplikasi web yang lengkap!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") htmlEl.setAttribute("data-theme", "light");
+    themeToggle.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle.addEventListener("click", () => mobileMenu.classList.toggle("open"));
+
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => header.parentElement.classList.toggle("open"));
+    });
+
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = original, 2000);
+      });
+    }
+
+    function hideLoading() {
+      const loading = document.getElementById("loading-screen");
+      if (loading) {
+        loading.classList.add("hidden");
+        setTimeout(() => loading.remove(), 500);
+      }
+    }
+
+    function initLoading() {
+      const minDisplayTime = 1200;
+      const startTime = Date.now();
+      const readyHandler = () => {
+        const elapsedTime = Date.now() - startTime;
+        setTimeout(hideLoading, Math.max(0, minDisplayTime - elapsedTime));
+      };
+      if (document.readyState === "complete") readyHandler();
+      else window.addEventListener("load", readyHandler);
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initLoading);
+    else initLoading();
+  </script>
+</body>
+</html>

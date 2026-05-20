@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ===== STYLE SAMA PERSIS DENGAN HALAMAN HTML ===== */
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #00d9a0;
+      --accent-secondary: #ff7b54;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(0, 217, 160, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --card-hover: rgba(246, 248, 250, 1);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --glow: 0 0 40px rgba(0, 217, 160, 0.2);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+      font-family: var(--font-display);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    /* ===== LOADING SCREEN ===== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* Logo Animation */
+    .loader-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .loader-logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #000;
+      animation: logoPulse 2s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(0, 217, 160, 0.4);
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 217, 160, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(0, 217, 160, 0.6); }
+    }
+
+    .loader-logo-text {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: -0.5px;
+    }
+
+    .loader-logo-text span {
+      color: var(--accent);
+    }
+
+    /* Code Terminal Animation */
+    .loader-terminal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      min-width: 340px;
+      max-width: 90vw;
+      box-shadow: var(--shadow);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-dot.red { background: #ff5f56; }
+    .terminal-dot.yellow { background: #ffbd2e; }
+    .terminal-dot.green { background: #27c93f; }
+
+    .terminal-title {
+      margin-left: 12px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+    }
+
+    .terminal-code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--fg);
+    }
+
+    .terminal-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateX(-10px);
+      animation: typeLine 0.5s ease forwards;
+    }
+
+    .terminal-line:nth-child(1) { animation-delay: 0.3s; }
+    .terminal-line:nth-child(2) { animation-delay: 0.8s; }
+    .terminal-line:nth-child(3) { animation-delay: 1.3s; }
+    .terminal-line:nth-child(4) { animation-delay: 1.8s; }
+    .terminal-line:nth-child(5) { animation-delay: 2.3s; }
+
+    @keyframes typeLine {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .terminal-selector { color: #ff7b54; }
+    .terminal-property { color: #d2a8ff; }
+    .terminal-value { color: #a5d6ff; }
+    .terminal-comment { color: #8b949e; font-style: italic; }
+    .terminal-bracket { color: var(--fg-muted); }
+
+    /* Cursor Blink */
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background: var(--accent);
+      margin-left: 4px;
+      animation: cursorBlink 1s step-end infinite;
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Progress Bar */
+    .loader-progress {
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      border-radius: 2px;
+      width: 0%;
+      animation: progressAnim 3s ease-in-out forwards;
+    }
+
+    @keyframes progressAnim {
+      0% { width: 0%; }
+      20% { width: 25%; }
+      40% { width: 45%; }
+      60% { width: 70%; }
+      80% { width: 85%; }
+      100% { width: 100%; }
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .progress-status {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Floating particles */
+    .loader-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: floatParticle 8s ease-in-out infinite;
+    }
+
+    .particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; animation-duration: 6s; }
+    .particle:nth-child(2) { left: 20%; top: 80%; animation-delay: 1s; animation-duration: 8s; }
+    .particle:nth-child(3) { left: 80%; top: 30%; animation-delay: 2s; animation-duration: 7s; }
+    .particle:nth-child(4) { left: 70%; top: 70%; animation-delay: 0.5s; animation-duration: 9s; }
+    .particle:nth-child(5) { left: 50%; top: 50%; animation-delay: 1.5s; animation-duration: 5s; }
+    .particle:nth-child(6) { left: 30%; top: 60%; animation-delay: 3s; animation-duration: 7s; }
+    .particle:nth-child(7) { left: 90%; top: 40%; animation-delay: 2.5s; animation-duration: 6s; }
+    .particle:nth-child(8) { left: 15%; top: 45%; animation-delay: 0.8s; animation-duration: 8s; }
+
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+      25% { transform: translateY(-30px) translateX(10px); opacity: 0.6; }
+      50% { transform: translateY(-20px) translateX(-15px); opacity: 0.4; }
+      75% { transform: translateY(-40px) translateX(5px); opacity: 0.5; }
+    }
+
+    /* Grid background for loader */
+    .loader-bg {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.3;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    /* Glow orbs */
+    .loader-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.15;
+      animation: orbFloat 10s ease-in-out infinite;
+    }
+
+    .loader-orb-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent);
+      top: -100px;
+      right: -100px;
+    }
+
+    .loader-orb-2 {
+      width: 250px;
+      height: 250px;
+      background: var(--accent-secondary);
+      bottom: -80px;
+      left: -80px;
+      animation-delay: -5s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    .bg-effects {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .grid-pattern {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+    }
+
+    .gradient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+    }
+
+    .orb-1 {
+      width: 400px; height: 400px;
+      background: var(--accent);
+      top: -100px; right: -100px;
+      opacity: 0.15;
+    }
+
+    .orb-2 {
+      width: 300px; height: 300px;
+      background: var(--accent-secondary);
+      bottom: -50px; left: -50px;
+      opacity: 0.1;
+    }
+
+    .orb-3 {
+      width: 200px; height: 200px;
+      background: var(--accent);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.08;
+    }
+
+    /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .page-hero {
+      min-height: 50vh;
+      display: flex; align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+
+    .page-hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .page-hero h1 .highlight { color: var(--accent); }
+
+    .page-hero p {
+      font-size: 1.1rem;
+      color: var(--fg-muted);
+      margin-bottom: 32px;
+      max-width: 550px;
+      margin-left: auto; margin-right: auto;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 32px;
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px; height: 28px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .lesson-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .lesson-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .lesson-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+    }
+
+    .lesson-card.open { border-color: var(--accent); }
+
+    .lesson-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+
+    .lesson-number {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
+      color: #000;
+    }
+
+    .lesson-title {
+      font-size: 1.1rem; font-weight: 600;
+      color: var(--fg);
+    }
+
+    .lesson-toggle {
+      color: var(--fg-muted);
+      transition: transform 0.3s ease;
+    }
+
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+
+    .lesson-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+
+    .lesson-card.open .lesson-body { max-height: 2000px; }
+
+    .lesson-content {
+      padding: 0 24px 24px;
+    }
+
+    .lesson-text {
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .code-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-lang {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    .code-copy {
+      padding: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--fg);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .code-copy:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .code-content {
+      padding: 16px;
+      overflow-x: auto;
+    }
+
+    .code-content pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    .info-box {
+      background: rgba(0, 217, 160, 0.08);
+      border: 1px solid rgba(0, 217, 160, 0.2);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--fg-muted);
+    }
+
+    .info-box strong { color: var(--accent); }
+
+    .info-box ul { margin: 8px 0 0 20px; }
+
+    .info-box li { margin-bottom: 4px; }
+
+    .tag { color: #ff7b54; }
+    .attr { color: #79c0ff; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .value { color: #a5d6ff; }
+    .number { color: #f0883e; }
+    .keyword { color: #ff7b54; }
+    .function { color: #d2a8ff; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+      .page-hero { padding: 100px 16px 40px; }
+      .lesson-header { padding: 16px; }
+      .lesson-content { padding: 0 16px 16px; }
+      .loader-terminal { min-width: auto; width: 90vw; }
+      .terminal-code { font-size: 0.75rem; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-container { padding: 0 16px; }
+      .lesson-info { flex-wrap: wrap; }
+      .loader-logo-text { font-size: 1.4rem; }
+    }
+
+    .try-section { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; }
+    .try-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); font-family: var(--font-display); }
+    .try-btn:hover { background: var(--accent-secondary); transform: translateY(-1px); }
+    .try-btn svg { width: 14px; height: 14px; }
+    .try-container { display: none; margin-top: 12px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .try-container.open { display: block; }
+    .try-tabs { display: flex; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .try-tab { padding: 8px 14px; font-size: 0.78rem; font-weight: 600; color: var(--fg-muted); cursor: pointer; border: none; background: none; font-family: var(--font-mono); transition: var(--transition); white-space: nowrap; }
+    .try-tab:hover { color: var(--fg); }
+    .try-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .try-editor-wrap { display: none; }
+    .try-editor-wrap.active { display: block; }
+    .try-editor-wrap textarea { width: 100%; min-height: 80px; padding: 12px; background: var(--code-bg); color: var(--fg); border: none; resize: vertical; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.5; outline: none; }
+    .try-toolbar { display: flex; gap: 6px; padding: 8px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
+    .try-run, .try-reset { padding: 5px 12px; font-size: 0.78rem; font-weight: 600; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: var(--font-display); transition: var(--transition); }
+    .try-run { background: var(--accent); color: #000; border-color: var(--accent); }
+    .try-run:hover { background: #00c090; }
+    .try-reset { background: var(--card); color: var(--fg); }
+    .try-reset:hover { border-color: var(--accent); }
+    .try-preview { background: #fff; min-height: 100px; max-height: 250px; overflow: auto; padding: 12px; border-top: 1px solid var(--border); }
+    .try-preview iframe { width: 100%; min-height: 100px; border: none; background: #fff; }
+    .try-error { padding: 8px 12px; background: rgba(248, 81, 73, 0.1); border: 1px solid var(--error); border-radius: 6px; color: var(--error); font-size: 0.82rem; font-family: var(--font-mono); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader-bg"></div>
+    <div class="loader-orb loader-orb-1"></div>
+    <div class="loader-orb loader-orb-2"></div>
+    <div class="loader-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <div class="loader-container">
+      <div class="loader-logo">
+        <div class="loader-logo-icon">CL</div>
+        <div class="loader-logo-text">Code<span>Learn</span></div>
+      </div>
+      
+      <div class="loader-terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <span class="terminal-title">style.css</span>
+        </div>
+        <div class="terminal-code">
+          <div class="terminal-line">
+            <span class="terminal-selector">.loader</span> <span class="terminal-bracket">{</span>
+          </div>
+          <div class="terminal-line">
+            &nbsp;&nbsp;<span class="terminal-property">display</span>: <span class="terminal-value">flex</span>;
+          </div>
+          <div class="terminal-line">
+            &nbsp;&nbsp;<span class="terminal-property">animation</span>: <span class="terminal-value">fadeIn 0.5s</span>;
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-bracket">}</span> <span class="terminal-comment">/* ready */</span>
+          </div>
+          <div class="terminal-line">
+            <span style="color: var(--accent);">Compiled!</span><span class="cursor"></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="loader-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progressMessage">Memuat materi CSS...</span>
+          <span class="progress-status" id="progressStatus">0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">
+        <span class="dot"></span>
+        37 Lessons
+      </div>
+      <h1>Belajar <span class="highlight">CSS</span></h1>
+      <p>Kuasai styling web: selectors, box model, flexbox, grid, animasi, dan responsive design.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<div data-topic="css-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info">
+          <div class="lesson-number">1</div>
+          <h3 class="lesson-title">Pengenalan CSS &amp; Spesifisitas</h3>
+        </div>
+        <div class="lesson-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><strong>CSS (Cascading Style Sheets)</strong> mengatur tampilan website. Konsep <strong>cascade</strong> dan <strong>spesifisitas</strong> menentukan rule mana yang diterapkan jika terjadi konflik. Spesifisitas: inline style > ID > class/attribute > element. <code>!important</code> mengalahkan semuanya (hindari jika tidak perlu).</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">CSS</span>
+              <button class="code-copy" onclick="copyCode(this)">Salin</button>
+            </div>
+            <div class="code-content">
+              <pre><code><span class="comment">/* Spesifisitas: ID (100) > class (10) > element (1) */</span>
+<span class="tag">p</span> { <span class="property">color</span>: <span class="value">blue</span>; }          <span class="comment">/* specificity 1 */</span>
+<span class="tag">.text</span> { <span class="property">color</span>: <span class="value">green</span>; }       <span class="comment">/* specificity 10 */</span>
+<span class="tag">#judul</span> { <span class="property">color</span>: <span class="value">red</span>; }        <span class="comment">/* specificity 100 */</span>
+<span class="tag">p.text#judul</span> { <span class="property">color</span>: <span class="value">purple</span>; }  <span class="comment">/* 1+10+100 = 111 */</span></code></pre>
+            </div>
+          </div>
+          <div class="info-box">
+            <strong>Aturan Prioritas:</strong>
+            <ul>
+              <li>Inline style = 1000</li>
+              <li>ID selector = 100</li>
+              <li>Class, attribute, pseudo-class = 10</li>
+              <li>Element, pseudo-element = 1</li>
+            </ul>
+          </div>
+          <div class="try-section">
+            <button class="try-btn" onclick="this.nextElementSibling.classList.toggle('open')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Coba Sendiri
+            </button>
+            <div class="try-container">
+              <div class="try-toolbar"><button class="try-run">Jalankan ▶</button><button class="try-reset">Reset</button></div>
+              <div class="try-tabs">
+                <button class="try-tab active" data-lang="html">HTML</button>
+                <button class="try-tab" data-lang="css">CSS</button>
+              </div>
+              <div class="try-editor-wrap active" data-lang="html"><textarea><p id="demo" class="text">Warna teks ini akan berubah sesuai selector CSS!</p></textarea></div>
+              <div class="try-editor-wrap" data-lang="css"><textarea>/* Ubah selector dan lihat perubahannya */
+p { color: blue; }
+.text { color: green; }
+#demo { color: red; }</textarea></div>
+              <div class="try-preview"><iframe></iframe></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-syntax">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">Sintaks CSS: Selector, Property, Value, Units</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Aturan CSS terdiri dari <strong>selector</strong> (elemen yang dituju), <strong>property</strong> (aspek yang diubah), dan <strong>value</strong> (nilai baru). Units: <code>px</code> (absolut), <code>rem</code> (relatif root), <code>em</code> (relatif parent), <code>%</code>, <code>vw/vh</code>.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">h1</span> {
+  <span class="property">font-size</span>: <span class="value">2rem</span>;      <span class="comment">/* 2x ukuran font root */</span>
+  <span class="property">margin</span>: <span class="value">1em</span>;         <span class="comment">/* 1x font-size element */</span>
+  <span class="property">width</span>: <span class="value">80%</span>;          <span class="comment">/* 80% dari parent */</span>
+  <span class="property">height</span>: <span class="value">100vh</span>;       <span class="comment">/* 100% viewport height */</span>
+}</pre></div></div>
+          <div class="info-box"><strong>Rekomendasi:</strong> Gunakan <code>rem</code> untuk font-size, <code>px</code> untuk border/shadow, <code>%</code> atau <code>vw</code> untuk layout lebar.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-methods">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">Inline, Internal, External CSS</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Ada 3 cara menambahkan CSS ke HTML. External (file terpisah) adalah best practice.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">&lt;!-- External (disarankan) --&gt;</span>
+<span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"style.css"</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- Internal (di dalam &lt;head&gt;) --&gt;</span>
+<span class="tag">&lt;style&gt;</span>
+  <span class="tag">body</span> { <span class="property">background</span>: <span class="value">#fff</span>; }
+<span class="tag">&lt;/style&gt;</span>
+
+<span class="comment">&lt;!-- Inline (hanya untuk kasus khusus) --&gt;</span>
+<span class="tag">&lt;p</span> <span class="attr">style</span>=<span class="string">"color: red;"</span><span class="tag">&gt;</span>Teks merah<span class="tag">&lt;/p&gt;</span></pre></div></div>
+          <div class="info-box">External CSS lebih mudah maintenance, caching, dan reusable di banyak halaman.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-selectors-basic">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Selector Element, Class, ID</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Element selector menarget semua tag HTML. Class (<code>.nama</code>) bisa dipakai banyak elemen. ID (<code>#nama</code>) hanya satu per halaman.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">p</span> { <span class="property">margin-bottom</span>: <span class="value">1em</span>; }
+<span class="tag">.button</span> { <span class="property">background</span>: <span class="value">blue</span>; }
+<span class="tag">#header</span> { <span class="property">position</span>: <span class="value">fixed</span>; }
+<span class="tag">.btn.primary</span> { <span class="property">background</span>: <span class="value">green</span>; }  <span class="comment">/* elemen punya kedua class */</span></pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-selectors-combo">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Kombinasi Selector</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>div p</code> (descendant) semua p di dalam div. <code>div > p</code> (child) hanya p langsung. <code>h2 + p</code> (adjacent) p tepat setelah h2. <code>h2 ~ p</code> (general sibling) semua p setelah h2.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">article p</span> { <span class="property">line-height</span>: <span class="value">1.6</span>; }
+<span class="tag">ul > li</span> { <span class="property">list-style</span>: <span class="value">none</span>; }
+<span class="tag">h2 + p</span> { <span class="property">font-weight</span>: <span class="value">bold</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-pseudo-class">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">Pseudo-class (:hover, :focus, :nth-child)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Pseudo-class menarget elemen dalam keadaan tertentu. Contoh: <code>:hover</code> saat mouse di atas, <code>:focus</code> saat input aktif, <code>:first-child</code>, <code>:nth-child(2)</code>.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">a:hover</span> { <span class="property">color</span>: <span class="value">red</span>; }
+<span class="tag">input:focus</span> { <span class="property">outline</span>: <span class="value">2px solid blue</span>; }
+<span class="tag">li:nth-child(odd)</span> { <span class="property">background</span>: <span class="value">#f0f0f0</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-attr-selector">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Attribute Selector [attr="value"]</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Memilih elemen berdasarkan atribut: <code>[type="text"]</code>, <code>[href^="https"]</code> (awalan), <code>[href$=".pdf"]</code> (akhiran).</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">input[type="email"]</span> { <span class="property">border-color</span>: <span class="value">blue</span>; }
+<span class="tag">a[href$=".pdf"]::after</span> { <span class="property">content</span>: <span class="string">" (PDF)"</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-box-model">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Box Model Lengkap + Border Radius</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Setiap elemen adalah box dengan: content, padding, border, margin. <code>box-sizing: border-box</code> membuat width/height termasuk padding dan border (sangat direkomendasikan).</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.box</span> {
+  <span class="property">width</span>: <span class="value">200px</span>;
+  <span class="property">padding</span>: <span class="value">20px</span>;
+  <span class="property">border</span>: <span class="value">2px solid black</span>;
+  <span class="property">margin</span>: <span class="value">10px</span>;
+  <span class="property">border-radius</span>: <span class="value">12px</span>;
+  <span class="property">box-sizing</span>: <span class="value">border-box</span>;
+}</pre></div></div>
+          <div class="info-box">Selalu gunakan <code>box-sizing: border-box</code> secara global: <code>* { box-sizing: border-box; }</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-margin-collapse">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Margin Collapsing (konsep)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Margin vertikal antar elemen bisa bergabung (collapse) menjadi margin terbesar. Solusi: gunakan <code>overflow: hidden</code> atau <code>padding/border</code> pada parent, atau pakai flex/grid gap.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">/* Collapsing terjadi pada: */</span>
+<span class="comment">/* 1. Adjacent siblings */</span>
+<span class="tag">.box1</span> { <span class="property">margin-bottom</span>: <span class="value">20px</span>; }
+<span class="tag">.box2</span> { <span class="property">margin-top</span>: <span class="value">10px</span>; }  <span class="comment">/* jarak = 20px, bukan 30px */</span>
+
+<span class="comment">/* Cara mengatasi: gunakan flex/gap atau padding pada parent */</span></pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-shorthand">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Shorthand Padding &amp; Margin</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">/* 4 nilai: top right bottom left (searah jarum jam) */</span>
+<span class="tag">.card</span> { <span class="property">margin</span>: <span class="value">10px 20px 10px 20px</span>; }
+<span class="comment">/* 3 nilai: top (left-right) bottom */</span>
+<span class="tag">.card</span> { <span class="property">padding</span>: <span class="value">10px 20px 10px</span>; }
+<span class="comment">/* 2 nilai: top-bottom left-right */</span>
+<span class="tag">.card</span> { <span class="property">margin</span>: <span class="value">10px 20px</span>; }
+<span class="comment">/* 1 nilai: semua sisi */</span>
+<span class="tag">.card</span> { <span class="property">padding</span>: <span class="value">16px</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-sizing">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Sizing: width, height, min/max</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">img</span> { <span class="property">max-width</span>: <span class="value">100%</span>; <span class="property">height</span>: <span class="value">auto</span>; }
+<span class="tag">.container</span> { <span class="property">min-height</span>: <span class="value">300px</span>; <span class="property">max-width</span>: <span class="value">1200px</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-typography">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">Typography (font, line-height, letter-spacing)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">body</span> {
+  <span class="property">font-family</span>: <span class="string">'Inter', system-ui, sans-serif</span>;
+  <span class="property">font-size</span>: <span class="value">16px</span>;
+  <span class="property">line-height</span>: <span class="value">1.6</span>;
+}
+<span class="tag">h1</span> { <span class="property">font-weight</span>: <span class="value">700</span>; <span class="property">letter-spacing</span>: <span class="value">-0.02em</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-text-styling">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Text Styling (color, text-align, text-decoration)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">a</span> { <span class="property">text-decoration</span>: <span class="value">none</span>; }
+<span class="tag">.text-center</span> { <span class="property">text-align</span>: <span class="value">center</span>; }
+<span class="tag">.uppercase</span> { <span class="property">text-transform</span>: <span class="value">uppercase</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-link-styling">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Link Styling (a:link, a:visited, a:hover, a:active)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Urutan penting: <strong>L</strong>ink, <strong>V</strong>isited, <strong>H</strong>over, <strong>A</strong>ctive (LoVe HAte).</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">a:link</span> { <span class="property">color</span>: <span class="value">blue</span>; }
+<span class="tag">a:visited</span> { <span class="property">color</span>: <span class="value">purple</span>; }
+<span class="tag">a:hover</span> { <span class="property">color</span>: <span class="value">red</span>; }
+<span class="tag">a:active</span> { <span class="property">color</span>: <span class="value">orange</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-backgrounds">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Backgrounds (color, image, size, position)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.hero</span> {
+  <span class="property">background</span>: <span class="value">linear-gradient(135deg, #667eea, #764ba2)</span>;
+  <span class="property">background-size</span>: <span class="value">cover</span>;
+  <span class="property">background-position</span>: <span class="value">center</span>;
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-gradients">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">Gradients (linear, radial, repeating)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">/* Linear */</span>
+<span class="tag">.btn</span> { <span class="property">background</span>: <span class="value">linear-gradient(to right, #00d9a0, #ff7b54)</span>; }
+<span class="comment">/* Radial */</span>
+<span class="tag">.spotlight</span> { <span class="property">background</span>: <span class="value">radial-gradient(circle at top, #fff, #ccc)</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-flexbox-container">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Flexbox: Container Properties</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Flexbox untuk layout satu dimensi. <code>justify-content</code> mengatur sumbu utama, <code>align-items</code> sumbu silang.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.container</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">justify-content</span>: <span class="value">space-between</span>;
+  <span class="property">align-items</span>: <span class="value">center</span>;
+  <span class="property">gap</span>: <span class="value">20px</span>;
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-flexbox-items">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">Flexbox Items (flex-grow, shrink, order)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.item</span> { <span class="property">flex</span>: <span class="value">1</span>; }  <span class="comment">/* grow 1 */</span>
+<span class="tag">.sidebar</span> { <span class="property">flex</span>: <span class="value">0 0 250px</span>; }
+<span class="tag">.order-2</span> { <span class="property">order</span>: <span class="value">2</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-flexbox-align">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">19</div><h3 class="lesson-title">Flexbox: align-self, flex-wrap</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.container</span> { <span class="property">flex-wrap</span>: <span class="value">wrap</span>; <span class="property">gap</span>: <span class="value">16px</span>; }
+<span class="tag">.special</span> { <span class="property">align-self</span>: <span class="value">flex-end</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-grid-basics">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">20</div><h3 class="lesson-title">CSS Grid: grid-template-columns/rows</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Grid untuk layout 2 dimensi (baris DAN kolom).</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.grid</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">repeat(3, 1fr)</span>;
+  <span class="property">gap</span>: <span class="value">20px</span>;
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-grid-placement">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">21</div><h3 class="lesson-title">Grid Placement: grid-column, grid-row</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.item-large</span> {
+  <span class="property">grid-column</span>: <span class="value">span 2</span>;
+  <span class="property">grid-row</span>: <span class="value">1 / 3</span>;
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-grid-auto">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">22</div><h3 class="lesson-title">Grid: auto-fit / auto-fill</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.responsive-grid</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">repeat(auto-fit, minmax(250px, 1fr))</span>;
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-positioning">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">23</div><h3 class="lesson-title">Positioning (static, relative, absolute, fixed, sticky)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.relative</span> { <span class="property">position</span>: <span class="value">relative</span>; <span class="property">top</span>: <span class="value">10px</span>; }
+<span class="tag">.absolute</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">top</span>: <span class="value">0</span>; <span class="property">right</span>: <span class="value">0</span>; }
+<span class="tag">.fixed</span> { <span class="property">position</span>: <span class="value">fixed</span>; <span class="property">bottom</span>: <span class="value">20px</span>; }
+<span class="tag">.sticky</span> { <span class="property">position</span>: <span class="value">sticky</span>; <span class="property">top</span>: <span class="value">0</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-zindex">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">24</div><h3 class="lesson-title">Z-index &amp; Stacking Context</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.modal</span> { <span class="property">position</span>: <span class="value">fixed</span>; <span class="property">z-index</span>: <span class="value">1000</span>; }
+<span class="tag">.dropdown</span> { <span class="property">z-index</span>: <span class="value">500</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-overflow">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">25</div><h3 class="lesson-title">Overflow &amp; Scroll</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.scroll-box</span> { <span class="property">overflow-y</span>: <span class="value">auto</span>; <span class="property">max-height</span>: <span class="value">300px</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-transitions">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">26</div><h3 class="lesson-title">Transitions</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.btn</span> {
+  <span class="property">transition</span>: <span class="value">background 0.3s ease, transform 0.2s</span>;
+}
+<span class="tag">.btn:hover</span> { <span class="property">background</span>: <span class="value">darkblue</span>; <span class="property">transform</span>: <span class="value">scale(1.05)</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-animations">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">27</div><h3 class="lesson-title">Animations (@keyframes)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">@keyframes</span> <span class="function">fadeIn</span> {
+  <span class="value">from</span> { <span class="property">opacity</span>: <span class="value">0</span>; }
+  <span class="value">to</span> { <span class="property">opacity</span>: <span class="value">1</span>; }
+}
+<span class="tag">.fade</span> { <span class="property">animation</span>: <span class="value">fadeIn 0.5s forwards</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-transform">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">28</div><h3 class="lesson-title">Transform (translate, scale, rotate)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.zoom:hover</span> { <span class="property">transform</span>: <span class="value">scale(1.1)</span>; }
+<span class="tag">.center-abs</span> { <span class="property">transform</span>: <span class="value">translate(-50%, -50%)</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-media-queries">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">29</div><h3 class="lesson-title">Responsive: Media Queries</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Mobile-first: tulis CSS untuk mobile dulu, lalu tambah rules untuk layar lebih besar dengan <code>min-width</code>.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.container</span> { <span class="property">width</span>: <span class="value">100%</span>; }
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">768px</span>) {
+  <span class="tag">.container</span> { <span class="property">width</span>: <span class="value">720px</span>; <span class="property">margin</span>: <span class="value">0 auto</span>; }
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-fluid-type">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">30</div><h3 class="lesson-title">Fluid Typography: clamp()</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">h1</span> { <span class="property">font-size</span>: <span class="value">clamp(1.5rem, 5vw, 3rem)</span>; }
+<span class="tag">p</span> { <span class="property">font-size</span>: <span class="value">clamp(1rem, 2vw, 1.25rem)</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-responsive-layout">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">31</div><h3 class="lesson-title">Responsive Layout Switching</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.layout</span> { <span class="property">display</span>: <span class="value">flex</span>; <span class="property">flex-direction</span>: <span class="value">column</span>; }
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">768px</span>) {
+  <span class="tag">.layout</span> { <span class="property">flex-direction</span>: <span class="value">row</span>; }
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-utility">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">32</div><h3 class="lesson-title">Utility Classes Concept</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.text-center</span> { <span class="property">text-align</span>: <span class="value">center</span>; }
+<span class="tag">.mt-2</span> { <span class="property">margin-top</span>: <span class="value">1rem</span>; }
+<span class="tag">.d-flex</span> { <span class="property">display</span>: <span class="value">flex</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-practice-card">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">33</div><h3 class="lesson-title">Practice: Card UI dengan Hover</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.card</span> {
+  <span class="property">background</span>: <span class="value">white</span>;
+  <span class="property">border-radius</span>: <span class="value">12px</span>;
+  <span class="property">padding</span>: <span class="value">24px</span>;
+  <span class="property">transition</span>: <span class="value">transform 0.2s, box-shadow 0.2s</span>;
+}
+<span class="tag">.card:hover</span> { <span class="property">transform</span>: <span class="value">translateY(-4px)</span>; <span class="property">box-shadow</span>: <span class="value">0 8px 20px rgba(0,0,0,0.1)</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-practice-navbar">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">34</div><h3 class="lesson-title">Practice: Responsive Navbar (Flex + Media)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.navbar</span> { <span class="property">display</span>: <span class="value">flex</span>; <span class="property">justify-content</span>: <span class="value">space-between</span>; }
+<span class="tag">.nav-links</span> { <span class="property">display</span>: <span class="value">flex</span>; <span class="property">gap</span>: <span class="value">20px</span>; }
+<span class="keyword">@media</span> (<span class="property">max-width</span>: <span class="value">768px</span>) {
+  <span class="tag">.nav-links</span> { <span class="property">display</span>: <span class="value">none</span>; }
+}</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-practice-gallery">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">35</div><h3 class="lesson-title">Practice: Gallery Grid (auto-fit + object-fit)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">.gallery</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">repeat(auto-fit, minmax(200px, 1fr))</span>;
+  <span class="property">gap</span>: <span class="value">16px</span>;
+}
+<span class="tag">.gallery img</span> { <span class="property">width</span>: <span class="value">100%</span>; <span class="property">height</span>: <span class="value">200px</span>; <span class="property">object-fit</span>: <span class="value">cover</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-practice-modal">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">36</div><h3 class="lesson-title">Practice: Modal dengan Checkbox Hack</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="tag">input#modal-trigger:checked ~ .modal-overlay</span> { <span class="property">display</span>: <span class="value">flex</span>; }
+<span class="tag">.modal-overlay</span> { <span class="property">display</span>: <span class="value">none</span>; <span class="property">position</span>: <span class="value">fixed</span>; <span class="property">inset</span>: <span class="value">0</span>; <span class="property">background</span>: <span class="value">rgba(0,0,0,0.5)</span>; }</pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-topic="css-review">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">37</div><h3 class="lesson-title">CSS Review: Best Practices</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Rangkuman konsep CSS penting yang harus diingat.</p>
+          <div class="code-block"><div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">/* Global box-sizing */</span>
+<span class="tag">*</span> { <span class="property">box-sizing</span>: <span class="value">border-box</span>; }
+
+<span class="comment">/* Flexbox centering */</span>
+<span class="tag">.center</span> { <span class="property">display</span>: <span class="value">flex</span>; <span class="property">justify-content</span>: <span class="value">center</span>; <span class="property">align-items</span>: <span class="value">center</span>; }
+
+<span class="comment">/* Responsive grid */</span>
+<span class="tag">.grid</span> { <span class="property">display</span>: <span class="value">grid</span>; <span class="property">grid-template-columns</span>: <span class="value">repeat(auto-fit, minmax(300px, 1fr))</span>; }
+
+<span class="comment">/* Custom properties (CSS variables) */</span>
+<span class="tag">:root</span> { <span class="property">--primary</span>: <span class="value">#00d9a0</span>; }
+<span class="tag">.btn</span> { <span class="property">background</span>: <span class="value">var(--primary)</span>; }</pre></div></div>
+          <div class="info-box">
+            <strong>Yang selalu diingat:</strong>
+            <ul>
+              <li>Gunakan <code>box-sizing: border-box</code> secara global</li>
+              <li>Mobile-first: <code>min-width</code> media queries</li>
+              <li>Flexbox untuk 1 dimensi, Grid untuk 2 dimensi</li>
+              <li>Hindari <code>!important</code> sebisa mungkin</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    // Loading animation
+    const loadingScreen = document.getElementById('loading-screen');
+    const progressFill = document.getElementById('progressFill');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressMessage = document.getElementById('progressMessage');
+    
+    let progress = 0;
+    const loadingMessages = [
+      'Memuat materi CSS...',
+      'Menyiapkan modul...',
+      'Mengompilasi stylesheet...',
+      'Hampir selesai...',
+      'Selamat datang!'
+    ];
+    
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15 + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(progressInterval);
+        
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => {
+            loadingScreen.remove();
+          }, 600);
+        }, 500);
+      }
+      
+      if (progressFill) {
+        progressFill.style.width = progress + '%';
+      }
+      if (progressStatus) {
+        progressStatus.textContent = Math.round(progress) + '%';
+      }
+      if (progressMessage) {
+        const msgIndex = Math.min(Math.floor(progress / 25), loadingMessages.length - 1);
+        progressMessage.textContent = loadingMessages[msgIndex];
+      }
+    }, 200);
+
+    // Theme toggle
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") htmlEl.setAttribute("data-theme", "light");
+    themeToggle?.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    // Mobile menu
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle?.addEventListener("click", () => mobileMenu.classList.toggle("open"));
+
+    // Lesson card toggle
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const card = header.parentElement;
+        card.classList.toggle("open");
+      });
+    });
+
+    // Copy code function
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || block.querySelector("pre")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Tersalin!";
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    }
+    window.copyCode = copyCode;
+
+    // Try it handler
+    function initTryIt(container) {
+      const tabs = container.querySelectorAll(".try-tab");
+      const editors = container.querySelectorAll(".try-editor-wrap");
+      tabs.forEach(tab => tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        editors.forEach(e => e.classList.remove("active"));
+        tab.classList.add("active");
+        container.querySelector(".try-editor-wrap[data-lang='" + tab.dataset.lang + "']").classList.add("active");
+      }));
+      const defHtml = container.querySelector(".try-editor-wrap[data-lang='html'] textarea")?.value || "";
+      const defCss = container.querySelector(".try-editor-wrap[data-lang='css'] textarea")?.value || "";
+      const runBtn = container.querySelector(".try-run");
+      const resetBtn = container.querySelector(".try-reset");
+      const iframe = container.querySelector("iframe");
+      const updatePreview = () => {
+        const html = container.querySelector(".try-editor-wrap[data-lang='html'] textarea")?.value || "";
+        const css = container.querySelector(".try-editor-wrap[data-lang='css'] textarea")?.value || "";
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write("<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" + css + "</style></head><body>" + html + "</body></html>");
+        doc.close();
+      };
+      if (runBtn) runBtn.addEventListener("click", updatePreview);
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          if (container.querySelector(".try-editor-wrap[data-lang='html'] textarea")) container.querySelector(".try-editor-wrap[data-lang='html'] textarea").value = defHtml;
+          if (container.querySelector(".try-editor-wrap[data-lang='css'] textarea")) container.querySelector(".try-editor-wrap[data-lang='css'] textarea").value = defCss;
+          updatePreview();
+        });
+      }
+      updatePreview();
+    }
+    document.querySelectorAll(".try-container").forEach(initTryIt);
+  </script>
+</body>
+</html>

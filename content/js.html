@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ===== LOADING SCREEN STYLES ===== */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #06080d;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    /* Animated JS Brackets */
+    .js-brackets {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bracket {
+      font-family: var(--font-mono);
+      font-size: 80px;
+      font-weight: 300;
+      color: var(--accent);
+      opacity: 0;
+      animation: bracketPulse 2s ease-in-out infinite;
+    }
+
+    .bracket-left { animation-delay: 0s; }
+    .bracket-right { animation-delay: 0.2s; }
+
+    .js-logo-center {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent-secondary);
+      opacity: 0;
+      animation: logoFade 2s ease-in-out infinite;
+      animation-delay: 0.4s;
+    }
+
+    /* Orbiting Dots */
+    .orbit-container {
+      position: absolute;
+      width: 160px;
+      height: 160px;
+    }
+
+    .orbit-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: orbit 3s linear infinite;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .orbit-dot:nth-child(1) { animation-delay: 0s; }
+    .orbit-dot:nth-child(2) { animation-delay: 0.5s; opacity: 0.7; }
+    .orbit-dot:nth-child(3) { animation-delay: 1s; opacity: 0.5; }
+    .orbit-dot:nth-child(4) { animation-delay: 1.5s; opacity: 0.3; }
+
+    /* Code Terminal Animation */
+    .code-terminal {
+      background: rgba(22, 27, 34, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      min-width: 320px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: dotBlink 1.5s ease-in-out infinite;
+    }
+
+    .terminal-dot.red { background: #f85149; }
+    .terminal-dot.yellow { background: #d29922; animation-delay: 0.2s; }
+    .terminal-dot.green { background: #3fb950; animation-delay: 0.4s; }
+
+    .terminal-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg-muted);
+      margin-left: auto;
+    }
+
+    .terminal-code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateX(-10px);
+      animation: codeAppear 2.5s ease-out infinite;
+    }
+
+    .code-line:nth-child(1) { animation-delay: 0s; }
+    .code-line:nth-child(2) { animation-delay: 0.4s; }
+    .code-line:nth-child(3) { animation-delay: 0.8s; }
+    .code-line:nth-child(4) { animation-delay: 1.2s; }
+
+    .line-number { color: var(--fg-muted); opacity: 0.5; min-width: 20px; }
+    .code-keyword { color: #ff7b54; }
+    .code-func { color: #d2a8ff; }
+    .code-string { color: #a5d6ff; }
+    .code-comment { color: #8b949e; font-style: italic; }
+
+    /* Cursor Blink */
+    .cursor-blink {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background: var(--accent);
+      margin-left: 4px;
+      animation: cursorBlink 1s step-end infinite;
+    }
+
+    /* Progress Bar */
+    .progress-container { width: 320px; margin-top: 20px; }
+    .progress-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      width: 0%;
+      animation: progressAnim 2.5s ease-out forwards;
+      border-radius: 3px;
+    }
+    .progress-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg-muted);
+      margin-top: 10px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    /* Keyframes */
+    @keyframes bracketPulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes logoFade {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(75px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(75px) rotate(-360deg); }
+    }
+    @keyframes dotBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes codeAppear {
+      0% { opacity: 0; transform: translateX(-10px); }
+      20% { opacity: 1; transform: translateX(0); }
+      80% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; transform: translateX(10px); }
+    }
+    @keyframes cursorBlink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    @keyframes progressAnim {
+      0% { width: 0%; }
+      30% { width: 40%; }
+      60% { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    /* Loading text particles */
+    .loading-particles {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      opacity: 0;
+      animation: particleFloat 4s ease-in-out infinite;
+    }
+
+    .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 20%; animation-delay: 0.5s; }
+    .particle:nth-child(3) { left: 35%; animation-delay: 1s; }
+    .particle:nth-child(4) { left: 50%; animation-delay: 1.5s; }
+    .particle:nth-child(5) { left: 65%; animation-delay: 2s; }
+    .particle:nth-child(6) { left: 80%; animation-delay: 2.5s; }
+    .particle:nth-child(7) { left: 90%; animation-delay: 3s; }
+
+    @keyframes particleFloat {
+      0% { bottom: -20px; opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { bottom: 100%; opacity: 0; }
+    }
+
+    /* ===== MAIN STYLES ===== */
+    :root {
+      --bg: #06080d; --bg-secondary: #0d1117; --fg: #e6edf3; --fg-muted: #7d8590;
+      --accent: #00d9a0; --accent-secondary: #ff7b54; --card: rgba(22,27,34,0.8);
+      --card-hover: rgba(33,38,45,0.9); --border: rgba(240,246,252,0.1);
+      --code-bg: #161b22; --success: #3fb950; --warning: #d29922; --error: #f85149;
+      --radius: 12px; --radius-lg: 20px; --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --glow: 0 0 40px rgba(0,217,160,0.15); --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      --font-display: 'Space Grotesk', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+    }
+    [data-theme="light"] {
+      --bg: #f0f3f6; --bg-secondary: #ffffff; --fg: #1f2328; --fg-muted: #656d76;
+      --card: rgba(255,255,255,0.9); --card-hover: rgba(246,248,250,1);
+      --border: rgba(31,35,40,0.15); --code-bg: #f6f8fa; --shadow: 0 8px 32px rgba(0,0,0,0.1);
+      --glow: 0 0 40px rgba(0,217,160,0.2);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { font-family: var(--font-display); background: var(--bg); color: var(--fg); line-height: 1.7; overflow-x: hidden; transition: background 0.5s ease, color 0.5s ease; }
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
+    .grid-pattern { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+    .orb-3 { width: 200px; height: 200px; background: var(--accent); top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.08; }
+    
+    /* Navbar */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; background: rgba(6, 8, 13, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 1000; transition: var(--transition); }
+    .navbar.scrolled { background: rgba(6, 8, 13, 0.95); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+    .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 24px; height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); font-weight: 600; font-size: 1.2rem; flex-shrink: 0; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #000; }
+    .nav-links { display: flex; align-items: center; gap: 4px; list-style: none; flex: 1; justify-content: center; }
+    .nav-links > li { position: relative; }
+    .nav-links a { display: flex; align-items: center; gap: 4px; padding: 8px 14px; color: var(--fg-muted); text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: var(--transition); white-space: nowrap; }
+    .nav-links a:hover { color: var(--fg); background: var(--card); }
+    .nav-links a.active { color: var(--accent); background: rgba(0, 217, 160, 0.1); }
+    .nav-dropdown-arrow { width: 14px; height: 14px; transition: transform 0.3s ease; }
+    .nav-links li:hover .nav-dropdown-arrow { transform: rotate(180deg); }
+    .nav-dropdown { position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(10px); min-width: 180px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 8px; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 100; }
+    .nav-links li:hover .nav-dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .nav-dropdown a { display: block; padding: 10px 14px; color: var(--fg-muted); font-size: 0.85rem; border-radius: 8px; }
+    .nav-dropdown a:hover { background: var(--card); color: var(--accent); }
+    .nav-dropdown a.active { color: var(--accent); background: rgba(0, 217, 160, 0.1); }
+    .dropdown-divider { height: 1px; background: var(--border); margin: 6px 0; }
+    .dropdown-label { padding: 8px 14px 4px; font-size: 0.7rem; font-weight: 600; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .theme-toggle, .mobile-toggle { width: 40px; height: 40px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--fg); transition: var(--transition); }
+    .theme-toggle:hover, .mobile-toggle:hover { background: var(--card-hover); border-color: var(--accent); }
+    .mobile-toggle { display: none; flex-direction: column; gap: 5px; }
+    .mobile-toggle span { width: 18px; height: 2px; background: currentColor; border-radius: 2px; transition: var(--transition); }
+    .mobile-menu { position: fixed; top: 70px; left: 0; right: 0; background: rgba(6, 8, 13, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 16px; max-height: calc(100vh - 70px); overflow-y: auto; z-index: 999; transform: translateY(-100%); opacity: 0; visibility: hidden; transition: var(--transition); }
+    .mobile-menu.open { transform: translateY(0); opacity: 1; visibility: visible; }
+    .mobile-menu-section { margin-bottom: 16px; }
+    .mobile-menu-title { font-size: 0.75rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 16px; }
+    .mobile-menu a { display: block; padding: 12px 16px; color: var(--fg); text-decoration: none; border-radius: 8px; font-weight: 500; transition: var(--transition); }
+    .mobile-menu a:hover, .mobile-menu a.active { background: var(--card); color: var(--accent); }
+    
+    .page-hero { min-height: 50vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 60px; position: relative; overflow: hidden; }
+    .page-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; pointer-events: none; }
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 100px; font-size: 0.85rem; color: var(--accent); margin-bottom: 24px; }
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; user-select: none; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #000; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; color: var(--fg); }
+    .lesson-toggle svg { transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle svg { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 3000px; } /* Increased for content */
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+    .lesson-text strong { color: var(--fg); }
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); margin: 16px 0; overflow: hidden; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; transition: var(--transition); }
+    .code-copy:hover { background: var(--accent); color: #000; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+    .info-box { background: rgba(0,217,160,0.08); border: 1px solid rgba(0,217,160,0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul, .info-box ol { margin: 8px 0 0 20px; }
+    .tag { color: #ff7b54; } .attr { color: #79c0ff; } .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; } .property { color: #d2a8ff; }
+    .value { color: #a5d6ff; } .number { color: #f0883e; } .keyword { color: #ff7b54; }
+    .function { color: #d2a8ff; }
+    
+    @media (max-width: 768px) { 
+      .nav-links { display: none; } 
+      .mobile-toggle { display: flex; } 
+      .page-hero { padding: 100px 16px 40px; } 
+      .lesson-header { padding: 16px; } 
+      .lesson-content { padding: 0 16px 16px; } 
+    }
+    @media (max-width: 480px) { .nav-container { padding: 0 16px; } .lesson-info { flex-wrap: wrap; } }
+    
+    /* Try It Editor */
+    .try-section { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; }
+    .try-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+    .try-btn:hover { background: var(--accent-secondary); transform: translateY(-1px); }
+    .try-btn svg { width: 14px; height: 14px; }
+    .try-container { display: none; margin-top: 12px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .try-container.open { display: block; }
+    .try-tabs { display: flex; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .try-tab { padding: 8px 14px; font-size: 0.78rem; font-weight: 600; color: var(--fg-muted); cursor: pointer; border: none; background: none; font-family: var(--font-mono); transition: var(--transition); white-space: nowrap; }
+    .try-tab:hover { color: var(--fg); }
+    .try-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .try-editor-wrap { display: none; }
+    .try-editor-wrap.active { display: block; }
+    .try-editor-wrap textarea { width: 100%; min-height: 100px; padding: 12px; background: var(--code-bg); color: var(--fg); border: none; resize: vertical; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.5; outline: none; }
+    .try-toolbar { display: flex; gap: 6px; padding: 8px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
+    .try-run, .try-reset { padding: 5px 12px; font-size: 0.78rem; font-weight: 600; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: var(--font-display); transition: var(--transition); }
+    .try-run { background: var(--accent); color: #000; border-color: var(--accent); }
+    .try-run:hover { background: #00c090; }
+    .try-reset { background: var(--card); color: var(--fg); }
+    .try-reset:hover { border-color: var(--accent); }
+    .try-preview { background: #fff; min-height: 120px; max-height: 300px; overflow: auto; padding: 12px; border-top: 1px solid var(--border); }
+    .try-preview iframe { width: 100%; min-height: 120px; border: none; background: #fff; }
+    .try-error { padding: 8px 12px; background: rgba(248,81,73,0.1); border: 1px solid var(--error); border-radius: 6px; color: var(--error); font-size: 0.82rem; font-family: var(--font-mono); }
+  </style>
+</head>
+<body>
+
+<!-- ===== LOADING SCREEN ===== -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-particles">
+    <span class="particle">{ }</span><span class="particle">( )</span><span class="particle">=&gt;</span>
+    <span class="particle">[ ]</span><span class="particle">;</span><span class="particle">const</span><span class="particle">async</span>
+  </div>
+  <div class="loader-container">
+    <div class="js-brackets">
+      <div class="orbit-container">
+        <div class="orbit-dot"></div><div class="orbit-dot"></div><div class="orbit-dot"></div><div class="orbit-dot"></div>
+      </div>
+      <span class="bracket bracket-left">{</span>
+      <span class="js-logo-center">JS</span>
+      <span class="bracket bracket-right">}</span>
+    </div>
+    <div class="code-terminal">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+        <span class="terminal-title">javascript</span>
+      </div>
+      <div class="terminal-code">
+        <div class="code-line"><span class="line-number">1</span><span class="code-keyword">const</span> app = <span class="code-func">initialize</span>();</div>
+        <div class="code-line"><span class="line-number">2</span><span class="code-func">app</span>.<span class="code-func">load</span>(<span class="code-string">'lessons'</span>);</div>
+        <div class="code-line"><span class="line-number">3</span><span class="code-comment">// Memuat modul JS...</span></div>
+        <div class="code-line"><span class="line-number">4</span><span class="code-func">render</span>(<span class="code-string">'ready'</span>)<span class="cursor-blink"></span></div>
+      </div>
+    </div>
+    <div class="progress-container">
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+      <div class="progress-text">LOADING JAVASCRIPT</div>
+    </div>
+  </div>
+</div>
+
+<div class="bg-effects"><div class="grid-pattern"></div><div class="gradient-orb orb-1"></div><div class="gradient-orb orb-2"></div><div class="gradient-orb orb-3"></div></div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><div class="logo-icon">CL</div><span>CodeLearn</span></a>
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li>
+          <a href="#">Frontend <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a><a href="css.html">CSS</a><a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html" class="active">JavaScript</a><a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+        <li>
+          <a href="#">Backend <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a><a href="beckend.html">Backend Dev</a><a href="database.html">Database</a>
+          </div>
+        </li>
+        <li>
+          <a href="#">DevOps <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a><a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a><a href="css.html">CSS</a><a href="responsive.html">Responsive Design</a><a href="js.html" class="active">JavaScript</a><a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a><a href="beckend.html">Backend Development</a><a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a><a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+<section class="page-hero">
+  <div class="page-hero-content">
+    <div class="page-hero-badge"><span class="dot"></span>36 Lessons</div>
+    <h1>Belajar <span class="highlight">JavaScript</span></h1>
+    <p>Kuasai bahasa pemrograman web: sintaks modern, DOM, event, async, dan ES6+ features.</p>
+  </div>
+</section>
+
+<div class="main-content">
+
+<!-- LESSON 1 -->
+<div class="lesson-card open">
+  <div class="lesson-header">
+    <div class="lesson-info"><div class="lesson-number">1</div><h3 class="lesson-title">Pengenalan JS & Runtime di Browser</h3></div>
+    <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+  </div>
+  <div class="lesson-body">
+    <div class="lesson-content">
+      <p class="lesson-text"><strong>JavaScript</strong> adalah bahasa pemrograman yang membuat halaman web menjadi interaktif. Berbeda dengan HTML (struktur) dan CSS (style), JS memberikan "perilaku" atau logic. JS dijalankan oleh JavaScript Engine di browser (seperti V8 di Chrome atau SpiderMonkey di Firefox) yang menerjemahkan kode menjadi instruksi mesin.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Cara menampilkan output</span>
+<span class="function">console.log</span>(<span class="string">"Hello World!"</span>);  <span class="comment">// ke console browser (F12)</span>
+<span class="function">alert</span>(<span class="string">"Pesan popup"</span>);          <span class="comment">// dialog alert</span>
+<span class="property">document.getElementById</span>(<span class="string">"demo"</span>).innerHTML = <span class="string">"Teks berubah"</span>;  <span class="comment">// manipulasi DOM</span></pre></div></div>
+      <div class="info-box"><strong>🔧 Cara menambahkan JS:</strong> External <code>&lt;script src="app.js"&gt;&lt;/script&gt;</code> atau internal <code>&lt;script&gt;...&lt;/script&gt;</code> di akhir <code>&lt;body&gt;</code>.</div>
+      <div class="try-section"><button class="try-btn" onclick="this.nextElementSibling.classList.toggle('open')">▶ Coba Sendiri</button><div class="try-container"><div class="try-toolbar"><button class="try-run">Jalankan</button><button class="try-reset">Reset</button></div><div class="try-tabs"><button class="try-tab active" data-lang="html">HTML</button><button class="try-tab" data-lang="css">CSS</button><button class="try-tab" data-lang="js">JS</button></div><div class="try-editor-wrap active" data-lang="html"><textarea><p id="output">Hasil akan muncul di sini</p></textarea></div><div class="try-editor-wrap" data-lang="css"><textarea>p { font-family: monospace; background: #eee; padding: 12px; }</textarea></div><div class="try-editor-wrap" data-lang="js"><textarea>// Ubah teks paragraf
+document.getElementById("output").innerHTML = "Selamat datang di JavaScript!";
+console.log("JS berjalan dengan baik!");</textarea></div><div class="try-preview"><iframe></iframe></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">Values & Data Types</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Dalam JavaScript, setiap nilai memiliki tipe data. JS adalah bahasa <em>dynamically typed</em>, artinya Anda tidak perlu mendeklarasikan tipe data secara eksplisit. Tipe data dibagi menjadi <strong>Primitif</strong> (String, Number, Boolean, null, undefined, Symbol, BigInt) yang nilainya tidak bisa diubah (immutable), dan <strong>Object</strong> (termasuk Array dan Function) yang bisa menyimpan kumpulan data.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> nama = <span class="string">"Budi"</span>;          <span class="comment">// string: teks dalam tanda kutip</span>
+<span class="keyword">let</span> umur = <span class="number">25</span>;               <span class="comment">// number: integer atau float</span>
+<span class="keyword">let</span> isActive = <span class="boolean">true</span>;        <span class="comment">// boolean: hanya true atau false</span>
+<span class="keyword">let</span> kosong = <span class="boolean">null</span>;           <span class="comment">// null: nilai sengaja dikosongkan</span>
+<span class="keyword">let</span> tidakTerdefinisi;         <span class="comment">// undefined: variabel belum punya nilai</span>
+<span class="function">console</span>.<span class="function">log</span>(<span class="keyword">typeof</span> nama);      <span class="comment">// operator typeof mengecek tipe data</span></pre></div></div>
+  <div class="info-box"><strong>⚠️ Type coercion:</strong> JS otomatis mengubah tipe. <code>"5" + 2 = "52"</code> (string concat), tapi <code>"5" - 2 = 3</code> (number conversion). Hati-hati bug akibat ini!</div>
+</div></div></div>
+
+<!-- LESSON 3 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">let/const/var (Variable Declaration)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Variabel adalah "wadah" untuk menyimpan data. Di JavaScript modern, ada tiga kata kunci untuk deklarasi: <code>var</code> (lama, function-scoped, bisa di-redeclare), <code>let</code> (modern, block-scoped, bisa diubah), dan <code>const</code> (modern, block-scoped, tidak bisa di-reassign). Gunakan <code>const</code> secara default, dan <code>let</code> jika nilai perlu diubah.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// const: nilai tidak bisa di-reassign, tapi properti object/array bisa diubah</span>
+<span class="keyword">const</span> PI = <span class="number">3.14</span>;
+<span class="keyword">const</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+arr.push(<span class="number">4</span>);  <span class="comment">// ✅ diperbolehkan (mutasi isi array)</span>
+
+<span class="comment">// let: block-scoped, nilai bisa diubah</span>
+<span class="keyword">let</span> count = <span class="number">0</span>;
+count = count + <span class="number">1</span>; <span class="comment">// ✅ reassignment</span>
+
+<span class="comment">// var: function-scoped, bisa bermasalah (hoisting)</span>
+<span class="keyword">var</span> oldWay = <span class="string">"hindari di kode modern"</span>;</pre></div></div>
+  <div class="info-box"><strong>Best practice:</strong> Selalu gunakan <code>const</code> untuk variabel yang tidak berubah, gunakan <code>let</code> untuk loop atau counter. Hindari <code>var</code> untuk menghindari bug scope.</div>
+</div></div></div>
+
+<!-- LESSON 4 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Operators: Aritmatika & Perbandingan</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Operator digunakan untuk memanipulasi nilai. <strong>Aritmatika</strong> (+, -, *, /, %, **) untuk kalkulasi matematika. <strong>Perbandingan</strong> menghasilkan boolean (true/false). Sangat penting untuk membedakan <code>==</code> (loose equality, melakukan konversi tipe) dengan <code>===</code> (strict equality, membandingkan nilai DAN tipe).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> a = <span class="number">10</span>, b = <span class="number">3</span>;
+<span class="function">console</span>.<span class="function">log</span>(a + b, a - b, a * b, a / b, a % b, a ** b); <span class="comment">// operasi matematika</span>
+
+<span class="comment">// Perbandingan: ===, !==, >, <, >=, <=</span>
+<span class="function">console</span>.<span class="function">log</span>(<span class="number">5</span> == <span class="string">"5"</span>);   <span class="comment">// true (loose, "5" diubah jadi 5)</span>
+<span class="function">console</span>.<span class="function">log</span>(<span class="number">5</span> === <span class="string">"5"</span>);  <span class="comment">// false (strict, number vs string)</span></pre></div></div>
+  <div class="info-box"><strong>✅ Golden Rule:</strong> Selalu gunakan <code>===</code> dan <code>!==</code> untuk menghindari bug yang disebabkan oleh type coercion yang tidak terduga.</div>
+</div></div></div>
+
+<!-- LESSON 5 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Truthy &amp; Falsy</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Dalam konteks boolean (misal kondisi <code>if</code>), JavaScript mengonversi nilai non-boolean menjadi true atau false. Nilai yang dianggap <strong>falsy</strong> (seperti false) ada 6: <code>false, 0, "", null, undefined, NaN</code>. Semua nilai lainnya dianggap <strong>truthy</strong>, termasuk string kosong <code>"0"</code>, array kosong <code>[]</code>, dan object kosong <code>{}</code>.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">if</span> (<span class="string">""</span>) <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Ini tidak akan tampil"</span>); <span class="comment">// "" adalah falsy</span>
+<span class="keyword">if</span> (<span class="string">"hello"</span>) <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Ini tampil"</span>);     <span class="comment">// string non-kosong adalah truthy</span>
+<span class="keyword">if</span> (<span class="number">0</span>) <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Tidak tampil"</span>);       <span class="comment">// 0 adalah falsy</span>
+<span class="keyword">if</span> ([]) <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Tampil"</span>);          <span class="comment">// Array kosong adalah truthy!</span></pre></div></div>
+  <div class="info-box"><strong>💡 Tips:</strong> Gunakan <code>!!value</code> untuk mengonversi nilai menjadi boolean secara eksplisit, atau gunakan <code>Boolean(value)</code>.</div>
+</div></div></div>
+
+<!-- LESSON 6 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">if/else Statement</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>Control flow</strong> memungkinkan kode mengambil keputusan. Statement <code>if</code> mengeksekusi blok kode jika kondisi bernilai truthy. <code>else if</code> untuk kondisi alternatif, dan <code>else</code> untuk fallback jika semua kondisi sebelumnya false. Untuk kondisi sederhana, gunakan <strong>Ternary Operator</strong> (<code>kondisi ? nilaiTrue : nilaiFalse</code>).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> score = <span class="number">85</span>;
+<span class="keyword">if</span> (score >= <span class="number">90</span>) {
+  <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Grade A"</span>);
+} <span class="keyword">else if</span> (score >= <span class="number">80</span>) {
+  <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Grade B"</span>);
+} <span class="keyword">else</span> {
+  <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Grade C"</span>);
+}
+
+<span class="comment">// Ternary Operator (shorthand)</span>
+<span class="keyword">let</span> status = score >= <span class="number">70</span> ? <span class="string">"Lulus"</span> : <span class="string">"Tidak Lulus"</span>;</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 7 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">switch Statement</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Statement <code>switch</code> adalah alternatif dari <code>if-else if</code> ketika membandingkan satu nilai terhadap banyak kemungkinan (case). Lebih mudah dibaca untuk kondisi yang banyak. Penting: gunakan <code>break</code> di setiap case untuk mencegah "fall-through" (eksekusi lanjut ke case berikutnya).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> day = <span class="string">"Monday"</span>;
+<span class="keyword">switch</span> (day) {
+  <span class="keyword">case</span> <span class="string">"Saturday"</span>:
+  <span class="keyword">case</span> <span class="string">"Sunday"</span>:
+    <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Weekend!"</span>);
+    <span class="keyword">break</span>; <span class="comment">// hentikan eksekusi di sini</span>
+  <span class="keyword">default</span>:
+    <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Weekday"</span>);
+}</pre></div></div>
+  <div class="info-box">Tanpa <code>break</code>, kode akan terus mengeksekusi case berikutnya (fall-through). Ini kadang sengaja dilakukan untuk mengelompokkan beberapa case (seperti contoh di atas).</div>
+</div></div></div>
+
+<!-- LESSON 8 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Loop: for, while, do-while</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Loop digunakan untuk mengulang eksekusi kode. <strong>For loop</strong> ideal jika jumlah iterasi diketahui (init; condition; update). <strong>While loop</strong> cocok jika kondisi berhenti bergantung pada logika dinamis. <strong>Do-while</strong> minimal mengeksekusi kode 1 kali sebelum mengecek kondisi (post-test loop).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// for: init (i=0); kondisi (i<5); update (i++)</span>
+<span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < <span class="number">5</span>; i++) { <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Iterasi ke-"</span>, i); }
+
+<span class="comment">// while: cek kondisi dulu, lalu jalankan</span>
+<span class="keyword">let</span> j = <span class="number">0</span>;
+<span class="keyword">while</span> (j < <span class="number">3</span>) { <span class="function">console</span>.<span class="function">log</span>(j); j++; }
+
+<span class="comment">// do-while: jalankan dulu minimal 1x, lalu cek kondisi</span>
+<span class="keyword">let</span> k = <span class="number">0</span>;
+<span class="keyword">do</span> { <span class="function">console</span>.<span class="function">log</span>(k); k++; } <span class="keyword">while</span> (k < <span class="number">0</span>); <span class="comment">// akan print 0 sekali</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 9 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">for...of &amp; for...in</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Loop modern untuk iterasi data. <strong>for...of</strong> mengiterasi <em>nilai</em> dari iterable (Array, String, Map, Set). <strong>for...in</strong> mengiterasi <em>key/index</em> dari Object. Gunakan <code>for...of</code> untuk array dan <code>for...in</code> untuk object.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// for...of: iterasi nilai (array)</span>
+<span class="keyword">const</span> fruits = [<span class="string">"🍎"</span>, <span class="string">"🍌"</span>, <span class="string">"🍊"</span>];
+<span class="keyword">for</span> (<span class="keyword">const</span> fruit <span class="keyword">of</span> fruits) <span class="function">console</span>.<span class="function">log</span>(fruit); <span class="comment">// 🍎, 🍌, 🍊</span>
+
+<span class="comment">// for...in: iterasi key/property (object)</span>
+<span class="keyword">const</span> user = { name: <span class="string">"Budi"</span>, age: <span class="number">25</span> };
+<span class="keyword">for</span> (<span class="keyword">const</span> key <span class="keyword">in</span> user) {
+  <span class="function">console</span>.<span class="function">log</span>(key, user[key]); <span class="comment">// name Budi, age 25</span>
+}</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 10 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Function Declaration vs Expression</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Function adalah blok kode yang dapat digunakan ulang. <strong>Function Declaration</strong> menggunakan kata kunci <code>function</code> dan di-hoist (bisa dipanggil sebelum definisi). <strong>Function Expression</strong> menyimpan fungsi dalam variabel, tidak di-hoist. Expression lebih fleksibel (bisa passed as argument, anonymous).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Declaration - Hoisted (bisa dipanggil di atas definisi)</span>
+<span class="function">greet</span>(<span class="string">"Budi"</span>); <span class="comment">// ✅ Works</span>
+<span class="keyword">function</span> <span class="function">greet</span>(name) { <span class="keyword">return</span> <span class="string">`Hello, ${name}!`</span>; }
+
+<span class="comment">// Expression - Not Hoisted</span>
+<span class="keyword">const</span> <span class="function">sayHi</span> = <span class="keyword">function</span>(name) { <span class="keyword">return</span> <span class="string">`Hi, ${name}!`</span>; };
+<span class="function">sayHi</span>(<span class="string">"Andi"</span>); <span class="comment">// ✅ Harus setelah definisi</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 11 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Arrow Functions</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>Arrow Function</strong> (diperkenalkan ES6) adalah sintaks singkat untuk menulis function expression. Menggunakan tanda <code>=></code>. Perbedaan utama: Arrow function tidak memiliki <code>this</code> sendiri (mewarisi <code>this</code> dari scope luarnya), sehingga ideal untuk callback.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Syntax singkat</span>
+<span class="keyword">const</span> <span class="function">add</span> = (a, b) => a + b;      <span class="comment">// implicit return</span>
+<span class="keyword">const</span> <span class="function">double</span> = n => n * <span class="number">2</span>;      <span class="comment">// 1 param, tanpa kurung</span>
+<span class="keyword">const</span> <span class="function">sayHello</span> = () => <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Hi"</span>); <span class="comment">// no param</span>
+
+<span class="comment">// Dengan block body (perlu return eksplisit)</span>
+<span class="keyword">const</span> <span class="function">process</span> = (value) => {
+  <span class="keyword">const</span> result = value * <span class="number">2</span>;
+  <span class="keyword">return</span> result;
+};</pre></div></div>
+  <div class="info-box">Arrow function tidak cocok untuk method object (jika butuh <code>this</code>) atau constructor.</div>
+</div></div></div>
+
+<!-- LESSON 12 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">Parameters, Default, Rest Parameter</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>Parameters</strong> adalah variabel input fungsi. <strong>Default Parameter</strong> memberikan nilai fallback jika argumen tidak diberikan. <strong>Rest Parameter</strong> (<code>...args</code>) mengumpulkan sisa argumen menjadi array, sangat berguna untuk fungsi dengan jumlah argumen fleksibel.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Default parameter (ES6)</span>
+<span class="keyword">function</span> <span class="function">greet</span>(name = <span class="string">"Guest"</span>) { <span class="keyword">return</span> <span class="string">`Hello ${name}`</span>; }
+<span class="function">greet</span>();       <span class="comment">// "Hello Guest"</span>
+
+<span class="comment">// Rest parameter (...) mengumpulkan argumen jadi array</span>
+<span class="keyword">function</span> <span class="function">sumAll</span>(...numbers) {
+  <span class="keyword">return</span> numbers.<span class="function">reduce</span>((total, n) => total + n, <span class="number">0</span>);
+}
+<span class="function">console</span>.<span class="function">log</span>(<span class="function">sumAll</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>));  <span class="comment">// 10</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 13 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Scope &amp; Hoisting</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>Scope</strong> menentukan aksesibilitas variabel. <code>var</code> adalah function-scoped (hanya terbatas di fungsi), sedangkan <code>let</code> dan <code>const</code> adalah block-scoped (terbatas di blok <code>{}</code>). <strong>Hoisting</strong> adalah perilaku JS memindahkan deklarasi ke atas scope saat kompilasi. <code>var</code> di-hoist dengan nilai <code>undefined</code>, sedangkan <code>let/const</code> menghasilkan error jika diakses sebelum deklarasi (Temporal Dead Zone).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> globalVar = <span class="string">"global"</span>; <span class="comment">// Global scope</span>
+<span class="keyword">function</span> <span class="function">test</span>() {
+  <span class="keyword">let</span> localVar = <span class="string">"local"</span>; <span class="comment">// Function scope</span>
+  <span class="keyword">if</span> (<span class="boolean">true</span>) {
+    <span class="keyword">let</span> blockVar = <span class="string">"block"</span>; <span class="comment">// Block scope</span>
+  }
+  <span class="comment">// console.log(blockVar); // Error</span>
+}
+
+<span class="comment">// Hoisting dengan var</span>
+<span class="function">console</span>.<span class="function">log</span>(hoisted);  <span class="comment">// undefined (bukan error)</span>
+<span class="keyword">var</span> hoisted = <span class="string">"value"</span>;</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 14 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Array: map, filter, reduce</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Tiga method andalan untuk manipulasi array (Higher-Order Functions). <strong>map</strong>: mentransformasi setiap elemen menghasilkan array baru. <strong>filter</strong>: menyaring elemen berdasarkan kondisi. <strong>reduce</strong>: menggabungkan semua elemen menjadi satu nilai. Ketiganya tidak mengubah array asli (immutable).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> numbers = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];
+
+<span class="comment">// map: transformasi (kuadratkan semua)</span>
+<span class="keyword">const</span> squared = numbers.<span class="function">map</span>(n => n * n); <span class="comment">// [1, 4, 9, 16, 25]</span>
+
+<span class="comment">// filter: saring (ambil ganjil)</span>
+<span class="keyword">const</span> odds = numbers.<span class="function">filter</span>(n => n % <span class="number">2</span> !== <span class="number">0</span>); <span class="comment">// [1, 3, 5]</span>
+
+<span class="comment">// reduce: akumulasi (jumlahkan semua)</span>
+<span class="keyword">const</span> sum = numbers.<span class="function">reduce</span>((acc, n) => acc + n, <span class="number">0</span>); <span class="comment">// 15</span></pre></div></div>
+  <div class="info-box"><strong>⚡ Functional Programming:</strong> Chain method untuk operasi kompleks: <code>numbers.filter(n => n > 2).map(n => n * 2)</code>.</div>
+</div></div></div>
+
+<!-- LESSON 15 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Array: find, findIndex, some, every</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Method pencarian dan validasi array. <strong>find</strong>: mencari elemen pertama yang cocok. <strong>findIndex</strong>: mencari index elemen pertama yang cocok. <strong>some</strong>: cek apakah ada minimal satu elemen cocok. <strong>every</strong>: cek apakah semua elemen cocok.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> users = [{id:<span class="number">1</span>, name:<span class="string">"Andi"</span>}, {id:<span class="number">2</span>, name:<span class="string">"Budi"</span>}];
+
+<span class="keyword">const</span> user = users.<span class="function">find</span>(u => u.id === <span class="number">2</span>);      <span class="comment">// {id:2, name:"Budi"}</span>
+<span class="keyword">const</span> index = users.<span class="function">findIndex</span>(u => u.id === <span class="number">2</span>); <span class="comment">// 1</span>
+<span class="keyword">const</span> hasBudi = users.<span class="function">some</span>(u => u.name === <span class="string">"Budi"</span>);  <span class="comment">// true</span>
+<span class="keyword">const</span> allHaveId = users.<span class="function">every</span>(u => u.id !== <span class="boolean">undefined</span>); <span class="comment">// true</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 16 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">Destructuring (Array &amp; Object)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>Destructuring</strong> adalah cara mengekstrak nilai dari array atau properti dari object ke dalam variabel terpisah dengan sintaks ringkas. Sangat berguna untuk mengambil data dari API response atau config object.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Array destructuring (berdasarkan posisi)</span>
+<span class="keyword">const</span> [a, b] = [<span class="number">10</span>, <span class="number">20</span>]; <span class="comment">// a=10, b=20</span>
+
+<span class="comment">// Object destructuring (berdasarkan nama properti)</span>
+<span class="keyword">const</span> { name, age } = { name: <span class="string">"Budi"</span>, age: <span class="number">25</span> };
+
+<span class="comment">// Alias nama variabel</span>
+<span class="keyword">const</span> { name: userName } = { name: <span class="string">"Budi"</span> }; <span class="comment">// userName = "Budi"</span>
+
+<span class="comment">// Default value jika properti tidak ada</span>
+<span class="keyword">const</span> { city = <span class="string">"Jakarta"</span> } = { name: <span class="string">"Budi"</span> };</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 17 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Spread &amp; Rest Operator (...)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Operator <code>...</code> punya dua fungsi tergantung konteks. <strong>Spread</strong>: Memecah array/object menjadi elemen individual (saat assignment atau function call). <strong>Rest</strong>: Mengumpulkan elemen menjadi array (saat deklarasi parameter). Sangat powerful untuk cloning dan merging.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Spread (memecah)</span>
+<span class="keyword">const</span> arr1 = [<span class="number">1</span>, <span class="number">2</span>], arr2 = [<span class="number">3</span>, <span class="number">4</span>];
+<span class="keyword">const</span> combined = [...arr1, ...arr2];   <span class="comment">// [1,2,3,4]</span>
+<span class="keyword">const</span> newObj = { ...{a:<span class="number">1</span>}, b:<span class="number">2</span> };     <span class="comment">// {a:1, b:2}</span>
+
+<span class="comment">// Rest (mengumpulkan)</span>
+<span class="keyword">const</span> [first, ...rest] = [<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>];  <span class="comment">// first=10, rest=[20,30]</span>
+<span class="keyword">const</span> { a, ...others } = { a: <span class="number">1</span>, b: <span class="number">2</span>, c: <span class="number">3</span> }; <span class="comment">// others={b:2,c:3}</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 18 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">Objects (Properti &amp; Method)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Object adalah tipe data kompleks untuk menyimpan pasangan key-value. Key biasanya string, value bisa berupa tipe data apa saja termasuk fungsi (disebut method). Akses properti bisa dengan dot notation (<code>obj.key</code>) atau bracket notation (<code>obj["key"]</code>) untuk key dinamis.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> car = {
+  brand: <span class="string">"Toyota"</span>,  <span class="comment">// property</span>
+  year: <span class="number">2022</span>,
+  start() {       <span class="comment">// method (shorthand ES6)</span>
+    <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Engine started"</span>);
+  }
+};
+
+car.brand;        <span class="comment">// "Toyota" (dot notation)</span>
+car[<span class="string">"year"</span>];        <span class="comment">// 2022 (bracket notation)</span>
+car.start();       <span class="comment">// memanggil method</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 19 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">19</div><h3 class="lesson-title">DOM: querySelector &amp; querySelectorAll</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>DOM (Document Object Model)</strong> adalah representasi HTML sebagai pohon objek yang bisa dimanipulasi JS. <code>querySelector</code> mengembalikan elemen pertama yang cocok dengan CSS selector. <code>querySelectorAll</code> mengembalikan NodeList semua elemen yang cocok. Gunakan ini untuk memilih elemen sebelum manipulasi.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Memilih elemen (gunakan CSS selector)</span>
+<span class="keyword">const</span> title = <span class="property">document</span>.<span class="property">querySelector</span>(<span class="string">"h1"</span>);       <span class="comment">// elemen <h1> pertama</span>
+<span class="keyword">const</span> container = <span class="property">document</span>.<span class="property">getElementById</span>(<span class="string">"app"</span>); <span class="comment">// by ID (lebih cepat)</span>
+<span class="keyword">const</span> buttons = <span class="property">document</span>.<span class="property">querySelectorAll</span>(<span class="string">".btn"</span>); <span class="comment">// NodeList</span>
+
+<span class="comment">// Mengubah konten</span>
+title.textContent = <span class="string">"Judul Baru"</span>;    <span class="comment">// teks saja</span>
+title.innerHTML = <span class="string">"<em>Judul Baru</em>"</span>; <span class="comment">// interpret HTML</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 20 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">20</div><h3 class="lesson-title">DOM: createElement, appendChild, remove</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">JS bisa membuat, menambah, dan menghapus elemen HTML secara dinamis. <code>createElement</code> membuat node baru. <code>appendChild</code> menambahkan node sebagai child terakhir. <code>remove</code> menghapus node dari DOM. Operasi ini memungkinkan halaman web berubah tanpa reload.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// Membuat elemen baru</span>
+<span class="keyword">const</span> newDiv = <span class="property">document</span>.<span class="function">createElement</span>(<span class="string">"div"</span>);
+newDiv.textContent = <span class="string">"Hello World"</span>;
+newDiv.classList.<span class="function">add</span>(<span class="string">"box"</span>);
+
+<span class="comment">// Menambahkan ke DOM</span>
+<span class="property">document</span>.<span class="property">body</span>.<span class="function">appendChild</span>(newDiv);
+
+<span class="comment">// Menghapus elemen</span>
+<span class="keyword">const</span> old = <span class="property">document</span>.<span class="property">getElementById</span>(<span class="string">"removeMe"</span>);
+old.<span class="function">remove</span>(); <span class="comment">// hapus dari DOM</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 21 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">21</div><h3 class="lesson-title">DOM: Event Listeners</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Interaktivitas web dibangun di atas <strong>Events</strong> (klik, hover, scroll, dll). <code>addEventListener</code> adalah cara standar untuk mendaftarkan fungsi (callback) yang akan dijalankan saat event terjadi. Fungsi ini menerima objek <code>event</code> yang berisi info tentang kejadian tersebut.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> btn = <span class="property">document</span>.<span class="property">querySelector</span>(<span class="string">"#myButton"</span>);
+
+<span class="comment">// Tambah event listener</span>
+btn.<span class="function">addEventListener</span>(<span class="string">"click"</span>, () => {
+  <span class="function">alert</span>(<span class="string">"Button diklik!"</span>);
+});
+
+<span class="comment">// Event object untuk detail</span>
+btn.<span class="function">addEventListener</span>(<span class="string">"click"</span>, (event) => {
+  <span class="function">console</span>.<span class="function">log</span>(event.target); <span class="comment">// elemen yang diklik</span>
+  <span class="function">console</span>.<span class="function">log</span>(event.type);   <span class="comment">// "click"</span>
+});</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 22 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">22</div><h3 class="lesson-title">Event Types: click, input, change, submit</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Ada puluhan event types. Yang sering digunakan: <strong>click</strong> (klik mouse), <strong>input</strong> (perubahan nilai real-time), <strong>change</strong> (perubahan nilai setelah blur/commit), <strong>submit</strong> (form disubmit). Gunakan <code>event.preventDefault()</code> untuk mencegah perilaku default (misal refresh saat submit form).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> input = <span class="property">document</span>.<span class="property">querySelector</span>(<span class="string">"#username"</span>);
+
+<span class="comment">// input: trigger setiap ketikan</span>
+input.<span class="function">addEventListener</span>(<span class="string">"input"</span>, (e) => {
+  <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Nilai saat ini:"</span>, e.target.value);
+});
+
+<span class="comment">// change: trigger setelah blur (user selesai edit)</span>
+input.<span class="function">addEventListener</span>(<span class="string">"change"</span>, (e) => {
+  <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Final value:"</span>, e.target.value);
+});
+
+<span class="comment">// submit: tangkap form submission</span>
+<span class="keyword">const</span> form = <span class="property">document</span>.<span class="property">querySelector</span>(<span class="string">"form"</span>);
+form.<span class="function">addEventListener</span>(<span class="string">"submit"</span>, (e) => {
+  e.preventDefault();  <span class="comment">// cegah refresh halaman</span>
+  <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Form submitted!"</span>);
+});</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 23 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">23</div><h3 class="lesson-title">Form Handling (mengambil nilai)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">FormData API menyederhanakan pengambilan nilai form. Metode tradisional: akses <code>input.value</code> satu per satu. Metode modern: gunakan <code>new FormData(form)</code> untuk mengambil semua nilai sekaligus dalam format key-value pair.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> form = <span class="property">document</span>.<span class="property">getElementById</span>(<span class="string">"loginForm"</span>);
+
+form.<span class="function">addEventListener</span>(<span class="string">"submit"</span>, (e) => {
+  e.preventDefault();
+  
+  <span class="comment">// Cara modern dengan FormData</span>
+  <span class="keyword">const</span> formData = <span class="keyword">new</span> <span class="function">FormData</span>(form);
+  <span class="keyword">const</span> username = formData.<span class="function">get</span>(<span class="string">"username"</span>); <span class="comment">// ambil by name</span>
+  <span class="keyword">const</span> password = formData.<span class="function">get</span>(<span class="string">"password"</span>);
+  
+  <span class="function">console</span>.<span class="function">log</span>({ username, password });
+});</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 24 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">24</div><h3 class="lesson-title">Fetch API &amp; Async/Await</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>Fetch API</strong> digunakan untuk mengirim/menerima data dari server (HTTP Request) tanpa reload halaman (AJAX). Fetch mengembalikan <strong>Promise</strong>. <code>async/await</code> adalah sintaks modern untuk menangani Promise agar kode lebih mudah dibaca seperti synchronous.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">async</span> <span class="keyword">function</span> <span class="function">fetchUser</span>() {
+  <span class="keyword">try</span> {
+    <span class="comment">// await menunggu response sampai selesai</span>
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">"https://jsonplaceholder.typicode.com/users/1"</span>);
+    
+    <span class="keyword">const</span> user = <span class="keyword">await</span> response.<span class="function">json</span>(); <span class="comment">// parse JSON</span>
+    <span class="function">console</span>.<span class="function">log</span>(user);
+  } <span class="keyword">catch</span> (error) {
+    <span class="function">console</span>.<span class="function">error</span>(<span class="string">"Gagal fetch:"</span>, error);
+  }
+}
+<span class="function">fetchUser</span>();</pre></div></div>
+  <div class="info-box"><strong>Promise:</strong> Objek yang mewakili nilai yang belum tersedia (tapi akan tersedia nanti). <code>await</code> hanya bisa digunakan di dalam fungsi <code>async</code>.</div>
+</div></div></div>
+
+<!-- LESSON 25 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">25</div><h3 class="lesson-title">Error Handling: try/catch/finally</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Error handling mencegah aplikasi crash saat terjadi kesalahan. Blok <code>try</code> berisi kode yang mungkin error. <code>catch</code> menangkap error jika terjadi. <code>finally</code> selalu dijalankan baik error maupun tidak (cocok untuk cleanup).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">try</span> {
+  <span class="comment">// Kode yang berisiko error</span>
+  <span class="keyword">let</span> result = <span class="function">riskyOperation</span>();
+  <span class="function">console</span>.<span class="function">log</span>(result);
+} <span class="keyword">catch</span> (error) {
+  <span class="comment">// Handler jika error</span>
+  <span class="function">console</span>.<span class="function">error</span>(<span class="string">"Terjadi error:"</span>, error.message);
+} <span class="keyword">finally</span> {
+  <span class="comment">// Selalu dieksekusi (cleanup)</span>
+  <span class="function">console</span>.<span class="function">log</span>(<span class="string">"Proses selesai."</span>);
+}</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 26 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">26</div><h3 class="lesson-title">localStorage &amp; sessionStorage</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Web Storage API menyimpan data di browser. <strong>localStorage</strong>: data tetap ada meski browser ditutup (persistent). <strong>sessionStorage</strong>: data hilang saat tab ditutup. Keduanya menyimpan data dalam format string (key-value).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// localStorage (persistent)</span>
+localStorage.<span class="function">setItem</span>(<span class="string">"theme"</span>, <span class="string">"dark"</span>);    <span class="comment">// simpan</span>
+<span class="keyword">const</span> theme = localStorage.<span class="function">getItem</span>(<span class="string">"theme"</span>); <span class="comment">// ambil</span>
+localStorage.<span class="function">removeItem</span>(<span class="string">"theme"</span>);           <span class="comment">// hapus</span>
+
+<span class="comment">// sessionStorage (hilang saat tab ditutup)</span>
+sessionStorage.<span class="function">setItem</span>(<span class="string">"temp"</span>, <span class="string">"data sementara"</span>);</pre></div></div>
+  <div class="info-box">Storage hanya bisa menyimpan string. Untuk menyimpan object/array, gunakan <code>JSON.stringify()</code> saat simpan dan <code>JSON.parse()</code> saat ambil.</div>
+</div></div></div>
+
+<!-- LESSON 27 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">27</div><h3 class="lesson-title">JSON.stringify &amp; JSON.parse</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>JSON (JavaScript Object Notation)</strong> adalah format pertukaran data ringan. <code>JSON.stringify()</code> mengubah object JS menjadi string JSON (untuk kirim ke server atau simpan di storage). <code>JSON.parse()</code> mengubah string JSON kembali menjadi object JS.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> user = { name: <span class="string">"Budi"</span>, age: <span class="number">25</span> };
+
+<span class="comment">// Object -> String JSON</span>
+<span class="keyword">const</span> jsonString = <span class="builtin">JSON</span>.<span class="function">stringify</span>(user);
+<span class="function">console</span>.<span class="function">log</span>(jsonString);  <span class="comment">// '{"name":"Budi","age":25}'</span>
+
+<span class="comment">// String JSON -> Object</span>
+<span class="keyword">const</span> parsedUser = <span class="builtin">JSON</span>.<span class="function">parse</span>(jsonString);
+
+<span class="comment">// Untuk storage:</span>
+localStorage.<span class="function">setItem</span>(<span class="string">"user"</span>, <span class="builtin">JSON</span>.<span class="function">stringify</span>(user));
+<span class="keyword">const</span> savedUser = <span class="builtin">JSON</span>.<span class="function">parse</span>(localStorage.<span class="function">getItem</span>(<span class="string">"user"</span>));</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 28 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">28</div><h3 class="lesson-title">Modules: import / export</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text"><strong>ES6 Modules</strong> memungkinkan kode dibagi ke file terpisah untuk modularitas. <code>export</code> mengekspos fungsi/variabel dari file. <code>import</code> mengimpor dari file lain. Ini adalah standar modern untuk manajemen kode di proyek besar.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// === utils.js ===</span>
+<span class="keyword">export</span> <span class="keyword">function</span> <span class="function">greet</span>(name) { <span class="keyword">return</span> <span class="string">`Hello ${name}`</span>; }
+<span class="keyword">export</span> <span class="keyword">const</span> VERSION = <span class="string">"1.0"</span>;
+<span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="function">main</span>() {} <span class="comment">// default export</span>
+
+<span class="comment">// === main.js ===</span>
+<span class="keyword">import</span> main, { greet, VERSION } <span class="keyword">from</span> <span class="string">"./utils.js"</span>;
+<span class="function">greet</span>(<span class="string">"Budi"</span>); <span class="comment">// "Hello Budi"</span></pre></div></div>
+  <div class="info-box">Untuk menggunakan modules di browser, tambahkan <code>&lt;script type="module" src="main.js"&gt;&lt;/script&gt;</code> di HTML.</div>
+</div></div></div>
+
+<!-- LESSON 29 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">29</div><h3 class="lesson-title">Practice: Todo List App</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Membangun Todo List menggabungkan konsep array manipulation, DOM, dan events. Data disimpan di array of objects. Fungsi terpisah untuk add, toggle (ubah status), dan delete. Render ulang DOM setiap kali data berubah untuk menjaga sinkronisasi.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> todos = [];
+
+<span class="keyword">function</span> <span class="function">addTodo</span>(text) {
+  todos.<span class="function">push</span>({ id: <span class="builtin">Date</span>.<span class="function">now</span>(), text, done: <span class="boolean">false</span> });
+  <span class="function">render</span>();
+}
+
+<span class="keyword">function</span> <span class="function">toggleTodo</span>(id) {
+  <span class="keyword">const</span> todo = todos.<span class="function">find</span>(t => t.id === id);
+  <span class="keyword">if</span> (todo) todo.done = !todo.done; <span class="comment">// toggle boolean</span>
+  <span class="function">render</span>();
+}
+
+<span class="keyword">function</span> <span class="function">deleteTodo</span>(id) {
+  todos = todos.<span class="function">filter</span>(t => t.id !== id); <span class="comment">// hapus dari array</span>
+  <span class="function">render</span>();
+}
+
+<span class="keyword">function</span> <span class="function">render</span>() {
+  <span class="comment">// Loop todos, buat elemen HTML, append ke container</span>
+}</pre></div></div>
+  <div class="info-box">Untuk persistensi data, simpan <code>todos</code> ke localStorage setiap ada perubahan.</div>
+</div></div></div>
+
+<!-- LESSON 30 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">30</div><h3 class="lesson-title">Practice: Quiz Sederhana</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Aplikasi Quiz melatih logika kondisional dan iterasi. Data soal disimpan dalam array of objects dengan properti <code>text</code>, <code>options</code>, dan <code>answer</code> (index jawaban benar). Bandingkan pilihan user dengan jawaban benar untuk menghitung skor.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> questions = [
+  { text: <span class="string">"Apa kepanjangan HTML?"</span>, options: [<span class="string">"Hyper Text Markup Language"</span>, <span class="string">"Home Tool"</span>], answer: <span class="number">0</span> },
+  { text: <span class="string">"CSS digunakan untuk?"</span>, options: [<span class="string">"Struktur"</span>, <span class="string">"Styling"</span>], answer: <span class="number">1</span> }
+];
+
+<span class="keyword">let</span> score = <span class="number">0</span>;
+
+questions.<span class="function">forEach</span>((q, idx) => {
+  <span class="comment">// Render pertanyaan dan radio button options</span>
+  <span class="comment">// Tambah event listener ke form/tombol submit</span>
+  <span class="keyword">if</span> (userAnswer === q.answer) score++;
+});
+
+<span class="function">console</span>.<span class="function">log</span>(<span class="string">`Skor: ${score}/${questions.length}`</span>);</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 31 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">31</div><h3 class="lesson-title">Practice: Calculator</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Calculator melatih manajemen state (nilai display, operator, memory). Logika utama: append angka ke string display, simpan operator, lalu hitung saat tombol "=" ditekan. Gunakan <code>eval()</code> untuk demo sederhana (hati-hati di production).</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> displayValue = <span class="string">""</span>;
+
+<span class="keyword">function</span> <span class="function">appendNumber</span>(num) { 
+  displayValue += num; 
+  updateDisplay(); 
+}
+
+<span class="keyword">function</span> <span class="function">chooseOperator</span>(op) { 
+  displayValue += <span class="string">` ${op} `</span>; <span class="comment">// spasi penting untuk parsing</span>
+  updateDisplay(); 
+}
+
+<span class="keyword">function</span> <span class="function">calculate</span>() {
+  <span class="keyword">try</span> {
+    displayValue = <span class="builtin">eval</span>(displayValue).<span class="function">toString</span>(); <span class="comment">// ⚠️ demo only</span>
+    updateDisplay();
+  } <span class="keyword">catch</span> { 
+    displayValue = <span class="string">"Error"</span>; 
+    updateDisplay(); 
+  }
+}
+
+<span class="keyword">function</span> <span class="function">clearDisplay</span>() { displayValue = <span class="string">""</span>; updateDisplay(); }</pre></div></div>
+  <div class="info-box"><strong>⚠️ Security Note:</strong> <code>eval()</code> berbahaya di production karena bisa mengeksekusi kode malicious. Gunakan parser library atau logic manual untuk calculator.</div>
+</div></div></div>
+
+<!-- LESSON 32 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">32</div><h3 class="lesson-title">Practice: Modal Popup dengan JS</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Modal adalah komponen UI overlay. Kontrol visibility dengan CSS <code>display</code> atau class toggle. Penting untuk menambahkan event listener pada backdrop (background gelap) agar modal tertutup saat user klik di luar konten modal.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">const</span> modal = <span class="property">document</span>.<span class="property">getElementById</span>(<span class="string">"myModal"</span>);
+<span class="keyword">const</span> openBtn = <span class="property">document</span>.<span class="property">getElementById</span>(<span class="string">"openModalBtn"</span>);
+<span class="keyword">const</span> closeBtn = <span class="property">document</span>.<span class="property">querySelector</span>(<span class="string">".close"</span>);
+
+<span class="keyword">function</span> <span class="function">openModal</span>() { modal.style.display = <span class="string">"flex"</span>; }
+<span class="keyword">function</span> <span class="function">closeModal</span>() { modal.style.display = <span class="string">"none"</span>; }
+
+openBtn.<span class="function">addEventListener</span>(<span class="string">"click"</span>, openModal);
+closeBtn.<span class="function">addEventListener</span>(<span class="string">"click"</span>, closeModal);
+
+<span class="comment">// Klik di luar modal (backdrop) untuk tutup</span>
+window.<span class="function">addEventListener</span>(<span class="string">"click"</span>, (e) => { 
+  <span class="keyword">if</span> (e.target === modal) closeModal(); 
+});</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 33 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">33</div><h3 class="lesson-title">Practice: Image Gallery Controller</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Gallery/Slider membutuhkan tracking index aktif. Fungsi <code>next()</code> increment index (dengan wrap-around ke 0 jika di akhir). Fungsi <code>prev()</code> decrement (dengan wrap-around ke akhir jika di 0). Tampilkan hanya gambar dengan index yang cocok.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> currentIndex = <span class="number">0</span>;
+<span class="keyword">const</span> images = <span class="property">document</span>.<span class="property">querySelectorAll</span>(<span class="string">".gallery img"</span>);
+
+<span class="keyword">function</span> <span class="function">showImage</span>(index) {
+  images.<span class="function">forEach</span>((img, i) => {
+    img.style.display = i === index ? <span class="string">"block"</span> : <span class="string">"none"</span>;
+  });
+}
+
+<span class="keyword">function</span> <span class="function">next</span>() {
+  currentIndex = (currentIndex + <span class="number">1</span>) % images.length; <span class="comment">// 0,1,2,3,0,1...</span>
+  <span class="function">showImage</span>(currentIndex);
+}
+
+<span class="keyword">function</span> <span class="function">prev</span>() {
+  <span class="comment">// +length untuk handle negative index</span>
+  currentIndex = (currentIndex - <span class="number">1</span> + images.length) % images.length;
+  <span class="function">showImage</span>(currentIndex);
+}
+<span class="function">showImage</span>(<span class="number">0</span>); <span class="comment">// init</span></pre></div></div>
+</div></div></div>
+
+<!-- LESSON 34 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">34</div><h3 class="lesson-title">Practice: Stopwatch</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Stopwatch menggunakan <code>setInterval</code> untuk update waktu berkala. Variabel <code>intervalId</code> disimpan untuk bisa dihentikan dengan <code>clearInterval</code>. Format waktu dari milidetik ke menit:detik:milidetik.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">let</span> time = <span class="number">0</span>, interval;
+
+<span class="keyword">function</span> <span class="function">startTimer</span>() {
+  <span class="keyword">if</span> (interval) <span class="keyword">return</span>; <span class="comment">// cegat multiple interval</span>
+  interval = <span class="function">setInterval</span>(() => {
+    time += <span class="number">10</span>; <span class="comment">// increment 10ms</span>
+    <span class="function">updateDisplay</span>();
+  }, <span class="number">10</span>); <span class="comment">// update setiap 10ms</span>
+}
+
+<span class="keyword">function</span> <span class="function">stopTimer</span>() { 
+  <span class="function">clearInterval</span>(interval); 
+  interval = <span class="boolean">null</span>; 
+}
+
+<span class="keyword">function</span> <span class="function">resetTimer</span>() { 
+  <span class="function">stopTimer</span>(); 
+  time = <span class="number">0</span>; 
+  <span class="function">updateDisplay</span>(); 
+}
+
+<span class="keyword">function</span> <span class="function">updateDisplay</span>() {
+  <span class="keyword">const</span> mins = Math.<span class="function">floor</span>(time / <span class="number">60000</span>);
+  <span class="keyword">const</span> secs = Math.<span class="function">floor</span>((time % <span class="number">60000</span>) / <span class="number">1000</span>);
+  <span class="comment">// tampilkan di elemen DOM</span>
+}</pre></div></div>
+</div></div></div>
+
+<!-- LESSON 35 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">35</div><h3 class="lesson-title">Mini Project: Weather App (Mock)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Weather App menggabungkan Fetch API, DOM manipulation, dan Error Handling. User input nama kota, app fetch data dari API (seperti OpenWeatherMap), tampilkan suhu dan kondisi cuaca. Latihan baik untuk mengintegrasikan berbagai konsep.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="keyword">async</span> <span class="keyword">function</span> <span class="function">fetchWeather</span>(city) {
+  <span class="keyword">const</span> apiKey = <span class="string">"YOUR_API_KEY"</span>;
+  <span class="keyword">const</span> url = <span class="string">`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`</span>;
+  
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="function">fetch</span>(url);
+    <span class="keyword">if</span> (!res.ok) <span class="keyword">throw new</span> <span class="function">Error</span>(<span class="string">"City not found"</span>);
+    <span class="keyword">const</span> data = <span class="keyword">await</span> res.<span class="function">json</span>();
+    
+    <span class="comment">// Update DOM dengan data.main.temp, data.weather[0].description</span>
+    <span class="function">console</span>.<span class="function">log</span>(<span class="string">`Temp: ${data.main.temp}°C`</span>);
+  } <span class="keyword">catch</span> (error) {
+    <span class="function">console</span>.<span class="function">error</span>(error.message);
+  }
+}</pre></div></div>
+  <div class="info-box">Daftar API key gratis di OpenWeatherMap atau gunakan mock data untuk development.</div>
+</div></div></div>
+
+<!-- LESSON 36 -->
+<div class="lesson-card"><div class="lesson-header"><div class="lesson-info"><div class="lesson-number">36</div><h3 class="lesson-title">Best Practices &amp; Code Organization</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="lesson-body"><div class="lesson-content">
+  <p class="lesson-text">Menulis kode yang "clean" sama pentingnya dengan kode yang berfungsi. Prinsip utama: gunakan nama variabel deskriptif, hindari "magic numbers", pecah kode besar jadi fungsi kecil (Single Responsibility), dan selalu handle error. Kode yang bersih mudah dibaca, di-debug, dan dikembangkan.</p>
+  <div class="code-block"><div class="code-header"><span class="code-lang">JS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><span class="comment">// ❌ Bad: Magic number, nama tidak jelas</span>
+<span class="keyword">const</span> x = <span class="number">86400</span>;
+<span class="keyword">if</span> (d > x) { ... }
+
+<span class="comment">// ✅ Good: Konstanta bernama, jelas maknanya</span>
+<span class="keyword">const</span> SECONDS_IN_DAY = <span class="number">86400</span>;
+<span class="keyword">if</span> (duration > SECONDS_IN_DAY) { ... }
+
+<span class="comment">// ✅ Early Return Pattern</span>
+<span class="keyword">function</span> <span class="function">processUser</span>(user) {
+  <span class="keyword">if</span> (!user) <span class="keyword">return</span> <span class="boolean">null</span>; <span class="comment">// keluar awal jika invalid</span>
+  
+  <span class="comment">// logic utama di sini tanpa nested if</span>
+  <span class="keyword">return</span> user.name;
+}
+
+<span class="comment">// ✅ Async/Await untuk kode asinkron yang bersih</span>
+<span class="keyword">async</span> <span class="keyword">function</span> <span class="function">getData</span>() {
+  <span class="keyword">try</span> { ... } <span class="keyword">catch</span> (e) { ... }
+}</pre></div></div>
+  <div class="info-box">Baca "Clean Code JavaScript" untuk panduan lebih lanjut tentang penulisan kode yang profesional.</div>
+</div></div></div>
+
+</div>
+
+<script>
+  // Loading Screen Handler
+  document.addEventListener("DOMContentLoaded", () => {
+    const loadingScreen = document.getElementById("loadingScreen");
+    setTimeout(() => {
+      loadingScreen.classList.add("hidden");
+      document.body.style.overflow = "auto";
+    }, 2500);
+  });
+
+  // Theme Toggle
+  const themeToggle = document.getElementById("themeToggle");
+  const htmlEl = document.documentElement;
+  if (localStorage.getItem("theme") === "light") htmlEl.setAttribute("data-theme", "light");
+  themeToggle?.addEventListener("click", () => {
+    if (htmlEl.getAttribute("data-theme") === "light") {
+      htmlEl.removeAttribute("data-theme");
+      localStorage.setItem("theme", "dark");
+    } else {
+      htmlEl.setAttribute("data-theme", "light");
+      localStorage.setItem("theme", "light");
+    }
+  });
+  
+  // Mobile Menu
+  const mobileToggle = document.getElementById("mobileToggle");
+  const mobileMenu = document.getElementById("mobileMenu");
+  mobileToggle?.addEventListener("click", () => mobileMenu.classList.toggle("open"));
+  
+  // Accordion Lessons
+  document.querySelectorAll(".lesson-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const card = header.closest(".lesson-card");
+      if (card) card.classList.toggle("open");
+    });
+  });
+  
+  // Copy Code Function
+  function copyCode(btn) {
+    const block = btn.closest(".code-block");
+    const code = block.querySelector("pre")?.textContent || "";
+    navigator.clipboard.writeText(code).then(() => {
+      const original = btn.textContent;
+      btn.textContent = "Tersalin!";
+      setTimeout(() => btn.textContent = original, 2000);
+    }).catch(() => alert("Gagal menyalin"));
+  }
+  window.copyCode = copyCode;
+  
+  // Try It Handler
+  function initTryIt(container) {
+    const tabs = container.querySelectorAll(".try-tab");
+    const editors = container.querySelectorAll(".try-editor-wrap");
+    tabs.forEach(tab => tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      editors.forEach(e => e.classList.remove("active"));
+      tab.classList.add("active");
+      container.querySelector(`.try-editor-wrap[data-lang='${tab.dataset.lang}']`).classList.add("active");
+    }));
+    const defHtml = container.querySelector(".try-editor-wrap[data-lang='html'] textarea")?.value || "";
+    const defCss = container.querySelector(".try-editor-wrap[data-lang='css'] textarea")?.value || "";
+    const defJs = container.querySelector(".try-editor-wrap[data-lang='js'] textarea")?.value || "";
+    const runBtn = container.querySelector(".try-run");
+    const resetBtn = container.querySelector(".try-reset");
+    const iframe = container.querySelector("iframe");
+    const updatePreview = () => {
+      const html = container.querySelector(".try-editor-wrap[data-lang='html'] textarea")?.value || "";
+      const css = container.querySelector(".try-editor-wrap[data-lang='css'] textarea")?.value || "";
+      const js = container.querySelector(".try-editor-wrap[data-lang='js'] textarea")?.value || "";
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`);
+      doc.close();
+    };
+    if (runBtn) runBtn.addEventListener("click", updatePreview);
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        if (container.querySelector(".try-editor-wrap[data-lang='html'] textarea")) container.querySelector(".try-editor-wrap[data-lang='html'] textarea").value = defHtml;
+        if (container.querySelector(".try-editor-wrap[data-lang='css'] textarea")) container.querySelector(".try-editor-wrap[data-lang='css'] textarea").value = defCss;
+        if (container.querySelector(".try-editor-wrap[data-lang='js'] textarea")) container.querySelector(".try-editor-wrap[data-lang='js'] textarea").value = defJs;
+        updatePreview();
+      });
+    }
+    updatePreview();
+  }
+  document.querySelectorAll(".try-container").forEach(initTryIt);
+</script>
+</body>
+</html>

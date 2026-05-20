@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backend - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #22c55e;
+      --accent-secondary: #10b981;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(34, 197, 94, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { font-family: var(--font-display); background: var(--bg); color: var(--fg); line-height: 1.7; overflow-x: hidden; }
+
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.5s ease, visibility 0.5s ease; }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; color: var(--fg-muted); }
+
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .grid-pattern { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+
+            /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    /* Navigation Links Container */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Arrow */
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Divider */
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* Dropdown Section Label */
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Nav Actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .page-hero { min-height: 50vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 60px; position: relative; }
+    .page-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; }
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 100px; font-size: 0.85rem; color: var(--accent); margin-bottom: 24px; }
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .lesson-grid { display: grid; gap: 16px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; }
+    .lesson-toggle { color: var(--fg-muted); transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 3000px; }
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+
+    .explanation { margin-bottom: 1rem; background: rgba(34, 197, 94, 0.05); padding: 12px 16px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.95rem; line-height: 1.6; }
+    .explanation strong { color: var(--accent); }
+
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; }
+    .code-copy:hover { background: var(--accent); color: #000; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+
+    .info-box { background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul { margin: 8px 0 0 20px; }
+
+    .keyword { color: #ff7b54; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .number { color: #f0883e; }
+    .function { color: #d2a8ff; }
+    .variable { color: #ffa657; }
+    .module { color: #7ee787; }
+
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+    .comparison-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .comparison-card h4 { color: var(--accent); margin-bottom: 8px; font-size: 1rem; }
+    .comparison-card ul { list-style: none; }
+    .comparison-card li { padding: 4px 0; color: var(--fg-muted); font-size: 0.9rem; }
+
+    .diagram { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; overflow-x: auto; }
+    .diagram pre { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.4; color: var(--fg); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Memuat materi Backend...</div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+  </div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <!-- Dropdown: Frontend -->
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: Backend -->
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: DevOps -->
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">18 Lessons</div>
+      <h1>Belajar <span class="highlight">Backend</span></h1>
+      <p>Kuasai sisi server: Node.js, Express, REST API, Authentication, dan best practices membangun backend yang solid.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1: Apa itu Backend -->
+<div data-topic="backend-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">1</div><h3 class="lesson-title">Apa itu Backend Development?</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Backend adalah sisi server dari aplikasi web yang menangani logic, database, authentication, dan hal-hal yang tidak terlihat oleh user.</p>
+          <div class="diagram">
+            <pre>
+FRONTEND (Client)              BACKEND (Server)              DATABASE
+─────────────────              ─────────────────              ────────
+                               ┌─────────────────┐
+                               │  Web Server     │
+       ──── HTTP Request ────► │  (Express.js)   │
+       ◄─── JSON Response ──── │                 │
+                               │  Business Logic │
+                               │  - Routes       │
+                               │  - Controllers  │
+                               │  - Services     │
+                               └────────┬────────┘
+                                        │
+                               ┌────────▼────────┐
+                               │    Database     │
+                               │  (PostgreSQL)   │
+                               └─────────────────┘
+            </pre>
+          </div>
+          <div class="explanation">
+            <strong>Tanggung Jawab Backend:</strong><br>
+            1. <strong>API Development</strong> — Membuat endpoints untuk frontend<br>
+            2. <strong>Business Logic</strong> — Aturan bisnis aplikasi<br>
+            3. <strong>Database Operations</strong> — CRUD data<br>
+            4. <strong>Authentication</strong> — Login, register, session<br>
+            5. <strong>Authorization</strong> — Permission dan access control<br>
+            6. <strong>Security</strong> — Proteksi dari serangan
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2: Node.js -->
+<div data-topic="backend-nodejs">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">Node.js Introduction</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Node.js adalah runtime JavaScript di server-side. Dengan Node.js, kamu bisa menggunakan JavaScript untuk backend.</p>
+          <div class="explanation">
+            <strong>Mengapa Node.js?</strong><br>
+            - Same language untuk frontend dan backend (JavaScript)<br>
+            - Non-blocking I/O, cocok untuk real-time apps<br>
+            - NPM ecosystem terbesar<br>
+            - Fast dan scalable
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Cek versi Node.js</span>
+node --version    <span class="comment"># v20.x.x</span>
+
+<span class="comment"># Cek versi NPM</span>
+npm --version     <span class="comment"># 10.x.x</span>
+
+<span class="comment"># Inisialisasi project</span>
+npm init -y       <span class="comment"># Buat package.json</span>
+
+<span class="comment"># Install dependencies</span>
+npm install express
+npm install --save-dev nodemon</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3: Express.js -->
+<div data-topic="backend-express">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">Express.js Framework</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Express.js adalah framework minimalis untuk Node.js yang memudahkan pembuatan web server dan API.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript (server.js)</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">const</span> express = <span class="function">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> app = <span class="function">express</span>();
+
+<span class="comment">// Middleware untuk parsing JSON</span>
+app.<span class="function">use</span>(express.<span class="function">json</span>());
+
+<span class="comment">// Basic route</span>
+app.<span class="function">get</span>(<span class="string">'/'</span>, (req, res) => {
+  res.<span class="function">json</span>({ message: <span class="string">'Hello World!'</span> });
+});
+
+<span class="comment">// CRUD Routes</span>
+app.<span class="function">get</span>(<span class="string">'/users'</span>, <span class="function">getUsers</span>);
+app.<span class="function">get</span>(<span class="string">'/users/:id'</span>, <span class="function">getUserById</span>);
+app.<span class="function">post</span>(<span class="string">'/users'</span>, <span class="function">createUser</span>);
+app.<span class="function">put</span>(<span class="string">'/users/:id'</span>, <span class="function">updateUser</span>);
+app.<span class="function">delete</span>(<span class="string">'/users/:id'</span>, <span class="function">deleteUser</span>);
+
+<span class="comment">// Start server</span>
+<span class="keyword">const</span> PORT = process.env.<span class="property">PORT</span> || <span class="number">3000</span>;
+app.<span class="function">listen</span>(PORT, () => {
+  console.<span class="function">log</span>(<span class="string">`Server running on port ${PORT}`</span>);
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4: Routing -->
+<div data-topic="backend-routing">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Routing & Route Parameters</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Routing menentukan bagaimana aplikasi merespons request ke endpoint tertentu dengan HTTP method spesifik.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Route parameters</span>
+app.<span class="function">get</span>(<span class="string">'/users/:id'</span>, (req, res) => {
+  <span class="keyword">const</span> { id } = req.<span class="property">params</span>;        <span class="comment">// /users/123 → id = '123'</span>
+  res.<span class="function">json</span>({ id });
+});
+
+<span class="comment">// Query parameters</span>
+app.<span class="function">get</span>(<span class="string">'/search'</span>, (req, res) => {
+  <span class="keyword">const</span> { q, page, limit } = req.<span class="property">query</span>;  <span class="comment">// /search?q=test&page=1</span>
+  res.<span class="function">json</span>({ query: q, page, limit });
+});
+
+<span class="comment">// Route dengan multiple params</span>
+app.<span class="function">get</span>(<span class="string">'/users/:userId/posts/:postId'</span>, (req, res) => {
+  <span class="keyword">const</span> { userId, postId } = req.<span class="property">params</span>;
+  res.<span class="function">json</span>({ userId, postId });
+});
+
+<span class="comment">// Request body (POST/PUT)</span>
+app.<span class="function">post</span>(<span class="string">'/users'</span>, (req, res) => {
+  <span class="keyword">const</span> { name, email } = req.<span class="property">body</span>;  <span class="comment">// Data dari client</span>
+  res.<span class="function">json</span>({ name, email });
+});
+
+<span class="comment">// Express Router untuk modular routes</span>
+<span class="keyword">const</span> router = express.<span class="function">Router</span>();
+
+router.<span class="function">get</span>(<span class="string">'/'</span>, <span class="function">getAllUsers</span>);
+router.<span class="function">get</span>(<span class="string">'/:id'</span>, <span class="function">getUser</span>);
+router.<span class="function">post</span>(<span class="string">'/'</span>, <span class="function">createUser</span>);
+
+app.<span class="function">use</span>(<span class="string">'/api/users'</span>, router);  <span class="comment">// Mount di /api/users</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5: Middleware -->
+<div data-topic="backend-middleware">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Middleware</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Middleware adalah function yang memiliki akses ke request object (req), response object (res), dan next function. Middleware bisa memodifikasi request, response, atau menghentikan request.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Custom middleware</span>
+<span class="keyword">const</span> <span class="function">logger</span> = (req, res, next) => {
+  console.<span class="function">log</span>(<span class="string">`${req.method} ${req.url} - ${new Date().toISOString()}`</span>);
+  <span class="function">next</span>();  <span class="comment">// Lanjut ke middleware/route berikutnya</span>
+};
+
+<span class="comment">// Apply globally</span>
+app.<span class="function">use</span>(logger);
+
+<span class="comment">// Authentication middleware</span>
+<span class="keyword">const</span> <span class="function">authenticate</span> = (req, res, next) => {
+  <span class="keyword">const</span> token = req.<span class="property">headers</span>.<span class="property">authorization</span>;
+  
+  <span class="keyword">if</span> (!token) {
+    <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">401</span>).<span class="function">json</span>({ error: <span class="string">'No token provided'</span> });
+  }
+  
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> decoded = <span class="function">verifyToken</span>(token);
+    req.<span class="property">user</span> = decoded;  <span class="comment">// Attach user ke request</span>
+    <span class="function">next</span>();
+  } <span class="keyword">catch</span> (err) {
+    res.<span class="function">status</span>(<span class="number">401</span>).<span class="function">json</span>({ error: <span class="string">'Invalid token'</span> });
+  }
+};
+
+<span class="comment">// Apply ke route tertentu</span>
+app.<span class="function">get</span>(<span class="string">'/profile'</span>, authenticate, (req, res) => {
+  res.<span class="function">json</span>({ user: req.<span class="property">user</span> });
+});
+
+<span class="comment">// Error handling middleware</span>
+app.<span class="function">use</span>((err, req, res, next) => {
+  console.<span class="function">error</span>(err.stack);
+  res.<span class="function">status</span>(<span class="number">500</span>).<span class="function">json</span>({ error: <span class="string">'Something went wrong!'</span> });
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6: MVC Pattern -->
+<div data-topic="backend-mvc">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">MVC Architecture Pattern</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">MVC (Model-View-Controller) adalah pattern yang memisahkan concerns aplikasi menjadi 3 komponen utama.</p>
+          <div class="explanation">
+            <strong>Komponen MVC:</strong><br>
+            - <strong>Model</strong> — Data dan business logic (database operations)<br>
+            - <strong>View</strong> — Presentation layer (di backend modern, ini adalah JSON response)<br>
+            - <strong>Controller</strong> — Request handling logic, menghubungkan Model dan View
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Project Structure</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code>project/
+├── src/
+│   ├── controllers/
+│   │   └── userController.js    <span class="comment"># Request handlers</span>
+│   ├── models/
+│   │   └── User.js              <span class="comment"># Database models</span>
+│   ├── routes/
+│   │   └── userRoutes.js        <span class="comment"># Route definitions</span>
+│   ├── middlewares/
+│   │   └── auth.js              <span class="comment"># Custom middlewares</span>
+│   ├── services/
+│   │   └── userService.js       <span class="comment"># Business logic</span>
+│   ├── utils/
+│   │   └── helpers.js           <span class="comment"># Utility functions</span>
+│   └── app.js                   <span class="comment"># Express app setup</span>
+├── tests/
+├── package.json
+└── .env</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7: Environment Variables -->
+<div data-topic="backend-env">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Environment Variables</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Environment variables menyimpan konfigurasi sensitif seperti database credentials, API keys, dan secrets. JANGAN hardcode di source code!</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">.env</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Environment</span>
+<span class="property">NODE_ENV</span>=<span class="string">development</span>
+<span class="property">PORT</span>=<span class="number">3000</span>
+
+<span class="comment"># Database</span>
+<span class="property">DB_HOST</span>=<span class="string">localhost</span>
+<span class="property">DB_PORT</span>=<span class="number">5432</span>
+<span class="property">DB_NAME</span>=<span class="string">myapp</span>
+<span class="property">DB_USER</span>=<span class="string">postgres</span>
+<span class="property">DB_PASSWORD</span>=<span class="string">your_password</span>
+
+<span class="comment"># JWT Secret</span>
+<span class="property">JWT_SECRET</span>=<span class="string">your-super-secret-key-here</span>
+<span class="property">JWT_EXPIRES_IN</span>=<span class="string">7d</span></code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install dotenv</span>
+npm install dotenv
+
+<span class="comment">// Di awal file utama</span>
+<span class="function">require</span>(<span class="string">'dotenv'</span>).<span class="function">config</span>();
+
+<span class="comment">// Akses environment variables</span>
+<span class="keyword">const</span> PORT = process.env.<span class="property">PORT</span> || <span class="number">3000</span>;
+<span class="keyword">const</span> DB_HOST = process.env.<span class="property">DB_HOST</span>;
+
+<span class="comment">// .gitignore</span>
+.env
+.env.local
+.env.*.local</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Penting:</strong> File .env HARUS ada di .gitignore. Jangan commit ke repository! Untuk production, set environment variables di server/hosting.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8: REST API -->
+<div data-topic="backend-rest">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Building REST API</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Implementasi lengkap REST API dengan Express.js mengikuti best practices.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// controllers/userController.js</span>
+<span class="keyword">const</span> User = <span class="function">require</span>(<span class="string">'../models/User'</span>);
+
+<span class="keyword">exports</span>.<span class="function">getAllUsers</span> = <span class="keyword">async</span> (req, res, next) => {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> users = <span class="keyword">await</span> User.<span class="function">findAll</span>();
+    res.<span class="function">json</span>({ 
+      success: <span class="keyword">true</span>, 
+      data: users,
+      count: users.<span class="property">length</span>
+    });
+  } <span class="keyword">catch</span> (error) {
+    <span class="function">next</span>(error);
+  }
+};
+
+<span class="keyword">exports</span>.<span class="function">getUserById</span> = <span class="keyword">async</span> (req, res, next) => {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> user = <span class="keyword">await</span> User.<span class="function">findById</span>(req.<span class="property">params</span>.<span class="property">id</span>);
+    
+    <span class="keyword">if</span> (!user) {
+      <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">404</span>).<span class="function">json</span>({ 
+        success: <span class="keyword">false</span>, 
+        error: <span class="string">'User not found'</span> 
+      });
+    }
+    
+    res.<span class="function">json</span>({ success: <span class="keyword">true</span>, data: user });
+  } <span class="keyword">catch</span> (error) {
+    <span class="function">next</span>(error);
+  }
+};
+
+<span class="keyword">exports</span>.<span class="function">createUser</span> = <span class="keyword">async</span> (req, res, next) => {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> { name, email, password } = req.<span class="property">body</span>;
+    
+    <span class="comment">// Validation</span>
+    <span class="keyword">if</span> (!name || !email || !password) {
+      <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">400</span>).<span class="function">json</span>({ 
+        success: <span class="keyword">false</span>, 
+        error: <span class="string">'All fields required'</span> 
+      });
+    }
+    
+    <span class="keyword">const</span> user = <span class="keyword">await</span> User.<span class="function">create</span>({ name, email, password });
+    
+    res.<span class="function">status</span>(<span class="number">201</span>).<span class="function">json</span>({ success: <span class="keyword">true</span>, data: user });
+  } <span class="keyword">catch</span> (error) {
+    <span class="function">next</span>(error);
+  }
+};</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9: Validation -->
+<div data-topic="backend-validation">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Input Validation</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Validasi input sangat penting untuk keamanan dan data integrity. Gunakan library seperti Joi atau express-validator.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install joi</span>
+<span class="keyword">const</span> Joi = <span class="function">require</span>(<span class="string">'joi'</span>);
+
+<span class="comment">// Schema validation</span>
+<span class="keyword">const</span> userSchema = Joi.<span class="function">object</span>({
+  name: Joi.<span class="function">string</span>().<span class="function">min</span>(<span class="number">2</span>).<span class="function">max</span>(<span class="number">50</span>).<span class="function">required</span>(),
+  email: Joi.<span class="function">string</span>().<span class="function">email</span>().<span class="function">required</span>(),
+  password: Joi.<span class="function">string</span>().<span class="function">min</span>(<span class="number">8</span>).<span class="function">pattern</span>(<span class="string">/^(?=.*[A-Z])(?=.*[0-9])/</span>),
+  age: Joi.<span class="function">number</span>().<span class="function">integer</span>().<span class="function">min</span>(<span class="number">0</span>).<span class="function">max</span>(<span class="number">120</span>)
+});
+
+<span class="comment">// Validation middleware</span>
+<span class="keyword">const</span> <span class="function">validate</span> = (schema) => {
+  <span class="keyword">return</span> (req, res, next) => {
+    <span class="keyword">const</span> { error, value } = schema.<span class="function">validate</span>(req.<span class="property">body</span>, {
+      <span class="property">abortEarly</span>: <span class="keyword">false</span>  <span class="comment">// Return all errors</span>
+    });
+    
+    <span class="keyword">if</span> (error) {
+      <span class="keyword">const</span> messages = error.<span class="property">details</span>.<span class="function">map</span>(d => d.<span class="property">message</span>);
+      <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">400</span>).<span class="function">json</span>({
+        success: <span class="keyword">false</span>,
+        errors: messages
+      });
+    }
+    
+    req.<span class="property">body</span> = value;  <span class="comment">// Use sanitized value</span>
+    <span class="function">next</span>();
+  };
+};
+
+<span class="comment">// Usage</span>
+app.<span class="function">post</span>(<span class="string">'/users'</span>, <span class="function">validate</span>(userSchema), <span class="function">createUser</span>);</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 10: Authentication JWT -->
+<div data-topic="backend-jwt">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">JWT Authentication</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">JWT (JSON Web Token) adalah cara populer untuk implementasi stateless authentication.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install jsonwebtoken bcryptjs</span>
+<span class="keyword">const</span> jwt = <span class="function">require</span>(<span class="string">'jsonwebtoken'</span>);
+<span class="keyword">const</span> bcrypt = <span class="function">require</span>(<span class="string">'bcryptjs'</span>);
+
+<span class="comment">// Register</span>
+<span class="keyword">exports</span>.<span class="function">register</span> = <span class="keyword">async</span> (req, res) => {
+  <span class="keyword">const</span> { name, email, password } = req.<span class="property">body</span>;
+  
+  <span class="comment">// Hash password</span>
+  <span class="keyword">const</span> hashedPassword = <span class="keyword">await</span> bcrypt.<span class="function">hash</span>(password, <span class="number">10</span>);
+  
+  <span class="comment">// Save to database</span>
+  <span class="keyword">const</span> user = <span class="keyword">await</span> User.<span class="function">create</span>({
+    name,
+    email,
+    password: hashedPassword
+  });
+  
+  res.<span class="function">status</span>(<span class="number">201</span>).<span class="function">json</span>({ success: <span class="keyword">true</span>, data: { id: user.<span class="property">id</span>, email } });
+};
+
+<span class="comment">// Login</span>
+<span class="keyword">exports</span>.<span class="function">login</span> = <span class="keyword">async</span> (req, res) => {
+  <span class="keyword">const</span> { email, password } = req.<span class="property">body</span>;
+  
+  <span class="comment">// Find user</span>
+  <span class="keyword">const</span> user = <span class="keyword">await</span> User.<span class="function">findByEmail</span>(email);
+  <span class="keyword">if</span> (!user) {
+    <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">401</span>).<span class="function">json</span>({ error: <span class="string">'Invalid credentials'</span> });
+  }
+  
+  <span class="comment">// Verify password</span>
+  <span class="keyword">const</span> isValid = <span class="keyword">await</span> bcrypt.<span class="function">compare</span>(password, user.<span class="property">password</span>);
+  <span class="keyword">if</span> (!isValid) {
+    <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">401</span>).<span class="function">json</span>({ error: <span class="string">'Invalid credentials'</span> });
+  }
+  
+  <span class="comment">// Generate JWT</span>
+  <span class="keyword">const</span> token = jwt.<span class="function">sign</span>(
+    { id: user.<span class="property">id</span>, email: user.<span class="property">email</span> },
+    process.env.<span class="property">JWT_SECRET</span>,
+    { expiresIn: process.env.<span class="property">JWT_EXPIRES_IN</span> }
+  );
+  
+  res.<span class="function">json</span>({ success: <span class="keyword">true</span>, token });
+};
+
+<span class="comment">// Verify token middleware</span>
+<span class="keyword">exports</span>.<span class="function">protect</span> = <span class="keyword">async</span> (req, res, next) => {
+  <span class="keyword">let</span> token;
+  
+  <span class="keyword">if</span> (req.<span class="property">headers</span>.<span class="property">authorization</span>?.<span class="function">startsWith</span>(<span class="string">'Bearer'</span>)) {
+    token = req.<span class="property">headers</span>.<span class="property">authorization</span>.<span class="function">split</span>(<span class="string">' '</span>)[<span class="number">1</span>];
+  }
+  
+  <span class="keyword">if</span> (!token) {
+    <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">401</span>).<span class="function">json</span>({ error: <span class="string">'Not authorized'</span> });
+  }
+  
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> decoded = jwt.<span class="function">verify</span>(token, process.env.<span class="property">JWT_SECRET</span>);
+    req.<span class="property">user</span> = <span class="keyword">await</span> User.<span class="function">findById</span>(decoded.<span class="property">id</span>);
+    <span class="function">next</span>();
+  } <span class="keyword">catch</span> (err) {
+    res.<span class="function">status</span>(<span class="number">401</span>).<span class="function">json</span>({ error: <span class="string">'Invalid token'</span> });
+  }
+};</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11: Error Handling -->
+<div data-topic="backend-error">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Error Handling Best Practices</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Penanganan error yang konsisten membuat debugging lebih mudah dan API lebih user-friendly.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Custom error class</span>
+<span class="keyword">class</span> <span class="function">AppError</span> <span class="keyword">extends</span> <span class="function">Error</span> {
+  <span class="function">constructor</span>(message, statusCode) {
+    <span class="keyword">super</span>(message);
+    <span class="keyword">this</span>.<span class="property">statusCode</span> = statusCode;
+    <span class="keyword">this</span>.<span class="property">status</span> = <span class="string">`${statusCode}`</span>.<span class="function">startsWith</span>(<span class="string">'4'</span>) ? <span class="string">'fail'</span> : <span class="string">'error'</span>;
+    <span class="keyword">this</span>.<span class="property">isOperational</span> = <span class="keyword">true</span>;
+    
+    Error.<span class="function">captureStackTrace</span>(<span class="keyword">this</span>, <span class="keyword">this</span>.constructor);
+  }
+}
+
+<span class="comment">// Usage</span>
+<span class="keyword">throw new</span> <span class="function">AppError</span>(<span class="string">'User not found'</span>, <span class="number">404</span>);
+<span class="keyword">throw new</span> <span class="function">AppError</span>(<span class="string">'Invalid email format'</span>, <span class="number">400</span>);
+
+<span class="comment">// Global error handler</span>
+app.<span class="function">use</span>((err, req, res, next) => {
+  err.<span class="property">statusCode</span> = err.<span class="property">statusCode</span> || <span class="number">500</span>;
+  err.<span class="property">status</span> = err.<span class="property">status</span> || <span class="string">'error'</span>;
+
+  <span class="keyword">if</span> (process.env.<span class="property">NODE_ENV</span> === <span class="string">'development'</span>) {
+    res.<span class="function">status</span>(err.<span class="property">statusCode</span>).<span class="function">json</span>({
+      success: <span class="keyword">false</span>,
+      error: err.<span class="property">message</span>,
+      stack: err.<span class="property">stack</span>
+    });
+  } <span class="keyword">else</span> {
+    <span class="comment">// Production: hide stack trace</span>
+    res.<span class="function">status</span>(err.<span class="property">statusCode</span>).<span class="function">json</span>({
+      success: <span class="keyword">false</span>,
+      error: err.<span class="property">isOperational</span> ? err.<span class="property">message</span> : <span class="string">'Something went wrong'</span>
+    });
+  }
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12: File Upload -->
+<div data-topic="backend-upload">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">File Upload Handling</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Multer adalah middleware Express untuk menangani multipart/form-data (file upload).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install multer</span>
+<span class="keyword">const</span> multer = <span class="function">require</span>(<span class="string">'multer'</span>);
+<span class="keyword">const</span> path = <span class="function">require</span>(<span class="string">'path'</span>);
+
+<span class="comment">// Storage configuration</span>
+<span class="keyword">const</span> storage = multer.<span class="function">diskStorage</span>({
+  <span class="function">destination</span>: (req, file, cb) => {
+    cb(<span class="keyword">null</span>, <span class="string">'uploads/'</span>);
+  },
+  <span class="function">filename</span>: (req, file, cb) => {
+    <span class="keyword">const</span> uniqueSuffix = Date.<span class="function">now</span>() + <span class="string">'-'</span> + Math.<span class="function">round</span>(Math.<span class="function">random</span>() * 1E9);
+    cb(<span class="keyword">null</span>, file.<span class="property">fieldname</span> + <span class="string">'-'</span> + uniqueSuffix + path.<span class="function">extname</span>(file.<span class="property">originalname</span>));
+  }
+});
+
+<span class="comment">// File filter</span>
+<span class="keyword">const</span> <span class="function">fileFilter</span> = (req, file, cb) => {
+  <span class="keyword">const</span> allowedTypes = [<span class="string">'image/jpeg'</span>, <span class="string">'image/png'</span>, <span class="string">'image/webp'</span>];
+  
+  <span class="keyword">if</span> (allowedTypes.<span class="function">includes</span>(file.<span class="property">mimetype</span>)) {
+    cb(<span class="keyword">null</span>, <span class="keyword">true</span>);
+  } <span class="keyword">else</span> {
+    cb(<span class="keyword">new</span> <span class="function">Error</span>(<span class="string">'Invalid file type'</span>), <span class="keyword">false</span>);
+  }
+};
+
+<span class="keyword">const</span> upload = <span class="function">multer</span>({
+  storage: storage,
+  <span class="property">fileFilter</span>: fileFilter,
+  <span class="property">limits</span>: { <span class="property">fileSize</span>: <span class="number">5</span> * <span class="number">1024</span> * <span class="number">1024</span> }  <span class="comment">// 5MB</span>
+});
+
+<span class="comment">// Single file upload</span>
+app.<span class="function">post</span>(<span class="string">'/upload'</span>, upload.<span class="function">single</span>(<span class="string">'avatar'</span>), (req, res) => {
+  res.<span class="function">json</span>({ file: req.<span class="property">file</span> });
+});
+
+<span class="comment">// Multiple files</span>
+app.<span class="function">post</span>(<span class="string">'/gallery'</span>, upload.<span class="function">array</span>(<span class="string">'photos'</span>, <span class="number">10</span>), (req, res) => {
+  res.<span class="function">json</span>({ files: req.<span class="property">files</span> });
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13: Security -->
+<div data-topic="backend-security">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Security Best Practices</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Keamanan adalah aspek kritis dalam backend development. Berikut practices yang wajib diterapkan.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install security packages</span>
+npm install helmet cors express-rate-limit express-mongo-sanitize xss-clean
+
+<span class="keyword">const</span> helmet = <span class="function">require</span>(<span class="string">'helmet'</span>);
+<span class="keyword">const</span> cors = <span class="function">require</span>(<span class="string">'cors'</span>);
+<span class="keyword">const</span> rateLimit = <span class="function">require</span>(<span class="string">'express-rate-limit'</span>);
+
+<span class="comment">// Security headers</span>
+app.<span class="function">use</span>(<span class="function">helmet</span>());
+
+<span class="comment">// CORS</span>
+app.<span class="function">use</span>(<span class="function">cors</span>({
+  <span class="property">origin</span>: [<span class="string">'https://yourdomain.com'</span>],
+  <span class="property">credentials</span>: <span class="keyword">true</span>
+}));
+
+<span class="comment">// Rate limiting</span>
+<span class="keyword">const</span> limiter = <span class="function">rateLimit</span>({
+  <span class="property">windowMs</span>: <span class="number">15</span> * <span class="number">60</span> * <span class="number">1000</span>,  <span class="comment">// 15 minutes</span>
+  <span class="property">max</span>: <span class="number">100</span>,  <span class="comment">// limit each IP to 100 requests per windowMs</span>
+  <span class="property">message</span>: <span class="string">'Too many requests, please try again later.'</span>
+});
+app.<span class="function">use</span>(<span class="string">'/api'</span>, limiter);
+
+<span class="comment">// Prevent NoSQL injection</span>
+app.<span class="function">use</span>(<span class="function">mongoSanitize</span>());
+
+<span class="comment">// Prevent XSS</span>
+app.<span class="function">use</span>(<span class="function">xss</span>());
+
+<span class="comment">// Parameter pollution</span>
+<span class="keyword">const</span> hpp = <span class="function">require</span>(<span class="string">'hpp'</span>);
+app.<span class="function">use</span>(<span class="function">hpp</span>());</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Security Checklist:</strong><br>
+            - Selalu validasi dan sanitize input<br>
+            - Gunakan HTTPS<br>
+            - Hash password dengan bcrypt<br>
+            - Jangan expose sensitive data di response<br>
+            - Implement rate limiting<br>
+            - Keep dependencies updated (npm audit)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14: Testing -->
+<div data-topic="backend-testing">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Testing Backend APIs</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Testing memastikan API berfungsi dengan benar dan mencegah regresi saat ada perubahan kode.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install --save-dev jest supertest</span>
+<span class="keyword">const</span> request = <span class="function">require</span>(<span class="string">'supertest'</span>);
+<span class="keyword">const</span> app = <span class="function">require</span>(<span class="string">'../app'</span>);
+
+<span class="function">describe</span>(<span class="string">'Users API'</span>, () => {
+  <span class="function">test</span>(<span class="string">'GET /api/users should return all users'</span>, <span class="keyword">async</span> () => {
+    <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="function">request</span>(app).<span class="function">get</span>(<span class="string">'/api/users'</span>);
+    
+    <span class="function">expect</span>(res.<span class="property">statusCode</span>).<span class="function">toBe</span>(<span class="number">200</span>);
+    <span class="function">expect</span>(res.<span class="property">body</span>.<span class="property">success</span>).<span class="function">toBe</span>(<span class="keyword">true</span>);
+    <span class="function">expect</span>(Array.<span class="function">isArray</span>(res.<span class="property">body</span>.<span class="property">data</span>)).<span class="function">toBe</span>(<span class="keyword">true</span>);
+  });
+
+  <span class="function">test</span>(<span class="string">'POST /api/users should create user'</span>, <span class="keyword">async</span> () => {
+    <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="function">request</span>(app)
+      .<span class="function">post</span>(<span class="string">'/api/users'</span>)
+      .<span class="function">send</span>({ name: <span class="string">'John'</span>, email: <span class="string">'john@test.com'</span>, password: <span class="string">'password123'</span> });
+    
+    <span class="function">expect</span>(res.<span class="property">statusCode</span>).<span class="function">toBe</span>(<span class="number">201</span>);
+    <span class="function">expect</span>(res.<span class="property">body</span>.<span class="property">data</span>.<span class="property">name</span>).<span class="function">toBe</span>(<span class="string">'John'</span>);
+  });
+});
+
+<span class="comment">// package.json</span>
+<span class="property">"scripts"</span>: {
+  <span class="string">"test"</span>: <span class="string">"jest --coverage"</span>,
+  <span class="string">"test:watch"</span>: <span class="string">"jest --watch"</span>
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15: Logging -->
+<div data-topic="backend-logging">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Logging & Monitoring</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Logging membantu debugging dan monitoring aplikasi di production.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install morgan winston</span>
+<span class="keyword">const</span> morgan = <span class="function">require</span>(<span class="string">'morgan'</span>);
+<span class="keyword">const</span> winston = <span class="function">require</span>(<span class="string">'winston'</span>);
+
+<span class="comment">// HTTP request logger</span>
+app.<span class="function">use</span>(<span class="function">morgan</span>(<span class="string">'combined'</span>));
+
+<span class="comment">// Winston logger</span>
+<span class="keyword">const</span> logger = winston.<span class="function">createLogger</span>({
+  <span class="property">level</span>: <span class="string">'info'</span>,
+  <span class="property">format</span>: winston.format.<span class="function">combine</span>(
+    winston.format.<span class="function">timestamp</span>(),
+    winston.format.<span class="function">json</span>()
+  ),
+  <span class="property">transports</span>: [
+    <span class="keyword">new</span> winston.transports.<span class="function">File</span>({ <span class="property">filename</span>: <span class="string">'error.log'</span>, <span class="property">level</span>: <span class="string">'error'</span> }),
+    <span class="keyword">new</span> winston.transports.<span class="function">File</span>({ <span class="property">filename</span>: <span class="string">'combined.log'</span> })
+  ]
+});
+
+<span class="comment">// Usage</span>
+logger.<span class="function">info</span>(<span class="string">'User logged in'</span>, { userId: <span class="string">'123'</span> });
+logger.<span class="function">error</span>(<span class="string">'Database connection failed'</span>, { error: err.<span class="property">message</span> });</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 16: API Documentation -->
+<div data-topic="backend-docs">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">API Documentation (Swagger)</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Dokumentasi API membantu developer lain memahami cara menggunakan API.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install swagger-jsdoc swagger-ui-express</span>
+<span class="keyword">const</span> swaggerJsdoc = <span class="function">require</span>(<span class="string">'swagger-jsdoc'</span>);
+<span class="keyword">const</span> swaggerUi = <span class="function">require</span>(<span class="string">'swagger-ui-express'</span>);
+
+<span class="keyword">const</span> options = {
+  <span class="property">definition</span>: {
+    <span class="property">openapi</span>: <span class="string">'3.0.0'</span>,
+    <span class="property">info</span>: {
+      <span class="property">title</span>: <span class="string">'My API'</span>,
+      <span class="property">version</span>: <span class="string">'1.0.0'</span>,
+      <span class="property">description</span>: <span class="string">'API documentation'</span>
+    },
+    <span class="property">servers</span>: [{ <span class="property">url</span>: <span class="string">'http://localhost:3000'</span> }]
+  },
+  <span class="property">apis</span>: [<span class="string">'./routes/*.js'</span>]
+};
+
+<span class="keyword">const</span> specs = <span class="function">swaggerJsdoc</span>(options);
+app.<span class="function">use</span>(<span class="string">'/api-docs'</span>, <span class="function">swaggerUi.serve</span>, <span class="function">swaggerUi.setup</span>(specs));
+
+<span class="comment">// Di route file:</span>
+<span class="comment">/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     responses:
+ *       200:
+ *         description: List of users
+ */</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 17: Choosing Backend -->
+<div data-topic="backend-choose">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Memilih Tech Stack Backend</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Berbagai pilihan backend technology dengan kelebihan masing-masing.</p>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>Node.js + Express</h4>
+              <ul>
+                <li>JavaScript everywhere</li>
+                <li>Non-blocking I/O</li>
+                <li>Huge NPM ecosystem</li>
+                <li>Great for real-time apps</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Python + FastAPI/Django</h4>
+              <ul>
+                <li>Easy to learn</li>
+                <li>Great for AI/ML</li>
+                <li>Django: batteries included</li>
+                <li>FastAPI: modern, fast</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Go + Gin</h4>
+              <ul>
+                <li>High performance</li>
+                <li>Compiled, type-safe</li>
+                <li>Great concurrency</li>
+                <li>Small binaries</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Java + Spring Boot</h4>
+              <ul>
+                <li>Enterprise-ready</li>
+                <li>Strong typing</li>
+                <li>Huge ecosystem</li>
+                <li>Great for large teams</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 18: Mini Project -->
+<div data-topic="backend-mini-project">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">Praktik: REST API dengan Express</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Buat REST API sederhana dengan Express.js untuk resource "tasks" dengan CRUD operations.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// app.js - Complete example</span>
+<span class="keyword">const</span> express = <span class="function">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> app = <span class="function">express</span>();
+
+app.<span class="function">use</span>(express.<span class="function">json</span>());
+
+<span class="comment">// In-memory database (ganti dengan real database)</span>
+<span class="keyword">let</span> tasks = [];
+<span class="keyword">let</span> nextId = <span class="number">1</span>;
+
+<span class="comment">// GET all tasks</span>
+app.<span class="function">get</span>(<span class="string">'/api/tasks'</span>, (req, res) => {
+  res.<span class="function">json</span>({ success: <span class="keyword">true</span>, data: tasks });
+});
+
+<span class="comment">// GET single task</span>
+app.<span class="function">get</span>(<span class="string">'/api/tasks/:id'</span>, (req, res) => {
+  <span class="keyword">const</span> task = tasks.<span class="function">find</span>(t => t.<span class="property">id</span> === <span class="function">parseInt</span>(req.<span class="property">params</span>.<span class="property">id</span>));
+  <span class="keyword">if</span> (!task) <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">404</span>).<span class="function">json</span>({ error: <span class="string">'Task not found'</span> });
+  res.<span class="function">json</span>({ success: <span class="keyword">true</span>, data: task });
+});
+
+<span class="comment">// POST create task</span>
+app.<span class="function">post</span>(<span class="string">'/api/tasks'</span>, (req, res) => {
+  <span class="keyword">const</span> { title, description } = req.<span class="property">body</span>;
+  <span class="keyword">if</span> (!title) <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">400</span>).<span class="function">json</span>({ error: <span class="string">'Title required'</span> });
+  
+  <span class="keyword">const</span> task = { <span class="property">id</span>: nextId++, title, description, <span class="property">completed</span>: <span class="keyword">false</span> };
+  tasks.<span class="function">push</span>(task);
+  res.<span class="function">status</span>(<span class="number">201</span>).<span class="function">json</span>({ success: <span class="keyword">true</span>, data: task });
+});
+
+<span class="comment">// PUT update task</span>
+app.<span class="function">put</span>(<span class="string">'/api/tasks/:id'</span>, (req, res) => {
+  <span class="keyword">const</span> task = tasks.<span class="function">find</span>(t => t.<span class="property">id</span> === <span class="function">parseInt</span>(req.<span class="property">params</span>.<span class="property">id</span>));
+  <span class="keyword">if</span> (!task) <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">404</span>).<span class="function">json</span>({ error: <span class="string">'Task not found'</span> });
+  
+  Object.<span class="function">assign</span>(task, req.<span class="property">body</span>);
+  res.<span class="function">json</span>({ success: <span class="keyword">true</span>, data: task });
+});
+
+<span class="comment">// DELETE task</span>
+app.<span class="function">delete</span>(<span class="string">'/api/tasks/:id'</span>, (req, res) => {
+  <span class="keyword">const</span> index = tasks.<span class="function">findIndex</span>(t => t.<span class="property">id</span> === <span class="function">parseInt</span>(req.<span class="property">params</span>.<span class="property">id</span>));
+  <span class="keyword">if</span> (index === <span class="number">-1</span>) <span class="keyword">return</span> res.<span class="function">status</span>(<span class="number">404</span>).<span class="function">json</span>({ error: <span class="string">'Task not found'</span> });
+  
+  tasks.<span class="function">splice</span>(index, <span class="number">1</span>);
+  res.<span class="function">status</span>(<span class="number">204</span>).<span class="function">send</span>();
+});
+
+app.<span class="function">listen</span>(<span class="number">3000</span>, () => console.<span class="function">log</span>(<span class="string">'Server running on port 3000'</span>));</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") htmlEl.setAttribute("data-theme", "light");
+    themeToggle.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle.addEventListener("click", () => mobileMenu.classList.toggle("open"));
+
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => header.parentElement.classList.toggle("open"));
+    });
+
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = original, 2000);
+      });
+    }
+
+    function hideLoading() {
+      const loading = document.getElementById("loading-screen");
+      if (loading) {
+        loading.classList.add("hidden");
+        setTimeout(() => loading.remove(), 500);
+      }
+    }
+
+    function initLoading() {
+      const minDisplayTime = 1200;
+      const startTime = Date.now();
+      const readyHandler = () => {
+        const elapsedTime = Date.now() - startTime;
+        setTimeout(hideLoading, Math.max(0, minDisplayTime - elapsedTime));
+      };
+      if (document.readyState === "complete") readyHandler();
+      else window.addEventListener("load", readyHandler);
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initLoading);
+    else initLoading();
+  </script>
+</body>
+</html>

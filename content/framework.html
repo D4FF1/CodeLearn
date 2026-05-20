@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Framework Frontend - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #61dafb;
+      --accent-secondary: #3178c6;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(97, 218, 251, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { font-family: var(--font-display); background: var(--bg); color: var(--fg); line-height: 1.7; overflow-x: hidden; }
+
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.5s ease, visibility 0.5s ease; }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; color: var(--fg-muted); }
+
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .grid-pattern { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+
+            /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    /* Navigation Links Container */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Arrow */
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Divider */
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* Dropdown Section Label */
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Nav Actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+    .page-hero { min-height: 50vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 60px; position: relative; }
+    .page-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; }
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 100px; font-size: 0.85rem; color: var(--accent); margin-bottom: 24px; }
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .lesson-grid { display: grid; gap: 16px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; }
+    .lesson-toggle { color: var(--fg-muted); transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 2500px; }
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+
+    .explanation { margin-bottom: 1rem; background: rgba(97, 218, 251, 0.05); padding: 12px 16px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.95rem; line-height: 1.6; }
+    .explanation strong { color: var(--accent); }
+
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; }
+    .code-copy:hover { background: var(--accent); color: #000; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+
+    .info-box { background: rgba(97, 218, 251, 0.08); border: 1px solid rgba(97, 218, 251, 0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul { margin: 8px 0 0 20px; }
+
+    .tag { color: #ff7b54; }
+    .attr { color: #79c0ff; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .keyword { color: #ff7b54; }
+    .function { color: #d2a8ff; }
+    .variable { color: #ffa657; }
+    .jsx-tag { color: #7ee787; }
+
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+    .comparison-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .comparison-card h4 { color: var(--accent); margin-bottom: 8px; font-size: 1rem; }
+    .comparison-card ul { list-style: none; }
+    .comparison-card li { padding: 4px 0; color: var(--fg-muted); font-size: 0.9rem; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Memuat materi Framework Frontend...</div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+  </div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <!-- Dropdown: Frontend -->
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: Backend -->
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: DevOps -->
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">18 Lessons</div>
+      <h1>Belajar <span class="highlight">Framework Frontend</span></h1>
+      <p>Pahami konsep modern: Component, State, Virtual DOM, dan memilih framework yang tepat untuk project kamu.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1: Kenapa Framework -->
+<div data-topic="framework-why">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">1</div><h3 class="lesson-title">Mengapa Perlu Framework?</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Framework frontend menyediakan struktur dan tools untuk membangun aplikasi web kompleks lebih efisien.</p>
+          <div class="explanation">
+            <strong>Masalah dengan Vanilla JS:</strong><br>
+            - Manipulasi DOM manual merepotkan<br>
+            - Tidak ada struktur standar<br>
+            - Sulit mengelola state di aplikasi besar<br>
+            - Re-render tidak efisien<br>
+            - Code reuseability terbatas
+          </div>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>Tanpa Framework</h4>
+              <ul>
+                <li>Manual DOM manipulation</li>
+                <li>jQuery spaghetti code</li>
+                <li>Global variables everywhere</li>
+                <li>Sulit scale untuk tim besar</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Dengan Framework</h4>
+              <ul>
+                <li>Declarative UI</li>
+                <li>Component-based architecture</li>
+                <li>State management built-in</li>
+                <li>Efficient updates (Virtual DOM)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="info-box">
+            <strong>Framework Populer 2024:</strong><br>
+            - <strong>React</strong> — Library UI dari Meta, ecosystem terbesar<br>
+            - <strong>Vue</strong> — Progressive framework, mudah dipelajari<br>
+            - <strong>Svelte</strong> — Compiler-based, no Virtual DOM<br>
+            - <strong>Angular</strong> — Full framework dari Google, enterprise-ready<br>
+            - <strong>Solid</strong> — Reactive without Virtual DOM, performa tinggi
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2: Component Architecture -->
+<div data-topic="framework-component">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">Component-Based Architecture</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Component adalah blok bangunan reusable yang menggabungkan HTML, CSS, dan JavaScript dalam satu unit independen.</p>
+          <div class="explanation">
+            <strong>Prinsip Component:</strong><br>
+            1. <strong>Encapsulation</strong> — Logic dan styling terisolasi<br>
+            2. <strong>Reusability</strong> — Pakai berkali-kali di tempat berbeda<br>
+            3. <strong>Composition</strong> — Gabung component kecil jadi besar<br>
+            4. <strong>Single Responsibility</strong> — Satu tugas spesifik
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">React Component</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Button.jsx - Reusable component</span>
+<span class="keyword">function</span> <span class="function">Button</span>({ children, onClick, variant = <span class="string">'primary'</span> }) {
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">button</span>
+      <span class="attr">className</span>={<span class="string">`btn btn-${variant}`</span>}
+      <span class="attr">onClick</span>={<span class="variable">onClick</span>}
+    &gt;
+      {<span class="variable">children</span>}
+    &lt;/<span class="jsx-tag">button</span>&gt;
+  );
+}
+
+<span class="comment">// Penggunaan</span>
+&lt;<span class="jsx-tag">Button</span> <span class="attr">variant</span>=<span class="string">"success"</span> <span class="attr">onClick</span>={<span class="variable">handleSubmit</span>}&gt;
+  Simpan
+&lt;/<span class="jsx-tag">Button</span>&gt;</code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Vue Component</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">&lt;!-- Button.vue --&gt;</span>
+&lt;<span class="jsx-tag">template</span>&gt;
+  &lt;<span class="jsx-tag">button</span> <span class="attr">:class</span>=<span class="string">"['btn', `btn-${variant}`]"</span> @<span class="attr">click</span>=<span class="string">"$emit('click')"</span>&gt;
+    &lt;<span class="jsx-tag">slot</span> /&gt;
+  &lt;/<span class="jsx-tag">button</span>&gt;
+&lt;/<span class="jsx-tag">template</span>&gt;
+
+&lt;<span class="jsx-tag">script</span> <span class="attr">setup</span>&gt;
+<span class="keyword">defineProps</span>({
+  variant: { type: String, default: <span class="string">'primary'</span> }
+});
+&lt;/<span class="jsx-tag">script</span>&gt;</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3: JSX -->
+<div data-topic="framework-jsx">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">JSX: JavaScript + XML</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">JSX adalah syntax extension untuk JavaScript yang memungkinkan menulis markup dalam JavaScript. JSX bukan HTML, tapi syntactic sugar untuk function calls.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JSX vs JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// JSX</span>
+<span class="keyword">const</span> element = (
+  &lt;<span class="jsx-tag">div</span> <span class="attr">className</span>=<span class="string">"card"</span>&gt;
+    &lt;<span class="jsx-tag">h1</span>&gt;Hello {<span class="variable">name</span>}&lt;/<span class="jsx-tag">h1</span>&gt;
+    &lt;<span class="jsx-tag">p</span>&gt;Welcome&lt;/<span class="jsx-tag">p</span>&gt;
+  &lt;/<span class="jsx-tag">div</span>&gt;
+);
+
+<span class="comment">// Compiled to JavaScript (what browser sees)</span>
+<span class="keyword">const</span> element = <span class="function">React.createElement</span>(
+  <span class="string">'div'</span>,
+  { className: <span class="string">'card'</span> },
+  <span class="function">React.createElement</span>(<span class="string">'h1'</span>, <span class="keyword">null</span>, <span class="string">'Hello '</span>, name),
+  <span class="function">React.createElement</span>(<span class="string">'p'</span>, <span class="keyword">null</span>, <span class="string">'Welcome'</span>)
+);
+
+<span class="comment">// Rules of JSX:</span>
+<span class="comment">// 1. Single root element</span>
+<span class="comment">// 2. Close all tags: &lt;img /&gt;, &lt;br /&gt;</span>
+<span class="comment">// 3. className instead of class</span>
+<span class="comment">// 4. JSX expressions in {}</span>
+<span class="comment">// 5. Conditional: {condition && &lt;Elem /&gt;} or {cond ? &lt;A/&gt; : &lt;B/&gt;}</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4: Props -->
+<div data-topic="framework-props">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Props: Data dari Parent ke Child</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Props adalah cara component menerima data dari parent. Props bersifat read-only (immutable), child tidak boleh mengubahnya.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">React Props</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Parent Component</span>
+<span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">UserCard</span>
+      <span class="attr">name</span>=<span class="string">"John Doe"</span>
+      <span class="attr">age</span>={<span class="variable">25</span>}
+      <span class="attr">isActive</span>={<span class="variable">true</span>}
+      <span class="attr">hobbies</span>={[<span class="string">'coding'</span>, <span class="string">'gaming'</span>]}
+    /&gt;
+  );
+}
+
+<span class="comment">// Child Component (destructuring)</span>
+<span class="keyword">function</span> <span class="function">UserCard</span>({ name, age, isActive, hobbies }) {
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">div</span> <span class="attr">className</span>=<span class="string">"card"</span>&gt;
+      &lt;<span class="jsx-tag">h2</span>&gt;{<span class="variable">name</span>}&lt;/<span class="jsx-tag">h2</span>&gt;
+      &lt;<span class="jsx-tag">p</span>&gt;Age: {<span class="variable">age</span>}&lt;/<span class="jsx-tag">p</span>&gt;
+      &lt;<span class="jsx-tag">span</span>&gt;Status: {<span class="variable">isActive</span> ? <span class="string">'Active'</span> : <span class="string">'Inactive'</span>}&lt;/<span class="jsx-tag">span</span>&gt;
+      &lt;<span class="jsx-tag">ul</span>&gt;
+        {<span class="variable">hobbies</span>.<span class="function">map</span>(hobby =&gt; &lt;<span class="jsx-tag">li</span> <span class="attr">key</span>={<span class="variable">hobby</span>}&gt;{<span class="variable">hobby</span>}&lt;/<span class="jsx-tag">li</span>&gt;)}
+      &lt;/<span class="jsx-tag">ul</span>&gt;
+    &lt;/<span class="jsx-tag">div</span>&gt;
+  );
+}
+
+<span class="comment">// Default props</span>
+<span class="keyword">function</span> <span class="function">Button</span>({ text = <span class="string">'Click me'</span>, color = <span class="string">'blue'</span> }) {
+  <span class="keyword">return</span> &lt;<span class="jsx-tag">button</span> <span class="attr">style</span>={{ <span class="attr">color</span> }}&gt;{<span class="variable">text</span>}&lt;/<span class="jsx-tag">button</span>&gt;;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5: State -->
+<div data-topic="framework-state">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">State: Data Internal Component</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">State adalah data internal yang bisa berubah dan memicu re-render saat diubah. Berbeda dengan props yang dari luar, state dikelola di dalam component.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">React useState Hook</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+  <span class="comment">// [currentState, setterFunction] = useState(initialValue)</span>
+  <span class="keyword">const</span> [count, setCount] = <span class="function">useState</span>(<span class="variable">0</span>);
+
+  <span class="keyword">const</span> <span class="function">increment</span> = () =&gt; {
+    <span class="function">setCount</span>(<span class="variable">prevCount</span> =&gt; <span class="variable">prevCount</span> + <span class="variable">1</span>);
+  };
+
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">div</span>&gt;
+      &lt;<span class="jsx-tag">p</span>&gt;Count: {<span class="variable">count</span>}&lt;/<span class="jsx-tag">p</span>&gt;
+      &lt;<span class="jsx-tag">button</span> <span class="attr">onClick</span>={<span class="variable">increment</span>}&gt;+&lt;/<span class="jsx-tag">button</span>&gt;
+    &lt;/<span class="jsx-tag">div</span>&gt;
+  );
+}
+
+<span class="comment">// State dengan object</span>
+<span class="keyword">const</span> [user, setUser] = <span class="function">useState</span>({
+  name: <span class="string">''</span>,
+  email: <span class="string">''</span>
+});
+
+<span class="comment">// Update partial object (spread operator!)</span>
+<span class="function">setUser</span>({ ...<span class="variable">user</span>, name: <span class="string">'John'</span> });
+
+<span class="comment">// State dengan array</span>
+<span class="keyword">const</span> [items, setItems] = <span class="function">useState</span>([]);
+
+<span class="comment">// Add item (immutably)</span>
+<span class="function">setItems</span>([...<span class="variable">items</span>, newItem]);
+
+<span class="comment">// Remove item</span>
+<span class="function">setItems</span>(<span class="variable">items</span>.<span class="function">filter</span>(item =&gt; item.id !== id));</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Aturan Penting:</strong><br>
+            - Jangan mutate state langsung (state.push = SALAH)<br>
+            - State updates adalah async<br>
+            - Gunakan functional update untuk nilai baru berdasarkan nilai lama
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6: Virtual DOM -->
+<div data-topic="framework-virtual-dom">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">Virtual DOM & Reconciliation</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Virtual DOM adalah representasi JavaScript dari DOM sebenarnya. Framework membuat perubahan di Virtual DOM dulu, lalu mengupdate DOM nyata secara efisien.</p>
+          <div class="explanation">
+            <strong>Proses Reconciliation:</strong><br>
+            1. State berubah → Virtual DOM baru dibuat<br>
+            2. Compare Virtual DOM baru vs lama<br>
+            3. Hitung minimal changes<br>
+            4. Apply changes ke Real DOM<br><br>
+            Ini membuat update sangat cepat karena manipulasi DOM (mahal) hanya dilakukan pada bagian yang benar-benar berubah.
+          </div>
+          <div class="info-box">
+            <strong>Key Prop:</strong> Memberikan key pada list items membantu React mengidentifikasi item mana yang berubah, ditambah, atau dihapus. Gunakan ID unik, BUKAN index!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7: Lifecycle & Effects -->
+<div data-topic="framework-lifecycle">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Lifecycle & useEffect Hook</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Component memiliki lifecycle: mount (dibuat), update (re-render), dan unmount (dihapus). useEffect hook mengelola side effects di React.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">React useEffect</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">import</span> { useState, useEffect } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">UserProfile</span>({ userId }) {
+  <span class="keyword">const</span> [user, setUser] = <span class="function">useState</span>(<span class="keyword">null</span>);
+
+  <span class="comment">// Run on mount and when userId changes</span>
+  <span class="function">useEffect</span>(() =&gt; {
+    <span class="keyword">async function</span> <span class="function">fetchUser</span>() {
+      <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">`/api/users/${userId}`</span>);
+      <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+      <span class="function">setUser</span>(data);
+    }
+    <span class="function">fetchUser</span>();
+
+    <span class="comment">// Cleanup function (run on unmount)</span>
+    <span class="keyword">return</span> () =&gt; {
+      console.<span class="function">log</span>(<span class="string">'Cleanup!'</span>);
+    };
+  }, [<span class="variable">userId</span>]); <span class="comment">// Dependency array</span>
+
+  <span class="keyword">if</span> (!<span class="variable">user</span>) <span class="keyword">return</span> &lt;<span class="jsx-tag">p</span>&gt;Loading...&lt;/<span class="jsx-tag">p</span>&gt;;
+
+  <span class="keyword">return</span> &lt;<span class="jsx-tag">h1</span>&gt;{<span class="variable">user</span>.name}&lt;/<span class="jsx-tag">h1</span>&gt;;
+}
+
+<span class="comment">// Dependency array variations:</span>
+<span class="function">useEffect</span>(() =&gt; {});           <span class="comment">// Run on EVERY render</span>
+<span class="function">useEffect</span>(() =&gt; {}, []);        <span class="comment">// Run ONCE on mount</span>
+<span class="function">useEffect</span>(() =&gt; {}, [dep]);     <span class="comment">// Run when dep changes</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8: Events -->
+<div data-topic="framework-events">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Event Handling</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Framework menggunakan synthetic events yang cross-browser. Penanganan event mirip dengan vanilla JS tapi dengan sintaks sedikit berbeda.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">React Events</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">function</span> <span class="function">Form</span>() {
+  <span class="keyword">const</span> [value, setValue] = <span class="function">useState</span>(<span class="string">''</span>);
+
+  <span class="comment">// Event handler menerima synthetic event</span>
+  <span class="keyword">const</span> <span class="function">handleChange</span> = (e) =&gt; {
+    <span class="function">setValue</span>(<span class="variable">e</span>.target.value);
+  };
+
+  <span class="keyword">const</span> <span class="function">handleSubmit</span> = (e) =&gt; {
+    <span class="variable">e</span>.<span class="function">preventDefault</span>();
+    console.<span class="function">log</span>(<span class="string">'Submitted:'</span>, <span class="variable">value</span>);
+  };
+
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">form</span> <span class="attr">onSubmit</span>={<span class="variable">handleSubmit</span>}&gt;
+      &lt;<span class="jsx-tag">input</span>
+        <span class="attr">type</span>=<span class="string">"text"</span>
+        <span class="attr">value</span>={<span class="variable">value</span>}
+        <span class="attr">onChange</span>={<span class="variable">handleChange</span>}
+      /&gt;
+      &lt;<span class="jsx-tag">button</span> <span class="attr">type</span>=<span class="string">"submit"</span>&gt;Send&lt;/<span class="jsx-tag">button</span>&gt;
+    &lt;/<span class="jsx-tag">form</span>&gt;
+  );
+}
+
+<span class="comment">// Passing arguments to handlers</span>
+&lt;<span class="jsx-tag">button</span> <span class="attr">onClick</span>={() =&gt; <span class="function">handleDelete</span>(<span class="variable">id</span>)}&gt;Delete&lt;/<span class="jsx-tag">button</span>&gt;</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Perbedaan dengan HTML:</strong><br>
+            - <code>onClick</code> bukan <code>onclick</code><br>
+            - Handler menerima function, bukan string<br>
+            - <code>preventDefault()</code> untuk stop default action
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9: Conditional Rendering -->
+<div data-topic="framework-conditional">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Conditional Rendering</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Menampilkan component atau elemen berdasarkan kondisi. Framework menggunakan JavaScript native untuk conditional rendering.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Conditional Patterns</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// 1. If statement (tidak bisa di JSX)</span>
+<span class="keyword">if</span> (<span class="variable">isLoading</span>) {
+  <span class="keyword">return</span> &lt;<span class="jsx-tag">Spinner</span> /&gt;;
+}
+<span class="keyword">return</span> &lt;<span class="jsx-tag">Content</span> /&gt;;
+
+<span class="comment">// 2. Ternary operator</span>
+{<span class="variable">isLoggedIn</span> ? &lt;<span class="jsx-tag">Dashboard</span> /&gt; : &lt;<span class="jsx-tag">Login</span> /&gt;}
+
+<span class="comment">// 3. Logical AND (&&amp;)</span>
+{<span class="variable">showModal</span> && &lt;<span class="jsx-tag">Modal</span> /&gt;}
+
+<span class="comment">// 4. Immediately invoked function</span>
+{(() =&gt; {
+  <span class="keyword">switch</span> (<span class="variable">status</span>) {
+    <span class="keyword">case</span> <span class="string">'loading'</span>: <span class="keyword">return</span> &lt;<span class="jsx-tag">Spinner</span> /&gt;;
+    <span class="keyword">case</span> <span class="string">'error'</span>: <span class="keyword">return</span> &lt;<span class="jsx-tag">Error</span> /&gt;;
+    <span class="keyword">default</span>: <span class="keyword">return</span> &lt;<span class="jsx-tag">Content</span> /&gt;;
+  }
+})()}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSSON 10: Lists & Keys -->
+<div data-topic="framework-lists">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Rendering Lists & Keys</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Menampilkan array data sebagai list elemen. Key prop sangat penting untuk performa dan kebenaran rendering.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">List Rendering</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">const</span> products = [
+  { id: <span class="variable">1</span>, name: <span class="string">'Laptop'</span>, price: <span class="variable">999</span> },
+  { id: <span class="variable">2</span>, name: <span class="string">'Phone'</span>, price: <span class="variable">699</span> },
+  { id: <span class="variable">3</span>, name: <span class="string">'Tablet'</span>, price: <span class="variable">499</span> },
+];
+
+<span class="keyword">function</span> <span class="function">ProductList</span>() {
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">ul</span>&gt;
+      {<span class="variable">products</span>.<span class="function">map</span>(product =&gt; (
+        &lt;<span class="jsx-tag">li</span> <span class="attr">key</span>={<span class="variable">product</span>.id}&gt;
+          {<span class="variable">product</span>.name} - ${<span class="variable">product</span>.price}
+        &lt;/<span class="jsx-tag">li</span>&gt;
+      ))}
+    &lt;/<span class="jsx-tag">ul</span>&gt;
+  );
+}
+
+<span class="comment">// Key harus UNIK di antara siblings</span>
+<span class="comment">// BAIK: key={item.id}</span>
+<span class="comment">// BURUK: key={index} (hanya jika tidak ada ID dan list static)</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11: Forms -->
+<div data-topic="framework-forms">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Controlled vs Uncontrolled Forms</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Di React, ada dua cara menangani form: controlled (state-driven) dan uncontrolled (ref-based). Controlled lebih umum digunakan.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Controlled Form</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">function</span> <span class="function">ContactForm</span>() {
+  <span class="keyword">const</span> [form, setForm] = <span class="function">useState</span>({
+    name: <span class="string">''</span>,
+    email: <span class="string">''</span>,
+    message: <span class="string">''</span>
+  });
+
+  <span class="keyword">const</span> <span class="function">handleChange</span> = (e) =&gt; {
+    <span class="function">setForm</span>({
+      ...<span class="variable">form</span>,
+      [<span class="variable">e</span>.target.name]: <span class="variable">e</span>.target.value
+    });
+  };
+
+  <span class="keyword">const</span> <span class="function">handleSubmit</span> = (e) =&gt; {
+    <span class="variable">e</span>.<span class="function">preventDefault</span>();
+    console.<span class="function">log</span>(<span class="string">'Form submitted:'</span>, <span class="variable">form</span>);
+  };
+
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">form</span> <span class="attr">onSubmit</span>={<span class="variable">handleSubmit</span>}&gt;
+      &lt;<span class="jsx-tag">input</span>
+        <span class="attr">name</span>=<span class="string">"name"</span>
+        <span class="attr">value</span>={<span class="variable">form</span>.name}
+        <span class="attr">onChange</span>={<span class="variable">handleChange</span>}
+      /&gt;
+      &lt;<span class="jsx-tag">textarea</span>
+        <span class="attr">name</span>=<span class="string">"message"</span>
+        <span class="attr">value</span>={<span class="variable">form</span>.message}
+        <span class="attr">onChange</span>={<span class="variable">handleChange</span>}
+      /&gt;
+      &lt;<span class="jsx-tag">button</span> <span class="attr">type</span>=<span class="string">"submit"</span>&gt;Kirim&lt;/<span class="jsx-tag">button</span>&gt;
+    &lt;/<span class="jsx-tag">form</span>&gt;
+  );
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12: State Management -->
+<div data-topic="framework-state-mgmt">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">State Management (Context, Redux, Zustand)</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Untuk aplikasi kompleks, state perlu dibagikan antar component. Berbagai solusi tersedia dari built-in hingga library eksternal.</p>
+          <div class="explanation">
+            <strong>Pilihan State Management:</strong><br>
+            1. <strong>useState/useReducer</strong> — Local state, cocok untuk state simple<br>
+            2. <strong>Context API</strong> — Share state tanpa prop drilling, built-in React<br>
+            3. <strong>Redux</strong> — Predictable state container, cocok untuk app besar<br>
+            4. <strong>Zustand</strong> — Lightweight alternative, simpler API<br>
+            5. <strong>Jotai/Recoil</strong> — Atomic state management
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Context API</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// 1. Create Context</span>
+<span class="keyword">const</span> UserContext = <span class="function">createContext</span>();
+
+<span class="comment">// 2. Provider Component</span>
+<span class="keyword">function</span> <span class="function">UserProvider</span>({ children }) {
+  <span class="keyword">const</span> [user, setUser] = <span class="function">useState</span>(<span class="keyword">null</span>);
+  
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">UserContext.Provider</span> <span class="attr">value</span>={{ <span class="variable">user</span>, <span class="variable">setUser</span> }}&gt;
+      {<span class="variable">children</span>}
+    &lt;/<span class="jsx-tag">UserContext.Provider</span>&gt;
+  );
+}
+
+<span class="comment">// 3. Consume in any component</span>
+<span class="keyword">function</span> <span class="function">Profile</span>() {
+  <span class="keyword">const</span> { user } = <span class="function">useContext</span>(UserContext);
+  <span class="keyword">return</span> &lt;<span class="jsx-tag">h1</span>&gt;Hello, {<span class="variable">user</span>?.name}&lt;/<span class="jsx-tag">h1</span>&gt;;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13: Routing -->
+<div data-topic="framework-routing">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Client-Side Routing</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">SPA (Single Page Application) menggunakan client-side routing untuk navigasi tanpa reload halaman penuh.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">React Router</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">import</span> { BrowserRouter, Routes, Route, Link } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">BrowserRouter</span>&gt;
+      &lt;<span class="jsx-tag">nav</span>&gt;
+        &lt;<span class="jsx-tag">Link</span> <span class="attr">to</span>=<span class="string">"/"</span>&gt;Home&lt;/<span class="jsx-tag">Link</span>&gt;
+        &lt;<span class="jsx-tag">Link</span> <span class="attr">to</span>=<span class="string">"/about"</span>&gt;About&lt;/<span class="jsx-tag">Link</span>&gt;
+      &lt;/<span class="jsx-tag">nav</span>&gt;
+
+      &lt;<span class="jsx-tag">Routes</span>&gt;
+        &lt;<span class="jsx-tag">Route</span> <span class="attr">path</span>=<span class="string">"/"</span> <span class="attr">element</span>={&lt;<span class="jsx-tag">Home</span> /&gt;} /&gt;
+        &lt;<span class="jsx-tag">Route</span> <span class="attr">path</span>=<span class="string">"/about"</span> <span class="attr">element</span>={&lt;<span class="jsx-tag">About</span> /&gt;} /&gt;
+        &lt;<span class="jsx-tag">Route</span> <span class="attr">path</span>=<span class="string">"/users/:id"</span> <span class="attr">element</span>={&lt;<span class="jsx-tag">UserDetail</span> /&gt;} /&gt;
+        &lt;<span class="jsx-tag">Route</span> <span class="attr">path</span>=<span class="string">"*"</span> <span class="attr">element</span>={&lt;<span class="jsx-tag">NotFound</span> /&gt;} /&gt;
+      &lt;/<span class="jsx-tag">Routes</span>&gt;
+    &lt;/<span class="jsx-tag">BrowserRouter</span>&gt;
+  );
+}
+
+<span class="comment">// Dynamic route parameter</span>
+<span class="keyword">function</span> <span class="function">UserDetail</span>() {
+  <span class="keyword">const</span> { id } = <span class="function">useParams</span>();
+  <span class="keyword">return</span> &lt;<span class="jsx-tag">h1</span>&gt;User ID: {<span class="variable">id</span>}&lt;/<span class="jsx-tag">h1</span>&gt;;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14: Data Fetching -->
+<div data-topic="framework-data-fetching">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Data Fetching Patterns</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Mengambil data dari API adalah tugas umum. Ada berbagai pendekatan dari fetch native hingga library khusus.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Custom Hook for Fetching</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">function</span> <span class="function">useFetch</span>(url) {
+  <span class="keyword">const</span> [data, setData] = <span class="function">useState</span>(<span class="keyword">null</span>);
+  <span class="keyword">const</span> [loading, setLoading] = <span class="function">useState</span>(<span class="keyword">true</span>);
+  <span class="keyword">const</span> [error, setError] = <span class="function">useState</span>(<span class="keyword">null</span>);
+
+  <span class="function">useEffect</span>(() =&gt; {
+    <span class="keyword">async function</span> <span class="function">fetchData</span>() {
+      <span class="keyword">try</span> {
+        <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="function">fetch</span>(url);
+        <span class="keyword">const</span> json = <span class="keyword">await</span> res.<span class="function">json</span>();
+        <span class="function">setData</span>(json);
+      } <span class="keyword">catch</span> (err) {
+        <span class="function">setError</span>(err);
+      } <span class="keyword">finally</span> {
+        <span class="function">setLoading</span>(<span class="keyword">false</span>);
+      }
+    }
+    <span class="function">fetchData</span>();
+  }, [<span class="variable">url</span>]);
+
+  <span class="keyword">return</span> { data, loading, error };
+}
+
+<span class="comment">// Usage</span>
+<span class="keyword">function</span> <span class="function">Users</span>() {
+  <span class="keyword">const</span> { data, loading, error } = <span class="function">useFetch</span>(<span class="string">'/api/users'</span>);
+  
+  <span class="keyword">if</span> (<span class="variable">loading</span>) <span class="keyword">return</span> &lt;<span class="jsx-tag">p</span>&gt;Loading...&lt;/<span class="jsx-tag">p</span>&gt;;
+  <span class="keyword">if</span> (<span class="variable">error</span>) <span class="keyword">return</span> &lt;<span class="jsx-tag">p</span>&gt;Error!&lt;/<span class="jsx-tag">p</span>&gt;;
+  <span class="keyword">return</span> &lt;<span class="jsx-tag">ul</span>&gt;{<span class="variable">data</span>.<span class="function">map</span>(u =&gt; &lt;<span class="jsx-tag">li</span> <span class="attr">key</span>={<span class="variable">u</span>.id}&gt;{<span class="variable">u</span>.name}&lt;/<span class="jsx-tag">li</span>&gt;)}&lt;/<span class="jsx-tag">ul</span>&gt;;
+}</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Alternatif Populer:</strong><br>
+            - <strong>TanStack Query (React Query)</strong> — Powerful data fetching & caching<br>
+            - <strong>SWR</strong> — Lightweight, dari Vercel<br>
+            - <strong>RTK Query</strong> — Bagian dari Redux Toolkit
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15: Styling -->
+<div data-topic="framework-styling">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Styling di Framework</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Ada berbagai cara untuk styling component di framework modern.</p>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>CSS Modules</h4>
+              <ul>
+                <li>Scoped CSS by default</li>
+                <li>No class name conflicts</li>
+                <li>File: Button.module.css</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>CSS-in-JS</h4>
+              <ul>
+                <li>Styled Components, Emotion</li>
+                <li>Dynamic styling dengan props</li>
+                <li>Write CSS in JavaScript</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Utility-First</h4>
+              <ul>
+                <li>Tailwind CSS</li>
+                <li>Pre-built utility classes</li>
+                <li>Fast development</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 16: Performance -->
+<div data-topic="framework-performance">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">Performance Optimization</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Optimasi performa sangat penting untuk aplikasi production.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">React Performance</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// 1. React.memo - prevent unnecessary re-renders</span>
+<span class="keyword">const</span> MemoizedComponent = <span class="function">React.memo</span>(MyComponent);
+
+<span class="comment">// 2. useMemo - memoize expensive calculations</span>
+<span class="keyword">const</span> expensiveValue = <span class="function">useMemo</span>(() =&gt; {
+  <span class="keyword">return</span> <span class="function">heavyCalculation</span>(data);
+}, [<span class="variable">data</span>]);
+
+<span class="comment">// 3. useCallback - memoize functions</span>
+<span class="keyword">const</span> handleClick = <span class="function">useCallback</span>(() =&gt; {
+  <span class="function">doSomething</span>(id);
+}, [<span class="variable">id</span>]);
+
+<span class="comment">// 4. Code splitting with lazy loading</span>
+<span class="keyword">const</span> Dashboard = <span class="function">lazy</span>(() =&gt; <span class="function">import</span>(<span class="string">'./Dashboard'</span>));
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="keyword">return</span> (
+    &lt;<span class="jsx-tag">Suspense</span> <span class="attr">fallback</span>={&lt;<span class="jsx-tag">Spinner</span> /&gt;}&gt;
+      &lt;<span class="jsx-tag">Dashboard</span> /&gt;
+    &lt;/<span class="jsx-tag">Suspense</span>&gt;
+  );
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 17: Testing -->
+<div data-topic="framework-testing">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Testing Components</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Testing memastikan component berfungsi dengan benar dan mencegah regresi.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Jest + React Testing Library</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">import</span> { render, screen, fireEvent } <span class="keyword">from</span> <span class="string">'@testing-library/react'</span>;
+
+<span class="function">test</span>(<span class="string">'button increments counter'</span>, () =&gt; {
+  <span class="function">render</span>(&lt;<span class="jsx-tag">Counter</span> /&gt;);
+  
+  <span class="comment">// Find elements</span>
+  <span class="keyword">const</span> button = screen.<span class="function">getByRole</span>(<span class="string">'button'</span>);
+  <span class="keyword">const</span> count = screen.<span class="function">getByText</span>(<span class="string">'Count: 0'</span>);
+  
+  <span class="comment">// Interact</span>
+  <span class="function">fireEvent.click</span>(button);
+  
+  <span class="comment">// Assert</span>
+  <span class="function">expect</span>(screen.<span class="function">getByText</span>(<span class="string">'Count: 1'</span>)).<span class="function">toBeInTheDocument</span>();
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 18: Pilih Framework -->
+<div data-topic="framework-choose">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">Memilih Framework</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Tidak ada framework terbaik untuk semua situasi. Pilih berdasarkan kebutuhan project dan tim.</p>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>React</h4>
+              <ul>
+                <li>Ekosistem terbesar</li>
+                <li>Fleksibel, library bukan framework</li>
+                <li>Job market terbesar</li>
+                <li>Cocok: SPA, team besar</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Vue</h4>
+              <ul>
+                <li>Learning curve rendah</li>
+                <li>Documentation excellent</li>
+                <li>Semua dalam satu paket</li>
+                <li>Cocok: Startup, tim kecil</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Svelte</h4>
+              <ul>
+                <li>No Virtual DOM</li>
+                <li>Bundle size kecil</li>
+                <li>Syntax paling simple</li>
+                <li>Cocok: Performance-critical</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Angular</h4>
+              <ul>
+                <li>Full framework</li>
+                <li>Opinionated structure</li>
+                <li>TypeScript by default</li>
+                <li>Cocok: Enterprise apps</li>
+              </ul>
+            </div>
+          </div>
+          <div class="info-box">
+            <strong>Meta Frameworks (Full-Stack):</strong><br>
+            - <strong>Next.js</strong> (React) — SSR, SSG, API routes<br>
+            - <strong>Nuxt</strong> (Vue) — SSR, static generation<br>
+            - <strong>SvelteKit</strong> (Svelte) — Full-stack Svelte
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+<script>
+  // Theme toggle
+  const themeToggle = document.getElementById("themeToggle");
+  const htmlEl = document.documentElement;
+  if (localStorage.getItem("theme") === "light") {
+    htmlEl.setAttribute("data-theme", "light");
+  }
+  themeToggle.addEventListener("click", () => {
+    if (htmlEl.getAttribute("data-theme") === "light") {
+      htmlEl.removeAttribute("data-theme");
+      localStorage.setItem("theme", "dark");
+    } else {
+      htmlEl.setAttribute("data-theme", "light");
+      localStorage.setItem("theme", "light");
+    }
+  });
+
+  // Mobile menu
+  const mobileToggle = document.getElementById("mobileToggle");
+  const mobileMenu = document.getElementById("mobileMenu");
+  mobileToggle.addEventListener("click", () => {
+    mobileMenu.classList.toggle("open");
+  });
+
+  // Lesson card toggle
+  document.querySelectorAll(".lesson-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const card = header.parentElement;
+      card.classList.toggle("open");
+    });
+  });
+
+  // Copy code
+  function copyCode(btn) {
+    const block = btn.closest(".code-block");
+    const code = block.querySelector("code")?.textContent || "";
+    navigator.clipboard.writeText(code).then(() => {
+      const original = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(() => { btn.textContent = original; }, 2000);
+    });
+  }
+
+  // LOADING SCREEN - dengan delay minimal 1.2 detik
+  function hideLoading() {
+    const loading = document.getElementById("loading-screen");
+    if (loading) {
+      loading.classList.add("hidden");
+      setTimeout(() => loading.remove(), 500);
+    }
+  }
+
+  // Tunggu DOM ready, lalu tambah delay 1200ms
+  function initLoading() {
+    const minDisplayTime = 1200; // minimal 1.2 detik tampil
+    const startTime = Date.now();
+
+    const readyHandler = () => {
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+
+      setTimeout(hideLoading, remainingTime);
+    };
+
+    if (document.readyState === "complete") {
+      readyHandler();
+    } else {
+      window.addEventListener("load", readyHandler);
+    }
+  }
+
+  // Mulai saat DOM ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initLoading);
+  } else {
+    initLoading();
+  }
+</script>
+</body>
+</html>

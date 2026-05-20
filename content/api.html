@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #a855f7;
+      --accent-secondary: #ec4899;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(168, 85, 247, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { font-family: var(--font-display); background: var(--bg); color: var(--fg); line-height: 1.7; overflow-x: hidden; }
+
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.5s ease, visibility 0.5s ease; }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; color: var(--fg-muted); }
+
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .grid-pattern { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+
+            /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    /* Navigation Links Container */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Arrow */
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Divider */
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* Dropdown Section Label */
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Nav Actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .page-hero { min-height: 50vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 60px; position: relative; }
+    .page-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; }
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 100px; font-size: 0.85rem; color: var(--accent); margin-bottom: 24px; }
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .lesson-grid { display: grid; gap: 16px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; }
+    .lesson-toggle { color: var(--fg-muted); transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 3000px; }
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+
+    .explanation { margin-bottom: 1rem; background: rgba(168, 85, 247, 0.05); padding: 12px 16px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.95rem; line-height: 1.6; }
+    .explanation strong { color: var(--accent); }
+
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; }
+    .code-copy:hover { background: var(--accent); color: #fff; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+
+    .info-box { background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul { margin: 8px 0 0 20px; }
+
+    .method { padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; font-family: var(--font-mono); }
+    .method-get { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+    .method-post { background: rgba(56, 139, 253, 0.2); color: #388bfd; }
+    .method-put { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+    .method-delete { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+    .method-patch { background: rgba(163, 113, 247, 0.2); color: #a371f7; }
+
+    .keyword { color: #ff7b54; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .number { color: #f0883e; }
+
+    .diagram { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; overflow-x: auto; }
+    .diagram pre { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.4; color: var(--fg); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Memuat materi API...</div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+  </div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <!-- Dropdown: Frontend -->
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: Backend -->
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: DevOps -->
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">15 Lessons</div>
+      <h1>Belajar <span class="highlight">API</span></h1>
+      <p>Pahami cara aplikasi berkomunikasi: REST, HTTP, Authentication, dan cara mengonsumsi API di frontend.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1: Apa itu API -->
+<div data-topic="api-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">1</div><h3 class="lesson-title">Apa itu API?</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">API (Application Programming Interface) adalah set aturan yang memungkinkan dua aplikasi berkomunikasi. Dalam konteks web, API memungkinkan frontend mengambil dan mengirim data ke backend.</p>
+          <div class="explanation">
+            <strong>Analogi Restoran:</strong><br>
+            - <strong>Kamu</strong> = Client (Frontend)<br>
+            - <strong>Waiter</strong> = API (Menerima pesanan, membawa makanan)<br>
+            - <strong>Dapur</strong> = Server/Backend (Memproses pesanan)<br>
+            - <strong>Menu</strong> = API Documentation (Apa yang bisa dipesan)
+          </div>
+          <div class="diagram">
+            <pre>
+CLIENT (Frontend)              API               SERVER (Backend)
+─────────────────          ─────────────          ────────────────
+       │                       │                        │
+       │── Request ────────────►                        │
+       │   "GET /users"       │                        │
+       │                       │──── Process ──────────►│
+       │                       │                        │
+       │                       │◄─── Data ─────────────│
+       │◄── Response ──────────│                        │
+       │   [{name: "John"}]    │                        │
+            </pre>
+          </div>
+          <div class="info-box">
+            <strong>Jenis API:</strong><br>
+            - <strong>REST API</strong> — Paling umum, menggunakan HTTP methods<br>
+            - <strong>GraphQL</strong> — Query language, fleksibel<br>
+            - <strong>SOAP</strong> — Legacy, enterprise<br>
+            - <strong>WebSockets</strong> — Real-time communication
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2: REST API -->
+<div data-topic="api-rest">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">REST API Architecture</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">REST (Representational State Transfer) adalah gaya arsitektur untuk membangun web services. RESTful API mengikuti prinsip-prinsip tertentu.</p>
+          <div class="explanation">
+            <strong>Prinsip REST:</strong><br>
+            1. <strong>Stateless</strong> — Setiap request independen, server tidak menyimpan state client<br>
+            2. <strong>Client-Server</strong> — Separation of concerns<br>
+            3. <strong>Cacheable</strong> — Response bisa di-cache<br>
+            4. <strong>Uniform Interface</strong> — Consistent naming convention<br>
+            5. <strong>Resource-based</strong> — Semua adalah resource (users, posts, etc)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">RESTful Endpoints</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Contoh REST API untuk resource "users"</span>
+
+<span class="comment"># Base URL</span>
+https://api.example.com/v1
+
+<span class="comment"># Endpoints</span>
+<span class="method method-get">GET</span>    /users           <span class="comment"># List semua users</span>
+<span class="method method-get">GET</span>    /users/:id       <span class="comment"># Detail user tertentu</span>
+<span class="method method-post">POST</span>   /users           <span class="comment"># Buat user baru</span>
+<span class="method method-put">PUT</span>    /users/:id       <span class="comment"># Update seluruh data user</span>
+<span class="method method-patch">PATCH</span>  /users/:id       <span class="comment"># Update sebagian data user</span>
+<span class="method method-delete">DELETE</span> /users/:id       <span class="comment"># Hapus user</span>
+
+<span class="comment"># Nested resources</span>
+<span class="method method-get">GET</span>    /users/:id/posts      <span class="comment"># Posts milik user</span>
+<span class="method method-get">GET</span>    /users/:id/posts/:postId</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Naming Convention:</strong><br>
+            - Gunakan noun plural: <code>/users</code>, bukan <code>/user</code><br>
+            - Hindari verb: <code>/getUsers</code> (SALAH), <code>/users</code> (BENAR)<br>
+            - Gunakan query untuk filter: <code>/users?status=active</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3: HTTP Methods -->
+<div data-topic="api-http-methods">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">HTTP Methods (CRUD Operations)</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">HTTP methods mendefinisikan aksi yang ingin dilakukan pada resource. Setiap method punya makna spesifik dalam REST API.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">HTTP Methods</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="method method-get">GET</span> — Read (Mengambil data)
+├── Safe: Ya (tidak mengubah data)
+├── Idempotent: Ya
+└── Contoh: GET /users/123
+
+<span class="method method-post">POST</span> — Create (Membuat data baru)
+├── Safe: Tidak
+├── Idempotent: Tidak (POST 2x = 2 data)
+└── Contoh: POST /users { name: "John" }
+
+<span class="method method-put">PUT</span> — Update (Replace seluruh data)
+├── Safe: Tidak
+├── Idempotent: Ya (PUT 10x = hasil sama)
+└── Contoh: PUT /users/123 { name: "John", email: "..." }
+
+<span class="method method-patch">PATCH</span> — Partial Update (Update sebagian)
+├── Safe: Tidak
+├── Idempotent: Ya (tergantung implementasi)
+└── Contoh: PATCH /users/123 { name: "New Name" }
+
+<span class="method method-delete">DELETE</span> — Delete (Menghapus data)
+├── Safe: Tidak
+├── Idempotent: Ya (DELETE data yang sudah terhapus = sama)
+└── Contoh: DELETE /users/123</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Idempotent:</strong> Operasi yang menghasilkan hasil sama meski dijalankan berkali-kali. GET, PUT, DELETE idempotent. POST tidak idempotent.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4: HTTP Status Codes -->
+<div data-topic="api-status-codes">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">HTTP Status Codes</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Status code adalah 3-digit angka yang menunjukkan hasil dari HTTP request. Memahami status code penting untuk debugging dan error handling.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Status Code Categories</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* 1xx - Informational */</span>
+100 Continue       <span class="comment">// Request diterima, lanjutkan</span>
+101 Switching Protocols
+
+<span class="comment">/* 2xx - Success */</span>
+200 OK             <span class="comment">// Request berhasil</span>
+201 Created        <span class="comment">// Resource berhasil dibuat</span>
+204 No Content     <span class="comment">// Berhasil tapi tidak ada body (untuk DELETE)</span>
+
+<span class="comment">/* 3xx - Redirection */</span>
+301 Moved Permanently
+302 Found (Redirect)
+304 Not Modified   <span class="comment">// Cache masih valid</span>
+
+<span class="comment">/* 4xx - Client Error */</span>
+400 Bad Request    <span class="comment">// Request tidak valid</span>
+401 Unauthorized   <span class="comment">// Butuh autentikasi</span>
+403 Forbidden      <span class="comment">// Tidak punya akses</span>
+404 Not Found      <span class="comment">// Resource tidak ada</span>
+409 Conflict       <span class="comment">// Konflik (misal: email sudah ada)</span>
+422 Unprocessable  <span class="comment">// Validasi gagal</span>
+429 Too Many Requests <span class="comment">// Rate limit exceeded</span>
+
+<span class="comment">/* 5xx - Server Error */</span>
+500 Internal Server Error  <span class="comment">// Error di server</span>
+502 Bad Gateway
+503 Service Unavailable    <span class="comment">// Server maintenance</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5: JSON -->
+<div data-topic="api-json">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">JSON Format</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">JSON (JavaScript Object Notation) adalah format pertukaran data yang ringan dan mudah dibaca. Hampir semua API modern menggunakan JSON.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JSON</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Contoh JSON Response</span>
+{
+  <span class="property">"success"</span>: <span class="keyword">true</span>,
+  <span class="property">"data"</span>: {
+    <span class="property">"id"</span>: <span class="number">123</span>,
+    <span class="property">"name"</span>: <span class="string">"John Doe"</span>,
+    <span class="property">"email"</span>: <span class="string">"john@example.com"</span>,
+    <span class="property">"role"</span>: <span class="string">"admin"</span>,
+    <span class="property">"isActive"</span>: <span class="keyword">true</span>,
+    <span class="property">"tags"</span>: [<span class="string">"developer"</span>, <span class="string">"designer"</span>],
+    <span class="property">"profile"</span>: {
+      <span class="property">"avatar"</span>: <span class="string">"https://..."</span>,
+      <span class="property">"bio"</span>: <span class="string">"Full-stack developer"</span>
+    }
+  },
+  <span class="property">"meta"</span>: {
+    <span class="property">"total"</span>: <span class="number">100</span>,
+    <span class="property">"page"</span>: <span class="number">1</span>
+  }
+}
+
+<span class="comment">// Aturan JSON:</span>
+<span class="comment">// - Key harus dalam double quotes</span>
+<span class="comment">// - String: double quotes</span>
+<span class="comment">// - Tidak ada trailing comma</span>
+<span class="comment">// - Tidak ada comments (tapi banyak parser support)</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6: Fetch API GET -->
+<div data-topic="api-fetch-get">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">Fetch API: GET Request</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Fetch API adalah cara modern untuk melakukan HTTP request di JavaScript. Berikut cara mengambil data dari API.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Basic GET request</span>
+<span class="keyword">fetch</span>(<span class="string">'https://api.example.com/users'</span>)
+  .<span class="keyword">then</span>(response => response.<span class="property">json</span>())
+  .<span class="keyword">then</span>(data => console.<span class="property">log</span>(data))
+  .<span class="keyword">catch</span>(error => console.<span class="property">error</span>(error));
+
+<span class="comment">// Dengan async/await (recommended)</span>
+<span class="keyword">async function</span> <span class="function">getUsers</span>() {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'https://api.example.com/users'</span>);
+    
+    <span class="comment">// Cek apakah request berhasil</span>
+    <span class="keyword">if</span> (!response.<span class="property">ok</span>) {
+      <span class="keyword">throw new</span> <span class="function">Error</span>(<span class="string">`HTTP error! status: ${response.status}`</span>);
+    }
+    
+    <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+    <span class="keyword">return</span> data;
+  } <span class="keyword">catch</span> (error) {
+    console.<span class="function">error</span>(<span class="string">'Fetch error:'</span>, error);
+  }
+}
+
+<span class="comment">// Dengan query parameters</span>
+<span class="keyword">const</span> params = <span class="keyword">new</span> <span class="function">URLSearchParams</span>({
+  page: <span class="string">'1'</span>,
+  limit: <span class="string">'10'</span>,
+  sort: <span class="string">'desc'</span>
+});
+
+<span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">`https://api.example.com/users?${params}`</span>);
+
+<span class="comment">// Dengan headers</span>
+<span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'https://api.example.com/users'</span>, {
+  <span class="property">headers</span>: {
+    <span class="string">'Authorization'</span>: <span class="string">`Bearer ${token}`</span>,
+    <span class="string">'Accept'</span>: <span class="string">'application/json'</span>
+  }
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7: Fetch API POST -->
+<div data-topic="api-fetch-post">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Fetch API: POST, PUT, DELETE</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Untuk mengirim data ke server, gunakan method POST, PUT, atau DELETE dengan body berisi data yang akan dikirim.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// POST - Membuat data baru</span>
+<span class="keyword">async function</span> <span class="function">createUser</span>(userData) {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'https://api.example.com/users'</span>, {
+    <span class="property">method</span>: <span class="string">'POST'</span>,
+    <span class="property">headers</span>: {
+      <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,
+      <span class="string">'Authorization'</span>: <span class="string">`Bearer ${token}`</span>
+    },
+    <span class="property">body</span>: <span class="function">JSON.stringify</span>(userData)
+  });
+  
+  <span class="keyword">return</span> response.<span class="function">json</span>();
+}
+
+<span class="comment">// PUT - Update seluruh data</span>
+<span class="keyword">async function</span> <span class="function">updateUser</span>(id, userData) {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">`https://api.example.com/users/${id}`</span>, {
+    <span class="property">method</span>: <span class="string">'PUT'</span>,
+    <span class="property">headers</span>: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+    <span class="property">body</span>: <span class="function">JSON.stringify</span>(userData)
+  });
+  
+  <span class="keyword">return</span> response.<span class="function">json</span>();
+}
+
+<span class="comment">// DELETE - Hapus data</span>
+<span class="keyword">async function</span> <span class="function">deleteUser</span>(id) {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">`https://api.example.com/users/${id}`</span>, {
+    <span class="property">method</span>: <span class="string">'DELETE'</span>,
+    <span class="property">headers</span>: { <span class="string">'Authorization'</span>: <span class="string">`Bearer ${token}`</span> }
+  });
+  
+  <span class="keyword">if</span> (response.<span class="property">status</span> === <span class="number">204</span>) {
+    console.<span class="function">log</span>(<span class="string">'User deleted successfully'</span>);
+  }
+}
+
+<span class="comment">// Penggunaan</span>
+<span class="keyword">const</span> newUser = <span class="keyword">await</span> <span class="function">createUser</span>({
+  name: <span class="string">'John Doe'</span>,
+  email: <span class="string">'john@example.com'</span>
+});</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8: Authentication -->
+<div data-topic="api-auth">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">API Authentication</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Banyak API memerlukan authentication untuk mengakses protected endpoints. Berikut metode autentikasi yang umum digunakan.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Auth Methods</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// 1. API Key (Simple)</span>
+<span class="keyword">fetch</span>(<span class="string">'https://api.example.com/data'</span>, {
+  <span class="property">headers</span>: {
+    <span class="string">'X-API-Key'</span>: <span class="string">'your-api-key-here'</span>
+  }
+});
+
+<span class="comment">// atau sebagai query parameter</span>
+<span class="keyword">fetch</span>(<span class="string">'https://api.example.com/data?api_key=your-api-key'</span>);
+
+<span class="comment">// 2. Bearer Token (JWT)</span>
+<span class="keyword">fetch</span>(<span class="string">'https://api.example.com/users'</span>, {
+  <span class="property">headers</span>: {
+    <span class="string">'Authorization'</span>: <span class="string">`Bearer ${accessToken}`</span>
+  }
+});
+
+<span class="comment">// 3. Basic Auth (Not recommended for production)</span>
+<span class="keyword">const</span> credentials = <span class="function">btoa</span>(<span class="string">`${username}:${password}`</span>);
+<span class="keyword">fetch</span>(<span class="string">'https://api.example.com/data'</span>, {
+  <span class="property">headers</span>: {
+    <span class="string">'Authorization'</span>: <span class="string">`Basic ${credentials}`</span>
+  }
+});
+
+<span class="comment">// 4. OAuth 2.0 Flow (simplified)</span>
+<span class="comment">// Redirect user to auth provider</span>
+<span class="keyword">const</span> authUrl = <span class="string">`https://auth.provider.com/authorize?
+  client_id=${clientId}&
+  redirect_uri=${redirectUri}&
+  response_type=code&
+  scope=read write`</span>;
+
+<span class="comment">// Exchange code for token di backend</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Best Practice:</strong><br>
+            - Jangan simpan token di localStorage (vulnerable to XSS)<br>
+            - Gunakan HttpOnly cookies untuk menyimpan token<br>
+            - Implement refresh token mechanism<br>
+            - Selalu gunakan HTTPS
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9: Error Handling -->
+<div data-topic="api-error">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Error Handling API</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Error handling yang baik membantu debugging dan memberikan feedback yang jelas ke user.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">class</span> <span class="function">APIError</span> <span class="keyword">extends</span> <span class="function">Error</span> {
+  <span class="function">constructor</span>(message, status, data) {
+    <span class="keyword">super</span>(message);
+    <span class="keyword">this</span>.<span class="property">status</span> = status;
+    <span class="keyword">this</span>.<span class="property">data</span> = data;
+    <span class="keyword">this</span>.<span class="property">name</span> = <span class="string">'APIError'</span>;
+  }
+}
+
+<span class="keyword">async function</span> <span class="function">apiRequest</span>(url, options = {}) {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(url, options);
+    
+    <span class="keyword">if</span> (!response.<span class="property">ok</span>) {
+      <span class="keyword">let</span> errorData;
+      <span class="keyword">try</span> {
+        errorData = <span class="keyword">await</span> response.<span class="function">json</span>();
+      } <span class="keyword">catch</span> {
+        errorData = { message: response.<span class="property">statusText</span> };
+      }
+      
+      <span class="keyword">throw new</span> <span class="function">APIError</span>(
+        errorData.<span class="property">message</span> || <span class="string">'Request failed'</span>,
+        response.<span class="property">status</span>,
+        errorData
+      );
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">await</span> response.<span class="function">json</span>();
+    
+  } <span class="keyword">catch</span> (error) {
+    <span class="keyword">if</span> (error <span class="keyword">instanceof</span> APIError) {
+      <span class="comment">// Handle API errors</span>
+      <span class="keyword">switch</span> (error.<span class="property">status</span>) {
+        <span class="keyword">case</span> <span class="number">401</span>:
+          console.<span class="function">error</span>(<span class="string">'Unauthorized - Redirect to login'</span>);
+          <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="number">403</span>:
+          console.<span class="function">error</span>(<span class="string">'Forbidden - No access'</span>);
+          <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="number">404</span>:
+          console.<span class="function">error</span>(<span class="string">'Not found'</span>);
+          <span class="keyword">break</span>;
+        <span class="keyword">case</span> <span class="number">500</span>:
+          console.<span class="function">error</span>(<span class="string">'Server error'</span>);
+          <span class="keyword">break</span>;
+        <span class="keyword">default</span>:
+          console.<span class="function">error</span>(<span class="string">`Error: ${error.message}`</span>);
+      }
+    } <span class="keyword">else</span> {
+      <span class="comment">// Network error or other</span>
+      console.<span class="function">error</span>(<span class="string">'Network error:'</span>, error);
+    }
+    
+    <span class="keyword">throw</span> error;
+  }
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 10: CORS -->
+<div data-topic="api-cors">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">CORS (Cross-Origin Resource Sharing)</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">CORS adalah mekanisme keamanan browser yang membatasi web page mengakses resource dari domain berbeda.</p>
+          <div class="explanation">
+            <strong>Mengapa CORS Error?</strong><br>
+            Browser memblokir request ke domain berbeda demi keamanan. Server harus secara eksplisit mengizinkan request dari origin tertentu.
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Server-Side CORS Headers</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Response headers yang harus di-set di server</span>
+Access-Control-Allow-Origin: https://yourdomain.com
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Credentials: true
+
+<span class="comment">// Express.js CORS setup</span>
+<span class="keyword">const</span> cors = <span class="function">require</span>(<span class="string">'cors'</span>);
+
+<span class="keyword">const</span> corsOptions = {
+  <span class="property">origin</span>: [<span class="string">'https://yourdomain.com'</span>, <span class="string">'http://localhost:3000'</span>],
+  <span class="property">methods</span>: [<span class="string">'GET'</span>, <span class="string">'POST'</span>, <span class="string">'PUT'</span>, <span class="string">'DELETE'</span>],
+  <span class="property">credentials</span>: <span class="keyword">true</span>
+};
+
+app.<span class="function">use</span>(<span class="function">cors</span>(corsOptions));
+
+<span class="comment">// Atau untuk development (JANGAN di production!)</span>
+app.<span class="function">use</span>(<span class="function">cors</span>({ <span class="property">origin</span>: <span class="string">'*'</span> }));</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Solusi CORS Error:</strong><br>
+            1. Setup CORS headers di server<br>
+            2. Gunakan proxy server untuk development<br>
+            3. Pastikan origin (domain + port + protocol) sama persis
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11: Axios -->
+<div data-topic="api-axios">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Axios Library</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Axios adalah library populer untuk HTTP request dengan fitur lebih lengkap dibanding fetch.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install axios</span>
+<span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">'axios'</span>;
+
+<span class="comment">// Create instance dengan config</span>
+<span class="keyword">const</span> api = axios.<span class="function">create</span>({
+  <span class="property">baseURL</span>: <span class="string">'https://api.example.com'</span>,
+  <span class="property">timeout</span>: <span class="number">10000</span>,
+  <span class="property">headers</span>: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> }
+});
+
+<span class="comment">// Request interceptor (tambah token otomatis)</span>
+api.<span class="property">interceptors</span>.<span class="property">request</span>.<span class="function">use</span>(config => {
+  <span class="keyword">const</span> token = localStorage.<span class="function">getItem</span>(<span class="string">'token'</span>);
+  <span class="keyword">if</span> (token) {
+    config.<span class="property">headers</span>.<span class="property">Authorization</span> = <span class="string">`Bearer ${token}`</span>;
+  }
+  <span class="keyword">return</span> config;
+});
+
+<span class="comment">// Response interceptor (handle errors globally)</span>
+api.<span class="property">interceptors</span>.<span class="property">response</span>.<span class="function">use</span>(
+  response => response.<span class="property">data</span>,
+  error => {
+    <span class="keyword">if</span> (error.<span class="property">response</span>.<span class="property">status</span> === <span class="number">401</span>) {
+      <span class="comment">// Redirect to login</span>
+    }
+    <span class="keyword">return</span> Promise.<span class="function">reject</span>(error);
+  }
+);
+
+<span class="comment">// Penggunaan</span>
+<span class="keyword">const</span> users = <span class="keyword">await</span> api.<span class="function">get</span>(<span class="string">'/users'</span>);
+<span class="keyword">const</span> user = <span class="keyword">await</span> api.<span class="function">post</span>(<span class="string">'/users'</span>, { name: <span class="string">'John'</span> });
+<span class="keyword">await</span> api.<span class="function">delete</span>(<span class="string">`/users/${id}`</span>);</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12: Rate Limiting -->
+<div data-topic="api-rate-limit">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">Rate Limiting & Pagination</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">API biasanya membatasi jumlah request per waktu tertentu. Pagination digunakan untuk data besar.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">API Response</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Response headers untuk rate limiting</span>
+X-RateLimit-Limit: 100      <span class="comment">// Max requests per hour</span>
+X-RateLimit-Remaining: 95   <span class="comment">// Requests remaining</span>
+X-RateLimit-Reset: 1609459200  <span class="comment">// Unix timestamp reset</span>
+
+<span class="comment">// Pagination response</span>
+{
+  <span class="property">"data"</span>: [...],
+  <span class="property">"pagination"</span>: {
+    <span class="property">"page"</span>: <span class="number">1</span>,
+    <span class="property">"limit"</span>: <span class="number">20</span>,
+    <span class="property">"total"</span>: <span class="number">150</span>,
+    <span class="property">"totalPages"</span>: <span class="number">8</span>,
+    <span class="property">"hasNext"</span>: <span class="keyword">true</span>,
+    <span class="property">"hasPrev"</span>: <span class="keyword">false</span>
+  },
+  <span class="property">"links"</span>: {
+    <span class="property">"first"</span>: <span class="string">"/users?page=1"</span>,
+    <span class="property">"prev"</span>: <span class="keyword">null</span>,
+    <span class="property">"next"</span>: <span class="string">"/users?page=2"</span>,
+    <span class="property">"last"</span>: <span class="string">"/users?page=8"</span>
+  }
+}
+
+<span class="comment">// Request dengan pagination</span>
+<span class="method method-get">GET</span> /users?page=2&amp;limit=20&amp;sort=-createdAt</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13: GraphQL Intro -->
+<div data-topic="api-graphql">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">GraphQL Introduction</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">GraphQL adalah query language untuk API yang memungkinkan client meminta exact data yang dibutuhkan.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">GraphQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Query - Fetch data</span>
+query {
+  user(id: <span class="string">"123"</span>) {
+    name
+    email
+    posts {
+      title
+      comments {
+        text
+      }
+    }
+  }
+}
+
+<span class="comment">// Mutation - Create/Update/Delete</span>
+mutation {
+  createUser(input: {
+    name: <span class="string">"John"</span>
+    email: <span class="string">"john@example.com"</span>
+  }) {
+    id
+    name
+  }
+}
+
+<span class="comment">// REST vs GraphQL</span>
+<span class="comment">// REST:   GET /users/123</span>
+<span class="comment">//         GET /users/123/posts</span>
+<span class="comment">//         GET /posts/456/comments</span>
+<span class="comment">// GraphQL: Satu request untuk semua data di atas!</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14: API Documentation -->
+<div data-topic="api-docs">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">API Documentation Tools</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Dokumentasi API sangat penting agar developer lain bisa menggunakan API dengan benar.</p>
+          <div class="info-box">
+            <strong>Tools untuk Testing & Documentation:</strong><br>
+            - <strong>Postman</strong> — GUI untuk testing API, generate documentation<br>
+            - <strong>Insomnia</strong> — Alternatif Postman, lebih ringan<br>
+            - <strong>Swagger/OpenAPI</strong> — Standard untuk API documentation<br>
+            - <strong>Thunder Client</strong> — VS Code extension<br>
+            - <strong>Hoppscotch</strong> — Open source, web-based
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15: Mini Project -->
+<div data-topic="api-mini-project">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Praktik: Konsumsi Public API</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Gunakan public API untuk praktik. Contoh: JSONPlaceholder (fake API untuk testing).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Contoh: Fetch posts dari JSONPlaceholder</span>
+<span class="keyword">async function</span> <span class="function">fetchPosts</span>() {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(
+      <span class="string">'https://jsonplaceholder.typicode.com/posts'</span>
+    );
+    
+    <span class="keyword">if</span> (!response.<span class="property">ok</span>) {
+      <span class="keyword">throw new</span> <span class="function">Error</span>(<span class="string">`HTTP error! ${response.status}`</span>);
+    }
+    
+    <span class="keyword">const</span> posts = <span class="keyword">await</span> response.<span class="function">json</span>();
+    
+    posts.<span class="function">forEach</span>(post => {
+      console.<span class="function">log</span>(<span class="string">`#${post.id}: ${post.title}`</span>);
+    });
+    
+  } <span class="keyword">catch</span> (error) {
+    console.<span class="function">error</span>(<span class="string">'Failed to fetch posts:'</span>, error);
+  }
+}
+
+<span class="function">fetchPosts</span>();
+
+<span class="comment">// Public APIs untuk praktik:</span>
+<span class="comment">// - https://jsonplaceholder.typicode.com</span>
+<span class="comment">// - https://rickandmortyapi.com</span>
+<span class="comment">// - https://pokeapi.co</span>
+<span class="comment">// - https://openweathermap.org/api</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") {
+      htmlEl.setAttribute("data-theme", "light");
+    }
+    themeToggle.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("open");
+    });
+
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const card = header.parentElement;
+        card.classList.toggle("open");
+      });
+    });
+
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    }
+
+    // LOADING SCREEN dengan delay minimal 1.2 detik
+    function hideLoading() {
+      const loading = document.getElementById("loading-screen");
+      if (loading) {
+        loading.classList.add("hidden");
+        setTimeout(() => loading.remove(), 500);
+      }
+    }
+
+    function initLoading() {
+      const minDisplayTime = 1200;
+      const startTime = Date.now();
+
+      const readyHandler = () => {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+        setTimeout(hideLoading, remainingTime);
+      };
+
+      if (document.readyState === "complete") {
+        readyHandler();
+      } else {
+        window.addEventListener("load", readyHandler);
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initLoading);
+    } else {
+      initLoading();
+    }
+  </script>
+</body>
+</html>

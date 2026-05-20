@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git & GitHub - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #f05033;
+      --accent-secondary: #ff7b54;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(240, 80, 51, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --card-hover: rgba(246, 248, 250, 1);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --glow: 0 0 40px rgba(240, 80, 51, 0.2);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: var(--font-display);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    #loading-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; color: var(--fg-muted); font-size: 0.9rem; }
+
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
+    .grid-pattern {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+    }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+    .orb-3 { width: 200px; height: 200px; background: var(--accent); top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.08; }
+        /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    /* Navigation Links Container */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Arrow */
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Divider */
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* Dropdown Section Label */
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Nav Actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+    .page-hero {
+      min-height: 50vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute; top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.1;
+      pointer-events: none;
+    }
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .page-hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+    .section-title { font-size: 1.8rem; font-weight: 600; margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
+    .section-title::before { content: ''; width: 4px; height: 28px; background: var(--accent); border-radius: 2px; }
+
+    .lesson-grid { display: grid; gap: 16px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; user-select: none; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #fff; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; color: var(--fg); }
+    .lesson-toggle { color: var(--fg-muted); transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 2500px; }
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+
+    .explanation { margin-bottom: 1rem; background: rgba(240, 80, 51, 0.05); padding: 12px 16px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.95rem; line-height: 1.6; }
+    .explanation strong { color: var(--accent); }
+
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; transition: var(--transition); }
+    .code-copy:hover { background: var(--accent); color: #fff; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+
+    .info-box { background: rgba(240, 80, 51, 0.08); border: 1px solid rgba(240, 80, 51, 0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul { margin: 8px 0 0 20px; }
+    .info-box li { margin-bottom: 4px; }
+
+    .tag { color: #ff7b54; }
+    .attr { color: #79c0ff; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .value { color: #a5d6ff; }
+    .number { color: #f0883e; }
+    .keyword { color: #ff7b54; }
+    .function { color: #d2a8ff; }
+    .cmd { color: #7ee787; }
+    .flag { color: #ffa657; }
+
+    .diagram { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; overflow-x: auto; }
+    .diagram pre { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.4; color: var(--fg); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+      .page-hero { padding: 100px 16px 40px; }
+      .lesson-header { padding: 16px; }
+      .lesson-content { padding: 0 16px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Memuat materi Git & GitHub...</div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <!-- Dropdown: Frontend -->
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: Backend -->
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: DevOps -->
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">20 Lessons + Penjelasan</div>
+      <h1>Belajar <span class="highlight">Git & GitHub</span></h1>
+      <p>Kuasai version control: dari command dasar hingga collaboration workflow. Setiap materi dilengkapi penjelasan mendalam dan visualisasi.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1: Pengenalan Git -->
+<div data-topic="git-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info">
+          <div class="lesson-number">1</div>
+          <h3 class="lesson-title">Apa itu Version Control & Git?</h3>
+        </div>
+        <div class="lesson-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Version Control System (VCS) adalah sistem yang mencatat setiap perubahan pada file sepanjang waktu. Git adalah VCS terdistribusi yang paling populer, diciptakan oleh Linus Torvalds pada 2005 untuk pengembangan kernel Linux.</p>
+          <div class="explanation">
+            <strong>Kenapa Git Penting?</strong><br>
+            1. <strong>History</strong> — Bisa kembali ke versi manapun kapan saja<br>
+            2. <strong>Collaboration</strong> — Banyak orang bisa kerja di project yang sama tanpa saling menimpa<br>
+            3. <strong>Branching</strong> — Bisa eksperimen fitur baru tanpa rusak kode utama<br>
+            4. <strong>Backup</strong> — Setiap clone adalah backup penuh dari repository<br>
+            5. <strong>Accountability</strong> — Tahu siapa mengubah apa dan kapan
+          </div>
+          <div class="diagram">
+            <pre>
+TANPA GIT                          DENGAN GIT
+─────────                          ──────────
+file_v1.txt                        commit abc123 (HEAD)
+file_v2.txt                    →   commit def456
+file_final.txt                     commit ghi789
+file_final_v2.txt                  ...history lengkap
+file_final_fix.txt                 
+            </pre>
+          </div>
+          <div class="info-box">
+            <strong>Git vs GitHub:</strong><br>
+            <strong>Git</strong> = Software version control yang diinstall di komputer (local)<br>
+            <strong>GitHub</strong> = Platform hosting repository Git di cloud (remote). Alternatif: GitLab, Bitbucket, Gitea.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2: Install & Setup -->
+<div data-topic="git-install">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">Instalasi & Konfigurasi Awal</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Setelah menginstall Git, langkah pertama adalah mengkonfigurasi identitas. Ini penting karena setiap commit akan mencatat siapa yang membuat perubahan.</p>
+          <div class="explanation">
+            <strong>Penjelasan:</strong> Git menyimpan konfigurasi di tiga level:<br>
+            1. <code>--system</code> → semua user di komputer ini<br>
+            2. <code>--global</code> → user saat ini (paling sering dipakai)<br>
+            3. <code>--local</code> → repository tertentu saja<br>
+            Gunakan <code>--global</code> untuk setup yang berlaku di semua project.
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Cek versi Git</span>
+<span class="cmd">git</span> --version
+
+<span class="comment"># Set nama dan email (WAJIB)</span>
+<span class="cmd">git</span> config <span class="flag">--global</span> user.name <span class="string">"Nama Kamu"</span>
+<span class="cmd">git</span> config <span class="flag">--global</span> user.email <span class="string">"email@example.com"</span>
+
+<span class="comment"># Lihat semua konfigurasi</span>
+<span class="cmd">git</span> config <span class="flag">--list</span>
+
+<span class="comment"># Set editor default (opsional)</span>
+<span class="cmd">git</span> config <span class="flag">--global</span> core.editor <span class="string">"code --wait"</span>
+
+<span class="comment"># Set branch default ke main</span>
+<span class="cmd">git</span> config <span class="flag">--global</span> init.defaultBranch main</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Tip:</strong> Pastikan email yang didaftarkan sama dengan email GitHub/GitLab agar commit terhubung dengan akun kamu.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3: Init Repository -->
+<div data-topic="git-init">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">Membuat Repository: git init</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Repository (repo) adalah folder project yang dilacak oleh Git. Perintah <code>git init</code> membuat folder menjadi repository Git.</p>
+          <div class="explanation">
+            <strong>Apa yang terjadi saat git init?</strong><br>
+            Git membuat folder tersembunyi <code>.git</code> yang berisi semua data version control. Folder ini jangan dihapus atau di-edit manual! Tanpa <code>.git</code>, folder biasa tidak akan dilacak.
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Buat folder project baru</span>
+<span class="cmd">mkdir</span> my-project
+<span class="cmd">cd</span> my-project
+
+<span class="comment"># Inisialisasi repository</span>
+<span class="cmd">git</span> init
+<span class="comment"># Output: Initialized empty Git repository in /path/my-project/.git/</span>
+
+<span class="comment"># Cek status</span>
+<span class="cmd">git</span> status
+<span class="comment"># Output: On branch main, No commits yet, nothing to commit</span></code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+SEBELUM git init          SESUDAH git init
+────────────────          ────────────────
+my-project/               my-project/
+├── index.html            ├── .git/          ← folder git (tersembunyi)
+├── style.css             ├── index.html
+└── script.js             ├── style.css
+                           └── script.js
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4: Git Status -->
+<div data-topic="git-status">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Memantau Perubahan: git status</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>git status</code> adalah perintah paling sering digunakan untuk melihat kondisi repository: file apa yang berubah, apa yang sudah di-stage, dan posisi branch.</p>
+          <div class="explanation">
+            <strong>3 State File di Git:</strong><br>
+            1. <strong>Untracked</strong> — File baru, belum pernah dilacak Git (merah)<br>
+            2. <strong>Modified</strong> — File sudah dilacak tapi ada perubahan (merah)<br>
+            3. <strong>Staged</strong> — File siap di-commit (hijau)<br>
+            4. <strong>Unmodified</strong> — File sama dengan di repo (tidak muncul di status)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="cmd">git</span> status
+
+<span class="comment"># Output contoh:</span>
+On branch main
+No commits yet
+
+Untracked files:
+  <span class="string" style="color:#f85149;">index.html</span>    <span class="comment"># merah = belum di-track</span>
+  <span class="string" style="color:#f85149;">style.css</span>
+
+nothing added to commit but untracked files present</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Tip:</strong> Gunakan <code>git status -s</code> untuk output lebih singkat (short format).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5: Git Add -->
+<div data-topic="git-add">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Staging File: git add</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>git add</code> memindahkan file dari "working directory" ke "staging area". Hanya file yang di-stage yang akan di-commit. Ini memungkinkan kamu memilih perubahan mana yang ingin disimpan.</p>
+          <div class="explanation">
+            <strong>Konsep 3 Area Git:</strong><br>
+            <strong>Working Directory</strong> → tempat kamu edit file<br>
+            <strong>Staging Area (Index)</strong> → antrian file yang akan di-commit<br>
+            <strong>Repository (.git)</strong> → database permanen semua snapshot<br><br>
+            <code>git add</code> = Working → Staging<br>
+            <code>git commit</code> = Staging → Repository
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Tambah satu file</span>
+<span class="cmd">git</span> add index.html
+
+<span class="comment"># Tambah beberapa file</span>
+<span class="cmd">git</span> add index.html style.css script.js
+
+<span class="comment"># Tambah semua file (yang sudah berubah)</span>
+<span class="cmd">git</span> add .
+
+<span class="comment"># Tambah semua file di seluruh folder</span>
+<span class="cmd">git</span> add <span class="flag">-A</span>
+
+<span class="comment"># Tambah dengan interaktif (pilih bagian kode)</span>
+<span class="cmd">git</span> add <span class="flag">-p</span> filename.js
+
+<span class="comment"># Lihat apa yang sudah di-stage</span>
+<span class="cmd">git</span> status
+<span class="cmd">git</span> diff <span class="flag">--staged</span></code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+         git add                  git commit
+Working ──────────► Staging ──────────────► Repository
+Directory           Area                    (.git)
+
+index.html ──► [staged: index.html] ──► [commit: "add index"]
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6: Git Commit -->
+<div data-topic="git-commit">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">Menyimpan Snapshot: git commit</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Commit adalah "checkpoint" atau snapshot dari project pada waktu tertentu. Setiap commit punya ID unik (hash SHA-1), penulis, waktu, dan pesan yang menjelaskan perubahan.</p>
+          <div class="explanation">
+            <strong>Aturan Pesan Commit yang Baik:</strong><br>
+            1. Gunakan bahasa Inggris atau Indonesia, tapi konsisten<br>
+            2. Awali dengan kata kerja: "Add", "Fix", "Update", "Remove", "Refactor"<br>
+            3. Baris pertama max 50 karakter, jelas dan spesifik<br>
+            4. Jangan tulis "update", "fix bug" — terlalu umum!<br>
+            5. Contoh baik: "Fix login validation on mobile devices"
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Commit dengan pesan</span>
+<span class="cmd">git</span> commit <span class="flag">-m</span> <span class="string">"Add homepage layout"</span>
+
+<span class="comment"># Commit dengan editor (untuk pesan panjang)</span>
+<span class="cmd">git</span> commit
+
+<span class="comment"># Commit dengan pesan multi-baris</span>
+<span class="cmd">git</span> commit <span class="flag">-m</span> <span class="string">"Add user authentication"</span> <span class="flag">-m</span> <span class="string">"Includes login, logout, and session management"</span>
+
+<span class="comment"># Skip staging (hanya file yang sudah di-track)</span>
+<span class="cmd">git</span> commit <span class="flag">-a</span> <span class="flag">-m</span> <span class="string">"Update styles"</span>
+
+<span class="comment"># Ubah commit terakhir (SEBELUM push!)</span>
+<span class="cmd">git</span> commit <span class="flag">--amend</span> <span class="flag">-m</span> <span class="string">"New message"</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Peringatan:</strong> Jangan ubah commit yang sudah di-push ke remote! Akan menyebabkan konflik dengan tim.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7: Git Log -->
+<div data-topic="git-log">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Melihat History: git log</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>git log</code> menampilkan riwayat semua commit. Setiap commit ditampilkan dengan hash, author, date, dan message.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Log standar</span>
+<span class="cmd">git</span> log
+
+<span class="comment"># Log ringkas (satu baris per commit)</span>
+<span class="cmd">git</span> log <span class="flag">--oneline</span>
+
+<span class="comment"># Log dengan grafik branch</span>
+<span class="cmd">git</span> log <span class="flag">--oneline</span> <span class="flag">--graph</span> <span class="flag">--all</span>
+
+<span class="comment"># Log dengan perubahan file</span>
+<span class="cmd">git</span> log <span class="flag">--stat</span>
+
+<span class="comment"># Log dengan diff lengkap</span>
+<span class="cmd">git</span> log <span class="flag">-p</span>
+
+<span class="comment"># Log 5 commit terakhir</span>
+<span class="cmd">git</span> log <span class="flag">-5</span>
+
+<span class="comment"># Log berdasarkan author</span>
+<span class="cmd">git</span> log <span class="flag">--author</span>=<span class="string">"John"</span>
+
+<span class="comment"># Log berdasarkan tanggal</span>
+<span class="cmd">git</span> log <span class="flag">--since</span>=<span class="string">"2024-01-01"</span> <span class="flag">--until</span>=<span class="string">"2024-12-31"</span>
+
+<span class="comment"># Log dengan format custom</span>
+<span class="cmd">git</span> log <span class="flag">--pretty=format</span>:<span class="string">"%h - %an : %s"</span></code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+git log --oneline --graph --all
+
+* abc1234 (HEAD -> main) Add footer component
+* def5678 Update navbar styles
+* ghi9012 Add responsive layout
+|\
+| * jkl3456 (feature/auth) Add login form
+| * mno7890 Create auth module
+|/
+* pqr1234 Initial commit
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8: Git Diff -->
+<div data-topic="git-diff">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Melihat Perbedaan: git diff</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>git diff</code> menampilkan perbedaan antara versi file. Berguna untuk review perubahan sebelum commit atau membandingkan branch.</p>
+          <div class="explanation">
+            <strong>Simbol dalam Diff:</strong><br>
+            <code>-</code> (merah) = baris dihapus<br>
+            <code>+</code> (hijau) = baris ditambahkan<br>
+            <code>@@</code> = lokasi perubahan (hunk header)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Diff: working vs staging</span>
+<span class="cmd">git</span> diff
+
+<span class="comment"># Diff: staging vs repo (yang akan di-commit)</span>
+<span class="cmd">git</span> diff <span class="flag">--staged</span>
+
+<span class="comment"># Diff file tertentu</span>
+<span class="cmd">git</span> diff index.html
+
+<span class="comment"># Diff antara 2 commit</span>
+<span class="cmd">git</span> diff abc123 def456
+
+<span class="comment"># Diff antar branch</span>
+<span class="cmd">git</span> diff main..feature/auth
+
+<span class="comment"># Diff hanya nama file yang berubah</span>
+<span class="cmd">git</span> diff <span class="flag">--name-only</span>
+
+<span class="comment"># Diff dengan statistik</span>
+<span class="cmd">git</span> diff <span class="flag">--stat</span></code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Contoh Output Diff</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">diff --git a/index.html b/index.html</span>
+<span class="attr">index abc1234..def5678 100644</span>
+<span class="comment">--- a/index.html</span>
+<span class="comment">+++ b/index.html</span>
+<span class="keyword">@@ -5,7 +5,9 @@</span>
+ &lt;body&gt;
+   &lt;h1&gt;Hello World&lt;/h1&gt;
+<span class="string" style="color:#f85149;">-  &lt;p&gt;Welcome&lt;/p&gt;</span>
+<span class="string" style="color:#3fb950;">+  &lt;p&gt;Welcome to my website&lt;/p&gt;</span>
+<span class="string" style="color:#3fb950;">+  &lt;p&gt;This is a new paragraph&lt;/p&gt;</span>
+<span class="string" style="color:#3fb950;">+  &lt;button&gt;Click me&lt;/button&gt;</span>
+ &lt;/body&gt;</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9: .gitignore -->
+<div data-topic="git-gitignore">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Mengabaikan File: .gitignore</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">File <code>.gitignore</code> memberitahu Git file/folder mana yang harus diabaikan. File yang di-ignore tidak akan muncul di <code>git status</code> dan tidak akan di-commit.</p>
+          <div class="explanation">
+            <strong>File yang Harus Di-ignore:</strong><br>
+            1. <strong>node_modules/</strong> — dependency Node.js (besar, bisa di-install ulang)<br>
+            2. <strong>.env</strong> — environment variables (berisi secret!)<br>
+            3. <strong>dist/, build/</strong> — hasil build (bisa di-generate ulang)<br>
+            4. <strong>.DS_Store</strong> — file sistem macOS<br>
+            5. <strong>*.log</strong> — file log<br>
+            6. <strong>IDE settings</strong> — .vscode/, .idea/
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">.gitignore</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Dependencies</span>
+node_modules/
+vendor/
+
+<span class="comment"># Build output</span>
+dist/
+build/
+.next/
+
+<span class="comment"># Environment files (PENTING!)</span>
+.env
+.env.local
+.env.*.local
+
+<span class="comment"># Logs</span>
+*.log
+npm-debug.log*
+
+<span class="comment"># OS files</span>
+.DS_Store
+Thumbs.db
+
+<span class="comment"># IDE</span>
+.vscode/
+.idea/
+*.swp
+
+<span class="comment"># Compiled files</span>
+*.class
+*.exe
+*.o
+
+<span class="comment"># Archive</span>
+*.zip
+*.tar.gz</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Tip:</strong> Kunjungi <a href="https://gitignore.io" style="color:var(--accent)">gitignore.io</a> untuk generate .gitignore sesuai tech stack project kamu.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 10: Branching -->
+<div data-topic="git-branch">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Branch: Bekerja Paralel</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Branch adalah cabang independen dari development. Main branch (biasanya 'main' atau 'master') adalah kode produksi. Branch lain digunakan untuk pengembangan fitur tanpa mengganggu kode utama.</p>
+          <div class="explanation">
+            <strong>Mengapa Branching?</strong><br>
+            1. Fitur baru tidak mengganggu main branch<br>
+            2. Bisa development paralel dengan tim<br>
+            3. Eksperimen tanpa takut rusak<br>
+            4. Code review sebelum merge<br>
+            5. Bisa switch antar fitur kapan saja
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Lihat semua branch</span>
+<span class="cmd">git</span> branch
+
+<span class="comment"># Buat branch baru</span>
+<span class="cmd">git</span> branch feature/login
+
+<span class="comment"># Pindah ke branch</span>
+<span class="cmd">git</span> checkout feature/login
+
+<span class="comment"># Buat + pindah (shortcut)</span>
+<span class="cmd">git</span> checkout <span class="flag">-b</span> feature/login
+
+<span class="comment"># Alternatif: switch (Git 2.23+)</span>
+<span class="cmd">git</span> switch feature/login
+<span class="cmd">git</span> switch <span class="flag">-c</span> feature/login   <span class="comment"># create + switch</span>
+
+<span class="comment"># Hapus branch</span>
+<span class="cmd">git</span> branch <span class="flag">-d</span> feature/login   <span class="comment"># safe delete</span>
+<span class="cmd">git</span> branch <span class="flag">-D</span> feature/login   <span class="comment"># force delete</span>
+
+<span class="comment"># Rename branch</span>
+<span class="cmd">git</span> branch <span class="flag">-m</span> old-name new-name
+
+<span class="comment"># Lihat branch + commit terakhir</span>
+<span class="cmd">git</span> branch <span class="flag">-v</span></code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+       main        ●────●────●────● (production)
+                    \         /
+feature/login        ●──●──●──┘    (fitur login)
+                         \
+feature/cart             ●──●      (fitur keranjang)
+
+HEAD → menunjukkan branch aktif
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11: Merge -->
+<div data-topic="git-merge">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Merge: Menggabungkan Branch</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>git merge</code> menggabungkan perubahan dari satu branch ke branch lain. Biasanya merge dari feature branch ke main branch setelah fitur selesai.</p>
+          <div class="explanation">
+            <strong>Strategi Merge:</strong><br>
+            1. <strong>Fast-forward</strong> — Tidak ada commit baru di main, Git hanya memindahkan pointer<br>
+            2. <strong>Three-way merge</strong> — Ada commit baru di kedua branch, Git membuat commit merge baru
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Pastikan di branch tujuan (main)</span>
+<span class="cmd">git</span> checkout main
+
+<span class="comment"># Merge feature branch ke main</span>
+<span class="cmd">git</span> merge feature/login
+
+<span class="comment"># Merge dengan pesan custom</span>
+<span class="cmd">git</span> merge feature/login <span class="flag">-m</span> <span class="string">"Merge login feature"</span>
+
+<span class="comment"># Merge dengan no-ff (selalu buat merge commit)</span>
+<span class="cmd">git</span> merge <span class="flag">--no-ff</span> feature/login
+
+<span class="comment"># Abort merge jika ada konflik</span>
+<span class="cmd">git</span> merge <span class="flag">--abort</span>
+
+<span class="comment"># Setelah merge, hapus branch yang sudah tidak dipakai</span>
+<span class="cmd">git</span> branch <span class="flag">-d</span> feature/login</code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+BEFORE MERGE:
+main        ●──●
+                 \
+feature/login     ●──●──●
+
+AFTER MERGE (fast-forward):
+main        ●──●──●──●──●
+
+AFTER MERGE (--no-ff):
+main        ●──●───────●  (merge commit)
+                 \   /
+feature/login     ●──●
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12: Merge Conflicts -->
+<div data-topic="git-conflicts">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">Menyelesaikan Merge Conflicts</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Conflict terjadi ketika dua branch mengubah baris yang sama di file yang sama. Git tidak bisa memutuskan mana yang benar, jadi meminta kamu untuk menyelesaikannya manual.</p>
+          <div class="explanation">
+            <strong>Langkah Selesaikan Conflict:</strong><br>
+            1. Git berhenti di tengah merge<br>
+            2. Buka file yang konflik<br>
+            3. Cari bagian dengan <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code><br>
+            4. Edit sesuai keinginan (pilih salah satu atau gabungkan)<br>
+            5. Hapus marker conflict<br>
+            6. <code>git add</code> file yang sudah diedit<br>
+            7. <code>git commit</code> (atau <code>git merge --continue</code>)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">File dengan Conflict</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+<span class="string" style="color:#79c0ff">const theme = 'dark';</span>
+<span class="keyword">=======</span>
+<span class="string" style="color:#ffa657">const theme = 'light';</span>
+<span class="keyword">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/theme</span>
+
+<span class="comment">&lt;!-- PENJELASAN: --&gt;</span>
+<span class="comment">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD    = versi di branch aktif (main)</span>
+<span class="comment">=======           = pemisah</span>
+<span class="comment">&gt;&gt;&gt;&gt;&gt;&gt;&gt; branch   = versi dari branch yang di-merge</span>
+
+<span class="comment">&lt;!-- SOLUSI: edit menjadi salah satu atau gabungan --&gt;</span>
+<span class="keyword">const</span> theme = <span class="string">'dark'</span>;  <span class="comment">&lt;-- pilih salah satu</span></code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal - Setelah Edit</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Setelah mengedit file, add dan commit</span>
+<span class="cmd">git</span> add script.js
+<span class="cmd">git</span> commit <span class="flag">-m</span> <span class="string">"Resolve theme conflict"</span>
+
+<span class="comment"># Atau gunakan merge --continue</span>
+<span class="cmd">git</span> merge <span class="flag">--continue</span>
+
+<span class="comment"># Jika ingin batal merge</span>
+<span class="cmd">git</span> merge <span class="flag">--abort</span>
+
+<span class="comment"># Lihat file yang konflik</span>
+<span class="cmd">git</span> status</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Tip:</strong> Gunakan VS Code atau editor modern yang memiliki fitur visual merge conflict resolution. Klik "Accept Current", "Accept Incoming", atau "Accept Both".
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13: Remote Repository -->
+<div data-topic="git-remote">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Remote Repository: GitHub</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Remote adalah versi repository yang disimpan di server (seperti GitHub). Memungkinkan kolaborasi, backup, dan akses dari mana saja.</p>
+          <div class="explanation">
+            <strong>Konsep Local vs Remote:</strong><br>
+            <strong>Local</strong> → repository di komputermu<br>
+            <strong>Remote</strong> → repository di server (GitHub, GitLab, dll)<br><br>
+            Sinkronisasi: <code>push</code> (local → remote), <code>pull</code> (remote → local)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Lihat remote yang terdaftar</span>
+<span class="cmd">git</span> remote <span class="flag">-v</span>
+
+<span class="comment"># Tambah remote (biasanya bernama 'origin')</span>
+<span class="cmd">git</span> remote add origin https://github.com/user/repo.git
+
+<span class="comment"># Ubah URL remote</span>
+<span class="cmd">git</span> remote set-url origin https://github.com/user/new-repo.git
+
+<span class="comment"># Hapus remote</span>
+<span class="cmd">git</span> remote remove origin
+
+<span class="comment"># Lihat detail remote</span>
+<span class="cmd">git</span> remote show origin
+
+<span class="comment"># Clone repository dari GitHub</span>
+<span class="cmd">git</span> clone https://github.com/user/repo.git
+<span class="cmd">git</span> clone git@github.com:user/repo.git  <span class="comment"># SSH</span></code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+     git push          git pull
+        │                 ↑
+        ↓                 │
+┌─────────────┐    ┌─────────────┐
+│   LOCAL     │ ←→ │   REMOTE    │
+│  (Komputer) │    │  (GitHub)   │
+└─────────────┘    └─────────────┘
+        ↑                 │
+        │    git clone    │
+        └─────────────────┘
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14: Push & Pull -->
+<div data-topic="git-push-pull">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Push & Pull: Sinkronisasi</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>git push</code> mengirim commit local ke remote. <code>git pull</code> mengambil commit dari remote ke local. Ini adalah cara utama berbagi kode dengan tim.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Push ke remote (pertama kali, set upstream)</span>
+<span class="cmd">git</span> push <span class="flag">-u</span> origin main
+
+<span class="comment"># Push selanjutnya (sudah ada upstream)</span>
+<span class="cmd">git</span> push
+
+<span class="comment"># Push semua branch</span>
+<span class="cmd">git</span> push <span class="flag">--all</span> origin
+
+<span class="comment"># Force push (HATI-HATI!)</span>
+<span class="cmd">git</span> push <span class="flag">--force</span>
+
+<span class="comment"># Pull dari remote</span>
+<span class="cmd">git</span> pull origin main
+
+<span class="comment"># Pull dengan rebase (lebih bersih)</span>
+<span class="cmd">git</span> pull <span class="flag">--rebase</span> origin main
+
+<span class="comment"># Fetch tanpa merge (cek dulu)</span>
+<span class="cmd">git</span> fetch origin
+<span class="cmd">git</span> log origin/main  <span class="comment"># lihat apa yang akan di-pull</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>fetch vs pull:</strong><br>
+            <code>git fetch</code> hanya mengambil data tanpa merge — aman untuk cek perubahan<br>
+            <code>git pull</code> = fetch + merge — langsung menggabungkan perubahan
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15: Pull Request -->
+<div data-topic="git-pr">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Pull Request & Code Review</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Pull Request (PR) adalah mekanisme di GitHub untuk mengusulkan perubahan. Tim bisa review kode, diskusi, dan approve sebelum di-merge ke branch utama.</p>
+          <div class="explanation">
+            <strong>Workflow Pull Request:</strong><br>
+            1. Buat branch fitur dari main<br>
+            2. Commit perubahan di branch fitur<br>
+            3. Push branch ke GitHub<br>
+            4. Buka Pull Request di GitHub<br>
+            5. Reviewer cek kode, kasih feedback<br>
+            6. Diskusi dan revisi jika perlu<br>
+            7. Approve dan merge ke main<br>
+            8. Hapus branch fitur
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Alur lengkap Pull Request</span>
+
+<span class="comment"># 1. Buat branch dari main yang terbaru</span>
+<span class="cmd">git</span> checkout main
+<span class="cmd">git</span> pull origin main
+<span class="cmd">git</span> checkout <span class="flag">-b</span> feature/user-profile
+
+<span class="comment"># 2. Kerjakan fitur</span>
+<span class="cmd">git</span> add .
+<span class="cmd">git</span> commit <span class="flag">-m</span> <span class="string">"Add user profile page"</span>
+
+<span class="comment"># 3. Push branch ke GitHub</span>
+<span class="cmd">git</span> push <span class="flag">-u</span> origin feature/user-profile
+
+<span class="comment"># 4. Buka GitHub, klik "Compare & pull request"</span>
+<span class="comment"># 5. Isi judul dan deskripsi PR</span>
+<span class="comment"># 6. Tambahkan reviewer</span>
+<span class="comment"># 7. Setelah approved, klik "Merge pull request"</span>
+
+<span class="comment"># 8. Hapus branch lokal setelah merge</span>
+<span class="cmd">git</span> checkout main
+<span class="cmd">git</span> pull origin main
+<span class="cmd">git</span> branch <span class="flag">-d</span> feature/user-profile</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 16: Stash -->
+<div data-topic="git-stash">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">Stash: Menyimpan Perubahan Sementara</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text"><code>git stash</code> menyimpan perubahan yang belum di-commit secara sementara. Berguna saat harus switch branch tapi belum siap commit.</p>
+          <div class="explanation">
+            <strong>Kapan Pakai Stash?</strong><br>
+            1. Ingin switch branch tapi ada perubahan belum selesai<br>
+            2. Ingin pull dari remote tapi ada conflict dengan local<br>
+            3. Ingin coba sesuatu tanpa commit dulu<br>
+            4. Ingin simpan "draft" perubahan
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Simpan perubahan ke stash</span>
+<span class="cmd">git</span> stash
+
+<span class="comment"># Stash dengan pesan</span>
+<span class="cmd">git</span> stash save <span class="string">"Work in progress on login"</span>
+
+<span class="comment"># Lihat semua stash</span>
+<span class="cmd">git</span> stash list
+
+<span class="comment"># Lihat isi stash tertentu</span>
+<span class="cmd">git</span> stash show <span class="flag">-p</span> stash@{0}
+
+<span class="comment"># Ambil stash terakhir (dan hapus dari list)</span>
+<span class="cmd">git</span> stash pop
+
+<span class="comment"># Ambil stash tapi tetap simpan</span>
+<span class="cmd">git</span> stash apply
+
+<span class="comment"># Ambil stash tertentu</span>
+<span class="cmd">git</span> stash apply stash@{2}
+
+<span class="comment"># Hapus stash</span>
+<span class="cmd">git</span> stash drop stash@{0}
+
+<span class="comment"># Hapus semua stash</span>
+<span class="cmd">git</span> stash clear</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 17: Reset & Revert -->
+<div data-topic="git-reset-revert">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Reset & Revert: Membatalkan Perubahan</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Ada beberapa cara membatalkan perubahan di Git, tergantung situasi dan apakah sudah di-push atau belum.</p>
+          <div class="explanation">
+            <strong>Kapan Pakai Apa?</strong><br>
+            <strong>git checkout --</strong> → Batalkan perubahan di working dir (belum staged)<br>
+            <strong>git reset HEAD</strong> → Unstage file (kembali ke modified)<br>
+            <strong>git reset --soft</strong> → Undo commit, tapi simpan changes di staging<br>
+            <strong>git reset --mixed</strong> → Undo commit, simpan changes di working dir<br>
+            <strong>git reset --hard</strong> → Undo commit, HAPUS SEMUA changes (bahaya!)<br>
+            <strong>git revert</strong> → Buat commit baru yang membatalkan commit lama (aman untuk yang sudah push)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Batalkan perubahan file (belum staged)</span>
+<span class="cmd">git</span> checkout <span class="flag">--</span> file.txt
+<span class="cmd">git</span> restore file.txt  <span class="comment"># Git 2.23+</span>
+
+<span class="comment"># Unstage file</span>
+<span class="cmd">git</span> reset HEAD file.txt
+<span class="cmd">git</span> restore <span class="flag">--staged</span> file.txt  <span class="comment"># Git 2.23+</span>
+
+<span class="comment"># Undo commit terakhir (simpan changes)</span>
+<span class="cmd">git</span> reset <span class="flag">--soft</span> HEAD~1
+
+<span class="comment"># Undo commit terakhir (changes di working dir)</span>
+<span class="cmd">git</span> reset <span class="flag">--mixed</span> HEAD~1
+
+<span class="comment"># Undo commit terakhir (HAPUS SEMUA)</span>
+<span class="cmd">git</span> reset <span class="flag">--hard</span> HEAD~1
+
+<span class="comment"># Revert commit (untuk yang sudah di-push)</span>
+<span class="cmd">git</span> revert abc123
+
+<span class="comment"># Revert beberapa commit</span>
+<span class="cmd">git</span> revert HEAD~3..HEAD</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Peringatan:</strong> <code>git reset --hard</code> akan menghapus semua perubahan yang belum di-commit. Tidak bisa dikembalikan! Pastikan paham sebelum menjalankan.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 18: SSH Key -->
+<div data-topic="git-ssh">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">SSH Key untuk GitHub</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">SSH Key memungkinkan autentikasi tanpa memasukkan username/password setiap push. Lebih aman dan praktis.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># 1. Generate SSH key</span>
+<span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="string">"email@example.com"</span>
+
+<span class="comment"># 2. Start SSH agent</span>
+<span class="cmd">eval</span> <span class="string">"$(ssh-agent -s)"</span>
+
+<span class="comment"># 3. Add key ke agent</span>
+<span class="cmd">ssh-add</span> ~/.ssh/id_ed25519
+
+<span class="comment"># 4. Copy public key</span>
+<span class="cmd">cat</span> ~/.ssh/id_ed25519.pub
+<span class="comment"># atau</span>
+<span class="cmd">clip</span> &lt; ~/.ssh/id_ed25519.pub  <span class="comment"># Windows</span>
+<span class="cmd">pbcopy</span> &lt; ~/.ssh/id_ed25519.pub  <span class="comment"># macOS</span>
+
+<span class="comment"># 5. Tambah ke GitHub: Settings → SSH Keys → New SSH key</span>
+
+<span class="comment"># 6. Test koneksi</span>
+<span class="cmd">ssh</span> <span class="flag">-T</span> git@github.com
+
+<span class="comment"># 7. Ubah remote URL ke SSH</span>
+<span class="cmd">git</span> remote set-url origin git@github.com:user/repo.git</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 19: Git Workflow -->
+<div data-topic="git-workflow">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">19</div><h3 class="lesson-title">Git Workflow: Best Practices</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Workflow adalah aturan bagaimana tim menggunakan Git. Beberapa workflow populer:</p>
+          <div class="explanation">
+            <strong>1. Feature Branch Workflow</strong> (paling umum)<br>
+            - Setiap fitur di branch terpisah<br>
+            - Pull request untuk merge<br>
+            - Code review wajib<br><br>
+            <strong>2. Gitflow</strong> (release cycle formal)<br>
+            - main: production code<br>
+            - develop: integration branch<br>
+            - feature/*: fitur baru<br>
+            - release/*: persiapan release<br>
+            - hotfix/*: bugfix urgent<br><br>
+            <strong>3. Trunk-Based Development</strong> (CI/CD)<br>
+            - Semua commit ke main<br>
+            - Feature flags untuk fitur belum selesai<br>
+            - Butuh CI/CD yang kuat
+          </div>
+          <div class="diagram">
+            <pre>
+GITFLOW:
+
+main        ●────●────●────● (production)
+            ↑    ↑    ↑
+release/*   ─────●────┘
+            ↑
+develop  ●──●──●──●──●──●──●
+         ↑       ↑
+feature/ ●──●──● └──●──●──● (fitur A & B)
+            </pre>
+          </div>
+          <div class="info-box">
+            <strong>Best Practices:</strong><br>
+            - Commit sering, commit kecil<br>
+            - Pesan commit jelas dan deskriptif<br>
+            - Pull sebelum push<br>
+            - Review code sebelum merge<br>
+            - Hapus branch yang sudah di-merge<br>
+            - Jangan commit file sensitif (.env, credentials)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 20: Mini Project -->
+<div data-topic="git-mini-project">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">20</div><h3 class="lesson-title">Praktik: Setup Project dengan Git</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Praktikkan semua yang sudah dipelajari dengan membuat repository lengkap dari awal hingga push ke GitHub.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal - Full Workflow</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># 1. Buat project</span>
+<span class="cmd">mkdir</span> my-portfolio
+<span class="cmd">cd</span> my-portfolio
+
+<span class="comment"># 2. Init Git</span>
+<span class="cmd">git</span> init
+
+<span class="comment"># 3. Buat file</span>
+<span class="cmd">touch</span> index.html style.css README.md .gitignore
+
+<span class="comment"># 4. Isi .gitignore</span>
+<span class="cmd">echo</span> <span class="string">".DS_Store\n*.log"</span> &gt; .gitignore
+
+<span class="comment"># 5. Stage dan commit</span>
+<span class="cmd">git</span> add .
+<span class="cmd">git</span> commit <span class="flag">-m</span> <span class="string">"Initial commit"</span>
+
+<span class="comment"># 6. Buat di GitHub, lalu hubungkan</span>
+<span class="cmd">git</span> remote add origin git@github.com:user/my-portfolio.git
+<span class="cmd">git</span> push <span class="flag">-u</span> origin main
+
+<span class="comment"># 7. Buat branch untuk fitur</span>
+<span class="cmd">git</span> checkout <span class="flag">-b</span> feature/header
+
+<span class="comment"># 8. Edit, commit, push branch</span>
+<span class="cmd">git</span> add index.html
+<span class="cmd">git</span> commit <span class="flag">-m</span> <span class="string">"Add header section"</span>
+<span class="cmd">git</span> push <span class="flag">-u</span> origin feature/header
+
+<span class="comment"># 9. Buka Pull Request di GitHub</span>
+<span class="comment"># 10. Merge, lalu update lokal</span>
+<span class="cmd">git</span> checkout main
+<span class="cmd">git</span> pull origin main</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") {
+      htmlEl.setAttribute("data-theme", "light");
+    }
+    themeToggle?.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle?.addEventListener("click", () => {
+      mobileMenu.classList.toggle("open");
+    });
+
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const card = header.parentElement;
+        card.classList.toggle("open");
+      });
+    });
+
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || block.querySelector("pre")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    }
+
+    window.addEventListener("load", () => {
+      const loading = document.getElementById("loading-screen");
+      if (loading) {
+        setTimeout(() => {
+          loading.classList.add("hidden");
+          setTimeout(() => loading.remove(), 500);
+        }, 800);
+      }
+    });
+  </script>
+</body>
+</html>

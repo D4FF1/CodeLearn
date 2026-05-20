@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeLearn - Platform Belajar Web Development</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #00d9a0;
+      --accent-secondary: #ff7b54;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(0, 217, 160, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --card-hover: rgba(246, 248, 250, 1);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: var(--font-display);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    /* ===== LOADING SCREEN ===== */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loading-content {
+      text-align: center;
+      max-width: 500px;
+      padding: 0 24px;
+    }
+
+    .loading-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .loading-logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #000;
+      animation: logoPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 217, 160, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 217, 160, 0.3); }
+    }
+
+    .loading-logo-text {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .loading-terminal {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 32px;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      min-height: 140px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terminal-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: dotBlink 1.5s ease-in-out infinite;
+    }
+
+    .terminal-dot:nth-child(1) { background: #ff5f57; animation-delay: 0s; }
+    .terminal-dot:nth-child(2) { background: #febc2e; animation-delay: 0.2s; }
+    .terminal-dot:nth-child(3) { background: #28c840; animation-delay: 0.4s; }
+
+    @keyframes dotBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .terminal-line {
+      color: var(--fg-muted);
+      margin-bottom: 8px;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+
+    .terminal-line.visible {
+      opacity: 1;
+      transform: translateX(0);
+      transition: all 0.3s ease;
+    }
+
+    .terminal-line .prompt {
+      color: var(--accent);
+    }
+
+    .terminal-line .command {
+      color: var(--fg);
+    }
+
+    .terminal-line .string {
+      color: var(--accent-secondary);
+    }
+
+    .terminal-line .keyword {
+      color: #ff7b72;
+    }
+
+    .terminal-cursor {
+      display: inline-block;
+      width: 10px;
+      height: 18px;
+      background: var(--accent);
+      margin-left: 2px;
+      animation: cursorBlink 1s step-end infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes cursorBlink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .loading-progress-container {
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .loading-progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loading-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      border-radius: 100px;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .loading-progress-fill::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .loading-status {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .loading-status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .status-check.done {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .status-check.done svg {
+      opacity: 1;
+    }
+
+    .status-check svg {
+      width: 10px;
+      height: 10px;
+      stroke: #000;
+      stroke-width: 3;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Background Effects untuk Loading */
+    .loading-bg-effects {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .loading-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(60px); }
+    }
+
+    .loading-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+
+    .loading-orb-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent);
+      top: -100px;
+      right: -100px;
+      opacity: 0.1;
+    }
+
+    .loading-orb-2 {
+      width: 250px;
+      height: 250px;
+      background: var(--accent-secondary);
+      bottom: -100px;
+      left: -100px;
+      opacity: 0.08;
+      animation-delay: -4s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    /* Particle Effect */
+    .loading-particles {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleRise 4s ease-in-out infinite;
+    }
+
+    @keyframes particleRise {
+      0% { opacity: 0; transform: translateY(100vh) scale(0); }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { opacity: 0; transform: translateY(-100px) scale(1); }
+    }
+
+    /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .bg-effects {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .grid-pattern {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+    }
+
+    .gradient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+    }
+
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: var(--accent);
+      top: -100px;
+      right: -100px;
+      opacity: 0.15;
+    }
+
+    .orb-2 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent-secondary);
+      bottom: -50px;
+      left: -50px;
+      opacity: 0.1;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--fg-muted);
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      font-family: var(--font-display);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 217, 160, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+
+    /* Features Section */
+    .section {
+      padding: 100px 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--fg-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Course Cards */
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .course-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: var(--transition);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .course-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: var(--glow);
+    }
+
+    .course-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .course-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .course-card p {
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .course-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .course-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .footer p {
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .nav-links {
+        gap: 2px;
+      }
+      
+      .nav-links a {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .nav-links {
+        display: none;
+      }
+      
+      .mobile-toggle {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-container {
+        padding: 0 16px;
+      }
+      
+      .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .hero-stats {
+        gap: 24px;
+      }
+
+      .loading-terminal {
+        font-size: 0.75rem;
+        padding: 16px;
+      }
+
+      .loading-logo-text {
+        font-size: 1.4rem;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-bg-effects">
+      <div class="loading-grid"></div>
+      <div class="loading-orb loading-orb-1"></div>
+      <div class="loading-orb loading-orb-2"></div>
+      <div class="loading-particles" id="loadingParticles"></div>
+    </div>
+
+    <div class="loading-content">
+      <div class="loading-logo">
+        <div class="loading-logo-icon">CL</div>
+        <span class="loading-logo-text">CodeLearn</span>
+      </div>
+
+      <div class="loading-terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+        </div>
+        <div class="terminal-line" id="line1">
+          <span class="prompt">$ </span><span class="command" id="cmd1"></span><span class="terminal-cursor"></span>
+        </div>
+        <div class="terminal-line" id="line2">
+          <span class="keyword">const</span> <span class="command">status</span> = <span class="string" id="statusText"></span>
+        </div>
+        <div class="terminal-line" id="line3">
+          <span class="keyword">import</span> <span class="command">skills</span> <span class="keyword">from</span> <span class="string">'./courses'</span>
+        </div>
+        <div class="terminal-line" id="line4">
+          <span class="prompt">$ </span><span class="command">ready</span> <span class="string" id="readyText"></span>
+        </div>
+      </div>
+
+      <div class="loading-progress-container">
+        <div class="loading-progress-bar">
+          <div class="loading-progress-fill" id="progressFill"></div>
+        </div>
+        <div class="loading-status">
+          <div class="loading-status-item">
+            <div class="status-check" id="checkAssets">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span id="assetText">Assets</span>
+          </div>
+          <div class="loading-status-item">
+            <div class="status-check" id="checkData">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span id="dataText">Data</span>
+          </div>
+          <div class="loading-status-item">
+            <div class="status-check" id="checkReady">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span id="readyCheckText">Ready</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="index.html">Home</a>
+        </li>
+        
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="content/html.html">HTML</a>
+            <a href="content/css.html">CSS</a>
+            <a href="content/responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="content/js.html">JavaScript</a>
+            <a href="content/framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="content/api.html">API</a>
+            <a href="content/beckend.html">Backend Dev</a>
+            <a href="content/database.html">Database</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="content/git.html">Git & GitHub</a>
+            <a href="content/deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="content/html.html">HTML</a>
+      <a href="content/css.html">CSS</a>
+      <a href="content/responsive.html">Responsive Design</a>
+      <a href="content/js.html">JavaScript</a>
+      <a href="content/framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="content/api.html">API</a>
+      <a href="content/beckend.html">Backend Development</a>
+      <a href="content/database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="content/git.html">Git & GitHub</a>
+      <a href="content/deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        Platform Belajar Web Development
+      </div>
+      <h1>Belajar Web Development <span class="highlight">dari Dasar</span></h1>
+      <p>Tutorial lengkap dari HTML, CSS, JavaScript hingga Backend dan Deployment. Pelajari skill yang dibutuhkan industri dengan materi terstruktur dan mudah dipahami.</p>
+      <div class="hero-buttons">
+        <a href="html.html" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          Mulai Belajar
+        </a>
+        <a href="#courses" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="9" y1="21" x2="9" y2="9"/>
+          </svg>
+          Lihat Kursus
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-value">8+</div>
+          <div class="stat-label">Materi Lengkap</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">150+</div>
+          <div class="stat-label">Lessons</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">Free</div>
+          <div class="stat-label">100% Gratis</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Courses Section -->
+  <section class="section" id="courses">
+    <div class="section-header">
+      <h2 class="section-title">Materi Pembelajaran</h2>
+      <p class="section-desc">Pelajari teknologi web modern dengan kurikulum yang terstruktur dari dasar hingga mahir.</p>
+    </div>
+
+    <div class="course-grid">
+      <a href="content/html.html" class="course-card">
+        <div class="course-icon" style="background: linear-gradient(135deg, #e34f26, #f06529);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+            <path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z"/>
+          </svg>
+        </div>
+        <h3>HTML</h3>
+        <p>Pelajari struktur dasar website dengan HTML5, semantic elements, forms, dan accessibility.</p>
+        <div class="course-meta">
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            25 Lessons
+          </span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            3 Jam
+          </span>
+        </div>
+      </a>
+
+      <a href="content/css.html" class="course-card">
+        <div class="course-icon" style="background: linear-gradient(135deg, #264de4, #2965f1);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+            <path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm17.09 4.413L5.41 4.41l.213 2.622 10.125.002-.255 2.716h-6.64l.24 2.573h6.182l-.366 3.523-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.288l5.373-1.53L18.59 4.413z"/>
+          </svg>
+        </div>
+        <h3>CSS</h3>
+        <p>Kuasai styling website dengan CSS3, Flexbox, Grid, Animations, dan Responsive Design.</p>
+        <div class="course-meta">
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            20 Lessons
+          </span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            4 Jam
+          </span>
+        </div>
+      </a>
+
+      <a href="content/js.html" class="course-card">
+        <div class="course-icon" style="background: linear-gradient(135deg, #f7df1e, #f0db4f);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#000">
+            <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.405-.6-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z"/>
+          </svg>
+        </div>
+        <h3>JavaScript</h3>
+        <p>Pelajari programming dengan JavaScript: DOM, Events, Async, API, dan modern ES6+.</p>
+        <div class="course-meta">
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            25 Lessons
+          </span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            5 Jam
+          </span>
+        </div>
+      </a>
+
+      <a href="content/git.html" class="course-card">
+        <div class="course-icon" style="background: linear-gradient(135deg, #f05033, #de4c36);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+            <path d="M23.546 10.93L13.067.452c-.604-.603-1.582-.603-2.188 0L8.708 2.627l2.76 2.76c.645-.215 1.379-.07 1.889.441.516.515.658 1.258.438 1.9l2.658 2.66c.645-.223 1.387-.078 1.9.435.721.72.721 1.884 0 2.604-.719.719-1.881.719-2.6 0-.539-.541-.674-1.337-.404-1.996L12.86 8.955v6.525c.176.086.342.203.488.348.713.721.713 1.883 0 2.6-.719.721-1.889.721-2.609 0-.719-.719-.719-1.879 0-2.598.182-.18.387-.316.605-.406V8.835c-.217-.091-.424-.222-.6-.401-.545-.545-.676-1.342-.396-2.009L7.636 3.7.45 10.881c-.6.605-.6 1.584 0 2.189l10.48 10.477c.604.604 1.582.604 2.186 0l10.43-10.43c.605-.603.605-1.582 0-2.187"/>
+          </svg>
+        </div>
+        <h3>Git & GitHub</h3>
+        <p>Kuasai version control dengan Git: branching, merge, pull request, dan collaboration.</p>
+        <div class="course-meta">
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            20 Lessons
+          </span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2 Jam
+          </span>
+        </div>
+      </a>
+
+      <a href="content/beckend.html" class="course-card">
+        <div class="course-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+            <path d="M12 1.85c-.27 0-.55.07-.78.2l-7.44 4.3c-.48.28-.78.8-.78 1.36v8.58c0 .56.3 1.08.78 1.36l1.95 1.12c.95.46 1.27.47 1.71.47 1.4 0 2.21-.85 2.21-2.33V8.44c0-.12-.1-.22-.22-.22H8.5c-.13 0-.23.1-.23.22v8.47c0 .66-.68 1.31-1.77.76L4.45 16.5c-.07-.04-.11-.11-.11-.19V7.73c0-.08.04-.16.11-.19l7.44-4.3c.06-.04.14-.04.21 0l7.44 4.3c.07.03.11.11.11.19v8.58c0 .08-.04.15-.11.19l-7.44 4.29c-.07.04-.15.04-.22 0l-1.88-1.12c-.06-.03-.13-.04-.19-.01-.53.3-.63.34-1.13.51-.12.04-.31.11.07.32l2.48 1.47c.24.14.5.21.78.21s.54-.07.78-.21l7.44-4.29c.48-.28.78-.8.78-1.36V7.71c0-.56-.3-1.08-.78-1.36l-7.44-4.3c-.23-.13-.5-.2-.78-.2z"/>
+          </svg>
+        </div>
+        <h3>Backend Development</h3>
+        <p>Pelajari Node.js, Express.js, REST API, Authentication, dan best practices.</p>
+        <div class="course-meta">
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            18 Lessons
+          </span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            4 Jam
+          </span>
+        </div>
+      </a>
+
+      <a href="content/deployment.html" class="course-card">
+        <div class="course-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+            <path d="M22.2 14.4L21 13.7c.1-.4.1-.8.1-1.3l-.1-1.3 1.2-.7c.4-.2.5-.6.3-1l-.7-1.2c-.2-.4-.6-.5-1-.3l-1.2.7c-.4-.3-.8-.5-1.2-.7l-.1-1.4c0-.4-.4-.8-.9-.8h-1.4c-.5 0-.9.4-.9.8l-.1 1.4c-.4.2-.8.4-1.2.7l-1.2-.7c-.4-.2-.8-.1-1 .3l-.7 1.2c-.2.4-.1.8.3 1l1.2.7v1.3l-.1 1.3-1.2.7c-.4.2-.5.6-.3 1l.7 1.2c.2.4.6.5 1 .3l1.2-.7c.4.3.8.5 1.2.7l.1 1.4c0 .4.4.8.9.8h1.4c.5 0 .9-.4.9-.8l.1-1.4c.4-.2.8-.4 1.2-.7l1.2.7c.4.2.8.1 1-.3l.7-1.2c.2-.4.1-.8-.3-1zM16 13.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM5.5 2C3.6 2 2 3.6 2 5.5S3.6 9 5.5 9 9 7.4 9 5.5 7.4 2 5.5 2zm0 5C4.7 7 4 6.3 4 5.5S4.7 4 5.5 4 7 4.7 7 5.5 6.3 7 5.5 7z"/>
+          </svg>
+        </div>
+        <h3>Deployment</h3>
+        <p>Pelajari cara deploy aplikasi: Vercel, Netlify, Docker, CI/CD, dan cloud platforms.</p>
+        <div class="course-meta">
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            18 Lessons
+          </span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            3 Jam
+          </span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>CodeLearn - Belajar Web Development dengan materi lengkap dan terstruktur.</p>
+  </footer>
+
+  <script>
+    // ===== LOADING SCREEN ANIMATION =====
+    (function() {
+      const loadingScreen = document.getElementById('loadingScreen');
+      const progressFill = document.getElementById('progressFill');
+      const cmd1 = document.getElementById('cmd1');
+      const statusText = document.getElementById('statusText');
+      const readyText = document.getElementById('readyText');
+      const checkAssets = document.getElementById('checkAssets');
+      const checkData = document.getElementById('checkData');
+      const checkReady = document.getElementById('checkReady');
+      const assetText = document.getElementById('assetText');
+      const dataText = document.getElementById('dataText');
+      const readyCheckText = document.getElementById('readyCheckText');
+      const loadingParticles = document.getElementById('loadingParticles');
+
+      // Create particles
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 4 + 's';
+        particle.style.animationDuration = (3 + Math.random() * 2) + 's';
+        loadingParticles.appendChild(particle);
+      }
+
+      // Typing animation helper
+      function typeText(element, text, speed) {
+        return new Promise(resolve => {
+          let i = 0;
+          function type() {
+            if (i < text.length) {
+              element.textContent += text.charAt(i);
+              i++;
+              setTimeout(type, speed);
+            } else {
+              resolve();
+            }
+          }
+          type();
+        });
+      }
+
+      // Show terminal line
+      function showLine(lineId) {
+        return new Promise(resolve => {
+          const line = document.getElementById(lineId);
+          line.classList.add('visible');
+          setTimeout(resolve, 200);
+        });
+      }
+
+      // Update progress
+      function setProgress(value) {
+        progressFill.style.width = value + '%';
+      }
+
+      // Mark check as done
+      function markDone(checkEl, textEl) {
+        checkEl.classList.add('done');
+        if (textEl) {
+          textEl.innerHTML = '<span style="color: var(--accent);">' + textEl.textContent + '</span>';
+        }
+      }
+
+      // Run loading sequence
+      async function runLoadingSequence() {
+        // Step 1: First command
+        await showLine('line1');
+        await typeText(cmd1, 'npm run start', 60);
+        setProgress(20);
+
+        // Step 2: Status line
+        await new Promise(r => setTimeout(r, 300));
+        await showLine('line2');
+        await typeText(statusText, "'loading...'", 40);
+        setProgress(40);
+        await new Promise(r => setTimeout(r, 200));
+        markDone(checkAssets, assetText);
+        setProgress(50);
+
+        // Step 3: Import line
+        await new Promise(r => setTimeout(r, 300));
+        await showLine('line3');
+        setProgress(70);
+        await new Promise(r => setTimeout(r, 400));
+        markDone(checkData, dataText);
+        setProgress(85);
+
+        // Step 4: Ready line
+        await new Promise(r => setTimeout(r, 300));
+        await showLine('line4');
+        await typeText(readyText, 'true', 40);
+        setProgress(100);
+        await new Promise(r => setTimeout(r, 300));
+        markDone(checkReady, readyCheckText);
+
+        // Hide loading screen
+        await new Promise(r => setTimeout(r, 600));
+        loadingScreen.classList.add('hidden');
+      }
+
+      // Start loading when DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', runLoadingSequence);
+      } else {
+        runLoadingSequence();
+      }
+    })();
+
+    // Theme toggle
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    
+    if (localStorage.getItem("theme") === "light") {
+      htmlEl.setAttribute("data-theme", "light");
+    }
+    
+    themeToggle.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    
+    mobileToggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("open");
+      mobileToggle.classList.toggle("active");
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!mobileMenu.contains(e.target) && !mobileToggle.contains(e.target)) {
+        mobileMenu.classList.remove("open");
+        mobileToggle.classList.remove("active");
+      }
+    });
+
+    // Navbar scroll effect
+    const navbar = document.getElementById("navbar");
+    
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 50) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
+    });
+
+    // Set active state based on current page
+    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    
+    document.querySelectorAll(".nav-dropdown a, .mobile-menu a").forEach(link => {
+      const href = link.getAttribute("href");
+      if (href === currentPage) {
+        link.classList.add("active");
+      }
+    });
+  </script>
+</body>
+</html>

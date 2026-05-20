@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Design - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #0ea5e9;
+      --accent-secondary: #06b6d4;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(14, 165, 233, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --card-hover: rgba(246, 248, 250, 1);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --glow: 0 0 40px rgba(14, 165, 233, 0.2);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: var(--font-display);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    /* ===== LOADING SCREEN ===== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .loader-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .loader-logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #000;
+      animation: logoPulse 2s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(14, 165, 233, 0.4);
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(14, 165, 233, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(14, 165, 233, 0.6); }
+    }
+
+    .loader-logo-text {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: -0.5px;
+    }
+
+    .loader-logo-text span {
+      color: var(--accent);
+    }
+
+    .loader-terminal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      min-width: 340px;
+      max-width: 90vw;
+      box-shadow: var(--shadow);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-dot.red { background: #ff5f56; }
+    .terminal-dot.yellow { background: #ffbd2e; }
+    .terminal-dot.green { background: #27c93f; }
+
+    .terminal-title {
+      margin-left: 12px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+    }
+
+    .terminal-code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--fg);
+    }
+
+    .terminal-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateX(-10px);
+      animation: typeLine 0.5s ease forwards;
+    }
+
+    .terminal-line:nth-child(1) { animation-delay: 0.3s; }
+    .terminal-line:nth-child(2) { animation-delay: 0.8s; }
+    .terminal-line:nth-child(3) { animation-delay: 1.3s; }
+    .terminal-line:nth-child(4) { animation-delay: 1.8s; }
+    .terminal-line:nth-child(5) { animation-delay: 2.3s; }
+
+    @keyframes typeLine {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .terminal-selector { color: #7ee787; }
+    .terminal-property { color: #d2a8ff; }
+    .terminal-value { color: #a5d6ff; }
+    .terminal-comment { color: #8b949e; font-style: italic; }
+    .terminal-bracket { color: var(--fg-muted); }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background: var(--accent);
+      margin-left: 4px;
+      animation: cursorBlink 1s step-end infinite;
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .loader-progress {
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      border-radius: 2px;
+      width: 0%;
+      animation: progressAnim 3s ease-in-out forwards;
+    }
+
+    @keyframes progressAnim {
+      0% { width: 0%; }
+      20% { width: 25%; }
+      40% { width: 45%; }
+      60% { width: 70%; }
+      80% { width: 85%; }
+      100% { width: 100%; }
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .progress-status {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .loader-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: floatParticle 8s ease-in-out infinite;
+    }
+
+    .particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; animation-duration: 6s; }
+    .particle:nth-child(2) { left: 20%; top: 80%; animation-delay: 1s; animation-duration: 8s; }
+    .particle:nth-child(3) { left: 80%; top: 30%; animation-delay: 2s; animation-duration: 7s; }
+    .particle:nth-child(4) { left: 70%; top: 70%; animation-delay: 0.5s; animation-duration: 9s; }
+    .particle:nth-child(5) { left: 50%; top: 50%; animation-delay: 1.5s; animation-duration: 5s; }
+    .particle:nth-child(6) { left: 30%; top: 60%; animation-delay: 3s; animation-duration: 7s; }
+    .particle:nth-child(7) { left: 90%; top: 40%; animation-delay: 2.5s; animation-duration: 6s; }
+    .particle:nth-child(8) { left: 15%; top: 45%; animation-delay: 0.8s; animation-duration: 8s; }
+
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+      25% { transform: translateY(-30px) translateX(10px); opacity: 0.6; }
+      50% { transform: translateY(-20px) translateX(-15px); opacity: 0.4; }
+      75% { transform: translateY(-40px) translateX(5px); opacity: 0.5; }
+    }
+
+    .loader-bg {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.3;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .loader-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.15;
+      animation: orbFloat 10s ease-in-out infinite;
+    }
+
+    .loader-orb-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent);
+      top: -100px;
+      right: -100px;
+    }
+
+    .loader-orb-2 {
+      width: 250px;
+      height: 250px;
+      background: var(--accent-secondary);
+      bottom: -80px;
+      left: -80px;
+      animation-delay: -5s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
+    .grid-pattern {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+    }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+    .orb-3 { width: 200px; height: 200px; background: var(--accent); top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.08; }
+
+    /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li { position: relative; }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover { color: var(--fg); background: var(--card); }
+    .nav-links a.active { color: var(--accent); background: rgba(14, 165, 233, 0.1); }
+
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow { transform: rotate(180deg); }
+
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover { background: var(--card); color: var(--accent); }
+    .nav-dropdown a.active { color: var(--accent); background: rgba(14, 165, 233, 0.1); }
+
+    .dropdown-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover { background: var(--card-hover); border-color: var(--accent); }
+
+    .mobile-toggle { display: none; flex-direction: column; gap: 5px; }
+    .mobile-toggle span { width: 18px; height: 2px; background: currentColor; border-radius: 2px; transition: var(--transition); }
+
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open { transform: translateY(0); opacity: 1; visibility: visible; }
+    .mobile-menu-section { margin-bottom: 16px; }
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active { background: var(--card); color: var(--accent); }
+
+    .page-hero {
+      min-height: 50vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute; top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+
+    .page-hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+    .section-title { font-size: 1.8rem; font-weight: 600; margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
+    .section-title::before { content: ''; width: 4px; height: 28px; background: var(--accent); border-radius: 2px; }
+
+    .lesson-grid { display: grid; gap: 16px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; user-select: none; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #000; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; color: var(--fg); }
+    .lesson-toggle { color: var(--fg-muted); transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 2500px; }
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+
+    .explanation { margin-bottom: 1rem; background: rgba(14, 165, 233, 0.05); padding: 12px 16px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.95rem; line-height: 1.6; }
+    .explanation strong { color: var(--accent); }
+
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; transition: var(--transition); }
+    .code-copy:hover { background: var(--accent); color: #000; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+
+    .info-box { background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul { margin: 8px 0 0 20px; }
+    .info-box li { margin-bottom: 4px; }
+
+    .tag { color: #ff7b54; }
+    .attr { color: #79c0ff; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .value { color: #a5d6ff; }
+    .number { color: #f0883e; }
+    .keyword { color: #ff7b54; }
+    .function { color: #d2a8ff; }
+    .selector { color: #7ee787; }
+    .unit { color: #ffa657; }
+
+    .diagram { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; overflow-x: auto; }
+    .diagram pre { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.4; color: var(--fg); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+      .page-hero { padding: 100px 16px 40px; }
+      .lesson-header { padding: 16px; }
+      .lesson-content { padding: 0 16px 16px; }
+      .loader-terminal { min-width: auto; width: 90vw; }
+      .terminal-code { font-size: 0.75rem; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-container { padding: 0 16px; }
+      .lesson-info { flex-wrap: wrap; }
+      .loader-logo-text { font-size: 1.4rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader-bg"></div>
+    <div class="loader-orb loader-orb-1"></div>
+    <div class="loader-orb loader-orb-2"></div>
+    <div class="loader-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <div class="loader-container">
+      <div class="loader-logo">
+        <div class="loader-logo-icon">CL</div>
+        <div class="loader-logo-text">Code<span>Learn</span></div>
+      </div>
+      
+      <div class="loader-terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <span class="terminal-title">responsive.css</span>
+        </div>
+        <div class="terminal-code">
+          <div class="terminal-line">
+            <span class="terminal-selector">.container</span> <span class="terminal-bracket">{</span>
+          </div>
+          <div class="terminal-line">
+            &nbsp;&nbsp;<span class="property">width</span>: <span class="value">100%</span>;
+          </div>
+          <div class="terminal-line">
+            &nbsp;&nbsp;<span class="property">max-width</span>: <span class="value">1200px</span>;
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-bracket">}</span> <span class="terminal-comment">/* responsive! */</span>
+          </div>
+          <div class="terminal-line">
+            <span style="color: var(--accent);">Loaded!</span><span class="cursor"></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="loader-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progressMessage">Memuat materi Responsive Design...</span>
+          <span class="progress-status" id="progressStatus">0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">15 Lessons + Penjelasan</div>
+      <h1>Belajar <span class="highlight">Responsive Design</span></h1>
+      <p>Kuasai teknik membuat website yang tampil sempurna di semua perangkat: dari mobile hingga desktop.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1 -->
+<div data-topic="responsive-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info">
+          <div class="lesson-number">1</div>
+          <h3 class="lesson-title">Apa itu Responsive Web Design?</h3>
+        </div>
+        <div class="lesson-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Responsive Web Design (RWD) adalah pendekatan desain yang membuat halaman web merender dengan baik di berbagai ukuran layar dan perangkat.</p>
+          <div class="explanation">
+            <strong>Tiga Pilar Responsive Design:</strong><br>
+            1. <strong>Fluid Grids</strong> — Layout menggunakan satuan relatif (%, rem, vw) bukan fixed (px)<br>
+            2. <strong>Flexible Images</strong> — Gambar menyesuaikan container<br>
+            3. <strong>Media Queries</strong> — CSS kondisional berdasarkan karakteristik device
+          </div>
+          <div class="diagram">
+            <pre>
+DESKTOP (1920px)    TABLET (768px)    MOBILE (375px)
+─────────────────────────────────────────────────────
+┌─────────────────┐  ┌─────────────┐  ┌───────┐
+│  HEADER         │  │  HEADER     │  │ HEADER│
+├────┬────┬────┬───┤  ├──────┬──────┤  ├───────┤
+│    │    │    │   │  │      │      │  │       │
+│ 1  │ 2  │ 3  │ 4 │  │  1   │  2   │  │   1   │
+│    │    │    │   │  │      │      │  │       │
+├────┴────┴────┴───┤  ├──────┼──────┤  ├───────┤
+│     FOOTER       │  │  3   │  4   │  │   2   │
+└─────────────────┘  ├──────┴──────┤  ├───────┤
+                     │   FOOTER    │  │   3   │
+                     └─────────────┘  ├───────┤
+                                      │   4   │
+                                      ├───────┤
+                                      │FOOTER │
+                                      └───────┘
+            </pre>
+          </div>
+          <div class="info-box">
+            <strong>Kenapa Responsive Penting?</strong><br>
+            - 60%+ traffic website dari mobile<br>
+            - Google memprioritaskan mobile-friendly site (SEO)<br>
+            - User experience lebih baik = conversion lebih tinggi<br>
+            - Maintenance satu codebase untuk semua device
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2 -->
+<div data-topic="responsive-viewport">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">Viewport Meta Tag</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Viewport meta tag mengontrol bagaimana browser mobile menampilkan halaman. Tanpa ini, browser akan menampilkan versi "desktop" yang di-zoom out.</p>
+          <div class="explanation">
+            <strong>Penjelasan Atribut:</strong><br>
+            - <code>width=device-width</code> → Lebar viewport = lebar device<br>
+            - <code>initial-scale=1</code> → Zoom awal 100% (tidak di-zoom)<br>
+            - <code>maximum-scale=1</code> → (Opsional) Cegah user zoom — HINDARI untuk aksesibilitas!
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">&lt;!-- WAJIB di setiap halaman responsive --&gt;</span>
+<span class="tag">&lt;meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- Contoh lengkap di head --&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>Responsive Website<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Tanpa Viewport Meta:</strong> Browser mobile menganggap lebar 980px dan mengecilkan semua.<br>
+            <strong>Dengan Viewport Meta:</strong> Browser menggunakan lebar device sebenarnya (375px, 414px, dll).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3 -->
+<div data-topic="responsive-media-queries">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">Media Queries Dasar</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Media queries memungkinkan CSS berbeda berdasarkan karakteristik device seperti lebar layar, tinggi, orientasi, dan lainnya.</p>
+          <div class="explanation">
+            <strong>Sintaks Media Query:</strong><br>
+            <code>@media (min-width: 768px) { ... }</code><br>
+            - <code>min-width</code> → "lebih dari atau sama dengan"<br>
+            - <code>max-width</code> → "kurang dari atau sama dengan"<br>
+            - Mobile First: gunakan <code>min-width</code> (mulai dari kecil, naik ke besar)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Mobile First Approach */</span>
+
+<span class="comment">/* Default: Mobile (&lt; 768px) */</span>
+<span class="selector">.container</span> {
+  <span class="property">padding</span>: <span class="value">16px</span>;
+  <span class="property">font-size</span>: <span class="value">14px</span>;
+}
+
+<span class="comment">/* Tablet (≥ 768px) */</span>
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">768px</span>) {
+  <span class="selector">.container</span> {
+    <span class="property">padding</span>: <span class="value">24px</span>;
+    <span class="property">font-size</span>: <span class="value">16px</span>;
+  }
+}
+
+<span class="comment">/* Desktop (≥ 1024px) */</span>
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">1024px</span>) {
+  <span class="selector">.container</span> {
+    <span class="property">padding</span>: <span class="value">32px</span>;
+    <span class="property">max-width</span>: <span class="value">1200px</span>;
+    <span class="property">margin</span>: <span class="value">0 auto</span>;
+  }
+}</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Breakpoints Umum:</strong><br>
+            - Mobile: &lt; 768px<br>
+            - Tablet: 768px - 1023px<br>
+            - Desktop: 1024px - 1279px<br>
+            - Large Desktop: ≥ 1280px
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4 -->
+<div data-topic="responsive-units">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Relative Units: rem, em, vw, vh, %</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Satuan relatif membuat ukuran menyesuaikan konteks. Berbeda dengan px yang fixed, satuan relatif lebih fleksibel untuk responsive design.</p>
+          <div class="explanation">
+            <strong>Perbandingan Satuan:</strong><br>
+            - <strong>rem</strong> → Relative ke font-size root (html). 1rem = 16px default. Konsisten di seluruh halaman.<br>
+            - <strong>em</strong> → Relative ke font-size parent. Bisa "compound" (berlipat) jika nested.<br>
+            - <strong>%</strong> → Relative ke parent element. Untuk width/height.<br>
+            - <strong>vw</strong> → 1% dari viewport width. 100vw = lebar layar penuh.<br>
+            - <strong>vh</strong> → 1% dari viewport height. 100vh = tinggi layar penuh.
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Best Practice: gunakan rem untuk sizing */</span>
+<span class="selector">html</span> {
+  <span class="property">font-size</span>: <span class="value">16px</span>;  <span class="comment">/* 1rem = 16px */</span>
+}
+
+<span class="selector">.card</span> {
+  <span class="property">padding</span>: <span class="value">1.5rem</span>;     <span class="comment">/* 24px */</span>
+  <span class="property">margin-bottom</span>: <span class="value">1rem</span>;  <span class="comment">/* 16px */</span>
+  <span class="property">font-size</span>: <span class="value">1rem</span>;      <span class="comment">/* 16px */</span>
+  <span class="property">border-radius</span>: <span class="value">0.5rem</span>; <span class="comment">/* 8px */</span>
+}
+
+<span class="comment">/* Fluid typography dengan clamp() */</span>
+<span class="selector">h1</span> {
+  <span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">2rem</span>, <span class="value">5vw</span>, <span class="value">4rem</span>);
+  <span class="comment">/* Min 2rem, ideal 5vw, max 4rem */</span>
+}
+
+<span class="comment">/* Container responsif */</span>
+<span class="selector">.container</span> {
+  <span class="property">width</span>: <span class="value">100%</span>;
+  <span class="property">max-width</span>: <span class="value">75rem</span>;  <span class="comment">/* 1200px */</span>
+  <span class="property">margin</span>: <span class="value">0 auto</span>;
+  <span class="property">padding</span>: <span class="value">0 1rem</span>;
+}
+
+<span class="comment">/* Full height hero */</span>
+<span class="selector">.hero</span> {
+  <span class="property">min-height</span>: <span class="value">100vh</span>;  <span class="comment">/* Full viewport height */</span>
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5 -->
+<div data-topic="responsive-flexbox">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Flexbox untuk Layout Responsif</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Flexbox sangat powerful untuk responsive layout. Dengan <code>flex-wrap</code> dan media queries, kamu bisa membuat layout yang menyesuaikan otomatis.</p>
+          <div class="explanation">
+            <strong>Penjelasan:</strong><br>
+            - <code>flex-wrap: wrap</code> memungkinkan item pindah ke baris baru jika tidak muat<br>
+            - <code>flex: 1 1 100%</code> berarti grow:1, shrink:1, basis:100%<br>
+            - Kombinasikan dengan media queries untuk kontrol lebih presisi<br>
+            - <code>gap</code> memberikan jarak antar item tanpa margin hack
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Card grid responsif dengan Flexbox */</span>
+<span class="selector">.card-container</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">flex-wrap</span>: <span class="value">wrap</span>;
+  <span class="property">gap</span>: <span class="value">1rem</span>;
+}
+
+<span class="selector">.card</span> {
+  <span class="property">flex</span>: <span class="value">1 1 100%</span>;      <span class="comment">/* Mobile: 1 kolom */</span>
+  <span class="property">max-width</span>: <span class="value">100%</span>;
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">640px</span>) {
+  <span class="selector">.card</span> {
+    <span class="property">flex</span>: <span class="value">1 1 calc(50% - 0.5rem)</span>;  <span class="comment">/* Tablet: 2 kolom */</span>
+  }
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">1024px</span>) {
+  <span class="selector">.card</span> {
+    <span class="property">flex</span>: <span class="value">1 1 calc(33.333% - 0.67rem)</span>;  <span class="comment">/* Desktop: 3 kolom */</span>
+  }
+}
+
+<span class="comment">/* Navigation responsif */</span>
+<span class="selector">.nav</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">justify-content</span>: <span class="value">space-between</span>;
+  <span class="property">align-items</span>: <span class="value">center</span>;
+  <span class="property">padding</span>: <span class="value">1rem</span>;
+}
+
+<span class="selector">.nav-links</span> {
+  <span class="property">display</span>: <span class="value">none</span>;  <span class="comment">/* Hidden di mobile */</span>
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">768px</span>) {
+  <span class="selector">.nav-links</span> {
+    <span class="property">display</span>: <span class="value">flex</span>;
+    <span class="property">gap</span>: <span class="value">1rem</span>;
+  }
+  
+  <span class="selector">.hamburger</span> {
+    <span class="property">display</span>: <span class="value">none</span>;
+  }
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6 -->
+<div data-topic="responsive-grid">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">CSS Grid: Auto-fit & minmax()</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">CSS Grid dengan <code>auto-fit</code> dan <code>minmax()</code> membuat responsif layout TANPA media queries. Ini adalah teknik paling powerful untuk grid.</p>
+          <div class="explanation">
+            <strong>Penjelasan:</strong><br>
+            - <code>minmax(300px, 1fr)</code> → Setiap kolom minimal 300px, maksimal 1fr<br>
+            - <code>auto-fit</code> → Buat kolom sebanyak mungkin yang muat<br>
+            - Jika tidak muat, elemen otomatis wrap ke baris baru<br>
+            - <code>auto-fill</code> vs <code>auto-fit</code>: auto-fill membuat kolom kosong, auto-fit melebarkan yang ada
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Grid responsif TANPA media query! */</span>
+<span class="selector">.grid-auto</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="function">repeat</span>(<span class="value">auto-fit</span>, <span class="function">minmax</span>(<span class="value">300px</span>, <span class="value">1fr</span>));
+  <span class="property">gap</span>: <span class="value">1.5rem</span>;
+}
+
+<span class="comment">/* Dengan batas maksimal kolom */</span>
+<span class="selector">.grid-max-3</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="function">repeat</span>(<span class="value">auto-fit</span>, <span class="function">minmax</span>(<span class="value">min(300px, 100%)</span>, <span class="value">1fr</span>));
+  <span class="property">gap</span>: <span class="value">1rem</span>;
+}
+
+<span class="comment">/* Dashboard layout */</span>
+<span class="selector">.dashboard</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">1fr</span>;  <span class="comment">/* Mobile: 1 kolom */</span>
+  <span class="property">grid-template-areas</span>:
+    <span class="string">"header"</span>
+    <span class="string">"main"</span>
+    <span class="string">"sidebar"</span>;
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">1024px</span>) {
+  <span class="selector">.dashboard</span> {
+    <span class="property">grid-template-columns</span>: <span class="value">250px 1fr</span>;
+    <span class="property">grid-template-areas</span>:
+      <span class="string">"header header"</span>
+      <span class="string">"sidebar main"</span>;
+  }
+}
+
+<span class="selector">.header</span> { <span class="property">grid-area</span>: <span class="value">header</span>; }
+<span class="selector">.main</span> { <span class="property">grid-area</span>: <span class="value">main</span>; }
+<span class="selector">.sidebar</span> { <span class="property">grid-area</span>: <span class="value">sidebar</span>; }</code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+DESKTOP (lebar &gt; 900px)        MOBILE (lebar &lt; 600px)
+─────────────────────         ─────────────────────
+┌─────────────────────┐       ┌───────────────────┐
+│  HEADER             │       │  HEADER           │
+├──────────┬──────────┤       ├───────────────────┤
+│          │          │       │  MAIN             │
+│ SIDEBAR  │   MAIN   │   →   │                   │
+│          │          │       ├───────────────────┤
+├──────────┴──────────┤       │  SIDEBAR          │
+│  FOOTER             │       ├───────────────────┤
+└─────────────────────┘       │  FOOTER           │
+                              └───────────────────┘
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7 -->
+<div data-topic="responsive-images">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Responsive Images</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Gambar harus menyesuaikan dengan ukuran container. Gunakan CSS dan atribut HTML untuk memastikan gambar tidak overflow dan load optimal.</p>
+          <div class="explanation">
+            <strong>Penjelasan:</strong><br>
+            - <code>max-width: 100%</code> memastikan gambar tidak melebihi container<br>
+            - <code>height: auto</code> menjaga aspect ratio saat resize<br>
+            - <code>object-fit: cover</code> untuk crop gambar dalam area tetap<br>
+            - <code>srcset</code> memungkinkan browser memilih gambar optimal<br>
+            - <code>&lt;picture&gt;</code> untuk art direction (gambar berbeda untuk breakpoint berbeda)
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Dasar responsive image */</span>
+<span class="selector">img</span> {
+  <span class="property">max-width</span>: <span class="value">100%</span>;
+  <span class="property">height</span>: <span class="value">auto</span>;
+  <span class="property">display</span>: <span class="value">block</span>;
+}
+
+<span class="comment">/* Object-fit untuk aspect ratio */</span>
+<span class="selector">.card-image</span> {
+  <span class="property">width</span>: <span class="value">100%</span>;
+  <span class="property">height</span>: <span class="value">200px</span>;
+  <span class="property">object-fit</span>: <span class="value">cover</span>;     <span class="comment">/* Crop untuk fill area */</span>
+  <span class="property">object-position</span>: <span class="value">center</span>;
+}
+
+<span class="comment">/* Aspect ratio (modern CSS) */</span>
+<span class="selector">.video-container</span> {
+  <span class="property">aspect-ratio</span>: <span class="value">16 / 9</span>;
+  <span class="property">width</span>: <span class="value">100%</span>;
+}
+
+<span class="comment">/* Background image responsive */</span>
+<span class="selector">.hero-bg</span> {
+  <span class="property">background-image</span>: <span class="function">url</span>(<span class="string">'hero-mobile.jpg'</span>);
+  <span class="property">background-size</span>: <span class="value">cover</span>;
+  <span class="property">background-position</span>: <span class="value">center</span>;
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">768px</span>) {
+  <span class="selector">.hero-bg</span> {
+    <span class="property">background-image</span>: <span class="function">url</span>(<span class="string">'hero-tablet.jpg'</span>);
+  }
+}</code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">HTML - srcset & sizes</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">&lt;!-- srcset: browser pilih gambar optimal --&gt;</span>
+<span class="tag">&lt;img</span>
+  <span class="attr">src</span>=<span class="string">"image-400.jpg"</span>
+  <span class="attr">srcset</span>=<span class="string">"image-400.jpg 400w,
+           image-800.jpg 800w,
+           image-1200.jpg 1200w"</span>
+  <span class="attr">sizes</span>=<span class="string">"(max-width: 600px) 100vw, 50vw"</span>
+  <span class="attr">alt</span>=<span class="string">"Deskripsi gambar"</span>
+  <span class="attr">loading</span>=<span class="string">"lazy"</span>
+<span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- picture: art direction --&gt;</span>
+<span class="tag">&lt;picture&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">media</span>=<span class="string">"(min-width: 1024px)"</span> <span class="attr">srcset</span>=<span class="string">"hero-desktop.jpg"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">media</span>=<span class="string">"(min-width: 768px)"</span> <span class="attr">srcset</span>=<span class="string">"hero-tablet.jpg"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"hero-mobile.jpg"</span> <span class="attr">alt</span>=<span class="string">"Hero"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/picture&gt;</span></code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8 -->
+<div data-topic="responsive-typography">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Responsive Typography</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Teks juga harus responsif. Ukuran font, line-height, dan line-length harus optimal untuk keterbacaan di semua ukuran layar.</p>
+          <div class="explanation">
+            <strong>Penjelasan:</strong><br>
+            - <code>clamp()</code> membuat font size fluid antara min dan max<br>
+            - <code>ch</code> unit sangat berguna untuk line length (ideal 60-75 karakter)<br>
+            - Line height bisa berbeda untuk heading (1.1-1.3) vs body text (1.5-1.8)<br>
+            - <code>text-overflow: ellipsis</code> untuk memotong teks yang terlalu panjang
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Fluid typography dengan clamp() */</span>
+<span class="selector">h1</span> {
+  <span class="comment">/* min: 2rem, preferred: 2rem + 1.5vw, max: 3.5rem */</span>
+  <span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">2rem</span>, <span class="value">2rem + 1.5vw</span>, <span class="value">3.5rem</span>);
+  <span class="property">line-height</span>: <span class="value">1.2</span>;
+}
+
+<span class="selector">h2</span> {
+  <span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">1.5rem</span>, <span class="value">1.5rem + 1vw</span>, <span class="value">2.5rem</span>);
+}
+
+<span class="selector">p</span> {
+  <span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">1rem</span>, <span class="value">1rem + 0.2vw</span>, <span class="value">1.125rem</span>);
+  <span class="property">line-height</span>: <span class="value">1.7</span>;
+}
+
+<span class="comment">/* Optimal line length: 60-75 karakter */</span>
+<span class="selector">.article-content</span> {
+  <span class="property">max-width</span>: <span class="value">65ch</span>;  <span class="comment">/* ch = lebar karakter "0" */</span>
+}
+
+<span class="comment">/* Truncate text (one line) */</span>
+<span class="selector">.truncate</span> {
+  <span class="property">white-space</span>: <span class="value">nowrap</span>;
+  <span class="property">overflow</span>: <span class="value">hidden</span>;
+  <span class="property">text-overflow</span>: <span class="value">ellipsis</span>;
+}
+
+<span class="comment">/* Line clamp (multi-line) */</span>
+<span class="selector">.line-clamp-3</span> {
+  <span class="property">display</span>: <span class="value">-webkit-box</span>;
+  <span class="property">-webkit-line-clamp</span>: <span class="value">3</span>;
+  <span class="property">-webkit-box-orient</span>: <span class="value">vertical</span>;
+  <span class="property">overflow</span>: <span class="value">hidden</span>;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9 -->
+<div data-topic="responsive-nav">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Pola Navigasi Mobile</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Navigasi adalah elemen paling challenging untuk responsive. Pilih pola yang sesuai dengan jumlah menu dan UX goals.</p>
+          <div class="explanation">
+            <strong>Pola Navigasi Mobile:</strong><br>
+            1. <strong>Hamburger Menu</strong> — Classic, cocok untuk banyak menu<br>
+            2. <strong>Bottom Navigation</strong> — Akses mudah dengan thumb, cocok untuk app-like experience<br>
+            3. <strong>Priority+ Pattern</strong> — Tampilkan item penting, sisanya di "more"<br>
+            4. <strong>Off-canvas</strong> — Menu geser dari samping<br><br>
+            <strong>Best Practice:</strong> Bottom navigation untuk 3-5 item utama, hamburger untuk menu kompleks.
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Bottom Navigation (Mobile App Style) */</span>
+<span class="selector">.bottom-nav</span> {
+  <span class="property">position</span>: <span class="value">fixed</span>;
+  <span class="property">bottom</span>: <span class="value">0</span>;
+  <span class="property">left</span>: <span class="value">0</span>;
+  <span class="property">right</span>: <span class="value">0</span>;
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">justify-content</span>: <span class="value">space-around</span>;
+  <span class="property">background</span>: <span class="value">#fff</span>;
+  <span class="property">padding</span>: <span class="value">0.5rem 0</span>;
+  <span class="property">border-top</span>: <span class="value">1px solid #ddd</span>;
+  <span class="property">z-index</span>: <span class="value">1000</span>;
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">768px</span>) {
+  <span class="selector">.bottom-nav</span> {
+    <span class="property">display</span>: <span class="value">none</span>;
+  }
+}
+
+<span class="comment">/* Off-canvas menu */</span>
+<span class="selector">.off-canvas</span> {
+  <span class="property">position</span>: <span class="value">fixed</span>;
+  <span class="property">top</span>: <span class="value">0</span>;
+  <span class="property">left</span>: <span class="value">-280px</span>;
+  <span class="property">width</span>: <span class="value">280px</span>;
+  <span class="property">height</span>: <span class="value">100vh</span>;
+  <span class="property">background</span>: <span class="value">#1a1a2e</span>;
+  <span class="property">transition</span>: <span class="value">transform 0.3s ease</span>;
+  <span class="property">z-index</span>: <span class="value">1001</span>;
+}
+
+<span class="selector">.off-canvas.open</span> {
+  <span class="property">transform</span>: <span class="function">translateX</span>(<span class="value">280px</span>);
+}
+
+<span class="selector">.overlay</span> {
+  <span class="property">position</span>: <span class="value">fixed</span>;
+  <span class="property">inset</span>: <span class="value">0</span>;
+  <span class="property">background</span>: <span class="function">rgba</span>(<span class="value">0</span>, <span class="value">0</span>, <span class="value">0</span>, <span class="value">0.5</span>);
+  <span class="property">opacity</span>: <span class="value">0</span>;
+  <span class="property">visibility</span>: <span class="value">hidden</span>;
+  <span class="property">transition</span>: <span class="value">all 0.3s</span>;
+}
+
+<span class="selector">.overlay.open</span> {
+  <span class="property">opacity</span>: <span class="value">1</span>;
+  <span class="property">visibility</span>: <span class="value">visible</span>;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 10 -->
+<div data-topic="responsive-container">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Container Queries (Modern CSS)</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Container Queries adalah fitur baru CSS yang memungkinkan styling berdasarkan ukuran container parent, bukan viewport. Ini lebih modular dibanding Media Queries.</p>
+          <div class="explanation">
+            <strong>Media Queries vs Container Queries:</strong><br>
+            - Media Queries: berdasarkan viewport (seluruh layar)<br>
+            - Container Queries: berdasarkan ukuran container (parent element)<br><br>
+            <strong>Keunggulan:</strong> Komponen bisa responsive terhadap container-nya sendiri, bukan viewport. Cocok untuk komponen yang dipakai di berbagai layout.
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Definisikan container */</span>
+<span class="selector">.card-container</span> {
+  <span class="property">container-type</span>: <span class="value">inline-size</span>;
+  <span class="property">container-name</span>: <span class="value">card</span>;  <span class="comment">/* opsional, untuk nama */</span>
+}
+
+<span class="comment">/* Query berdasarkan ukuran container */</span>
+<span class="keyword">@container</span> <span class="value">card</span> (<span class="property">min-width</span>: <span class="value">400px</span>) {
+  <span class="selector">.card</span> {
+    <span class="property">display</span>: <span class="value">flex</span>;
+    <span class="property">gap</span>: <span class="value">1rem</span>;
+  }
+  
+  <span class="selector">.card-image</span> {
+    <span class="property">width</span>: <span class="value">200px</span>;
+    <span class="property">flex-shrink</span>: <span class="value">0</span>;
+  }
+}
+
+<span class="keyword">@container</span> <span class="value">card</span> (<span class="property">min-width</span>: <span class="value">600px</span>) {
+  <span class="selector">.card</span> {
+    <span class="property">flex-direction</span>: <span class="value">column</span>;
+  }
+  
+  <span class="selector">.card-image</span> {
+    <span class="property">width</span>: <span class="value">100%</span>;
+  }
+}
+
+<span class="comment">/* Container units */</span>
+<span class="selector">.title</span> {
+  <span class="property">font-size</span>: <span class="value">5cqi</span>;  <span class="comment">/* 5% dari container inline size */</span>
+}</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Browser Support:</strong> Container Queries didukung di semua browser modern (Chrome 105+, Firefox 110+, Safari 16+). Gunakan dengan progressive enhancement.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11 -->
+<div data-topic="responsive-touch">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Touch-friendly Design</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Mobile device menggunakan touch input. Ukuran target, spacing, dan interaksi harus dirancang untuk jari, bukan mouse.</p>
+          <div class="explanation">
+            <strong>Guideline Touch Target:</strong><br>
+            - Minimum size: 44x44px (Apple), 48x48dp (Android)<br>
+            - Spacing antar target: minimal 8px<br>
+            - Hindari hover-dependent interactions<br>
+            - Tidak ada double-click<br><br>
+            <strong>Media Query Pointer:</strong><br>
+            - <code>(pointer: coarse)</code> → touch device<br>
+            - <code>(pointer: fine)</code> → mouse/trackpad<br>
+            - <code>(hover: hover)</code> → device yang support hover
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">/* Touch-friendly buttons */</span>
+<span class="selector">.btn</span> {
+  <span class="property">min-height</span>: <span class="value">44px</span>;
+  <span class="property">min-width</span>: <span class="value">44px</span>;
+  <span class="property">padding</span>: <span class="value">12px 20px</span>;
+}
+
+<span class="comment">/* Pointer media query */</span>
+<span class="keyword">@media</span> (<span class="property">pointer</span>: <span class="value">coarse</span>) {
+  <span class="comment">/* Device dengan touch screen */</span>
+  <span class="selector">.btn</span> {
+    <span class="property">padding</span>: <span class="value">14px 24px</span>;
+  }
+  
+  <span class="selector">.nav-link</span> {
+    <span class="property">padding</span>: <span class="value">16px</span>;
+  }
+}
+
+<span class="keyword">@media</span> (<span class="property">pointer</span>: <span class="value">fine</span>) {
+  <span class="comment">/* Device dengan mouse/trackpad */</span>
+  <span class="selector">.tooltip</span> {
+    <span class="property">display</span>: <span class="value">block</span>;
+  }
+  
+  <span class="selector">.hoverable:hover</span> {
+    <span class="property">background</span>: <span class="value">#f0f0f0</span>;
+  }
+}
+
+<span class="comment">/* Hover hanya untuk device yang support */</span>
+<span class="keyword">@media</span> (<span class="property">hover</span>: <span class="value">hover</span>) {
+  <span class="selector">.card:hover</span> {
+    <span class="property">transform</span>: <span class="function">translateY</span>(<span class="value">-4px</span>);
+    <span class="property">box-shadow</span>: <span class="value">0 12px 24px rgba(0,0,0,0.1)</span>;
+  }
+}
+
+<span class="comment">/* Safe area untuk notch devices */</span>
+<span class="selector">.bottom-bar</span> {
+  <span class="property">padding-bottom</span>: <span class="value">env(safe-area-inset-bottom)</span>;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12 -->
+<div data-topic="responsive-devtools">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">Testing dengan DevTools</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Chrome DevTools menyediakan Device Mode untuk testing responsive design tanpa perlu device fisik.</p>
+          <div class="explanation">
+            <strong>Cara Akses Device Mode:</strong><br>
+            1. Buka DevTools (F12 atau Cmd+Option+I)<br>
+            2. Klik icon Toggle Device Toolbar (Ctrl+Shift+M)<br>
+            3. Pilih device atau atur ukuran custom<br><br>
+            <strong>Fitur Berguna:</strong><br>
+            - Responsive mode: drag untuk resize<br>
+            - Device presets: iPhone, iPad, Pixel, dll<br>
+            - Network throttling: simulasi koneksi lambat<br>
+            - DPR (Device Pixel Ratio): simulasi Retina display<br>
+            - Screenshots: capture tampilan di berbagai ukuran
+          </div>
+          <div class="info-box">
+            <strong>Device Sizes untuk Testing:</strong><br>
+            - iPhone SE: 375 x 667<br>
+            - iPhone 14: 390 x 844<br>
+            - iPad Mini: 768 x 1024<br>
+            - iPad Pro: 1024 x 1366<br>
+            - Desktop: 1920 x 1080
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13 -->
+<div data-topic="responsive-performance">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Performance untuk Mobile</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Mobile memiliki koneksi lambat dan CPU terbatas. Optimasi performance sangat penting untuk UX.</p>
+          <div class="explanation">
+            <strong>Tips Optimasi Mobile:</strong><br>
+            - <code>loading="lazy"</code> untuk lazy loading gambar<br>
+            - Gunakan format modern: WebP, AVIF<br>
+            - <code>preload</code> untuk resource critical<br>
+            - <code>contain</code> CSS untuk isolasi render<br>
+            - <code>prefers-reduced-motion</code> untuk aksesibilitas<br>
+            - Minimize JavaScript dan CSS yang tidak perlu
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">HTML/CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">&lt;!-- Lazy loading images --&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"image.jpg"</span> <span class="attr">loading</span>=<span class="string">"lazy"</span> <span class="attr">alt</span>=<span class="string">"..."</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- Preload critical resources --&gt;</span>
+<span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="string">"preload"</span> <span class="attr">href</span>=<span class="string">"critical.css"</span> <span class="attr">as</span>=<span class="string">"style"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="string">"preload"</span> <span class="attr">href</span>=<span class="string">"hero.webp"</span> <span class="attr">as</span>=<span class="string">"image"</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- Modern image formats --&gt;</span>
+<span class="tag">&lt;picture&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">type</span>=<span class="string">"image/avif"</span> <span class="attr">srcset</span>=<span class="string">"image.avif"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">type</span>=<span class="string">"image/webp"</span> <span class="attr">srcset</span>=<span class="string">"image.webp"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"image.jpg"</span> <span class="attr">alt</span>=<span class="string">"..."</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/picture&gt;</span>
+
+<span class="comment">/* CSS Containment untuk performance */</span>
+<span class="selector">.card</span> {
+  <span class="property">contain</span>: <span class="value">layout style</span>;
+}
+
+<span class="comment">/* Will-change untuk animasi */</span>
+<span class="selector">.animated-element</span> {
+  <span class="property">will-change</span>: <span class="value">transform</span>;
+}
+
+<span class="comment">/* Reduce motion untuk aksesibilitas */</span>
+<span class="keyword">@media</span> (<span class="property">prefers-reduced-motion</span>: <span class="value">reduce</span>) {
+  <span class="selector">*, *::before, *::after</span> {
+    <span class="property">animation-duration</span>: <span class="value">0.01ms</span> <span class="value">!important</span>;
+    <span class="property">transition-duration</span>: <span class="value">0.01ms</span> <span class="value">!important</span>;
+  }
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14 -->
+<div data-topic="responsive-print">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Print Stylesheet</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Halaman web juga bisa di-print. Media query <code>print</code> memungkinkan styling khusus untuk cetak.</p>
+          <div class="explanation">
+            <strong>Tips Print Stylesheet:</strong><br>
+            - Sembunyikan navigasi, sidebar, iklan, komentar<br>
+            - Gunakan warna hitam/putih untuk hemat tinta<br>
+            - Tampilkan URL link dengan pseudo-element<br>
+            - Kontrol page break dengan <code>page-break-*</code><br>
+            - Ukur margin dengan <code>@page</code> rule
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="keyword">@media</span> <span class="value">print</span> {
+  <span class="comment">/* Hide non-essential elements */</span>
+  <span class="selector">nav, .sidebar, .footer, .ads, .comments</span> {
+    <span class="property">display</span>: <span class="value">none</span>;
+  }
+  
+  <span class="comment">/* Reset colors for printing */</span>
+  <span class="selector">body</span> {
+    <span class="property">color</span>: <span class="value">#000</span>;
+    <span class="property">background</span>: <span class="value">#fff</span>;
+  }
+  
+  <span class="comment">/* Show link URLs */</span>
+  <span class="selector">a[href]::after</span> {
+    <span class="property">content</span>: <span class="string">" (" attr(href) ")"</span>;
+    <span class="property">font-size</span>: <span class="value">0.8em</span>;
+    <span class="property">color</span>: <span class="value">#666</span>;
+  }
+  
+  <span class="comment">/* Page breaks */</span>
+  <span class="selector">h1, h2, h3</span> {
+    <span class="property">page-break-after</span>: <span class="value">avoid</span>;
+  }
+  
+  <span class="selector">img</span> {
+    <span class="property">page-break-inside</span>: <span class="value">avoid</span>;
+    <span class="property">max-width</span>: <span class="value">100%</span>;
+  }
+  
+  <span class="comment">/* Paper margins */</span>
+  <span class="keyword">@page</span> {
+    <span class="property">margin</span>: <span class="value">2cm</span>;
+  }
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15 -->
+<div data-topic="responsive-mini-project">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Praktik: Responsive Card Layout</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Buat layout card yang responsif menggunakan teknik yang sudah dipelajari: Grid, Fluid Typography, dan Responsive Images.</p>
+          <div class="explanation">
+            <strong>Checklist Proyek:</strong><br>
+            - Container dengan max-width dan padding responsif<br>
+            - Grid dengan auto-fit dan minmax<br>
+            - Fluid typography dengan clamp()<br>
+            - Responsive images dengan object-fit<br>
+            - Gap untuk spacing konsisten<br>
+            - Touch-friendly button sizes
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">HTML + CSS</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">&lt;!-- HTML --&gt;</span>
+<span class="tag">&lt;main</span> <span class="attr">class</span>=<span class="string">"container"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Our Products<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"product-grid"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;article</span> <span class="attr">class</span>=<span class="string">"card"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"product.jpg"</span> <span class="attr">alt</span>=<span class="string">"Product"</span> <span class="attr">loading</span>=<span class="string">"lazy"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"card-body"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;h2&gt;</span>Product Name<span class="tag">&lt;/h2&gt;</span>
+        <span class="tag">&lt;p&gt;</span>Description here...<span class="tag">&lt;/p&gt;</span>
+        <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"price"</span><span class="tag">&gt;</span>$99<span class="tag">&lt;/span&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/article&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/main&gt;</span>
+
+<span class="comment">/* CSS */</span>
+<span class="selector">.container</span> {
+  <span class="property">width</span>: <span class="value">100%</span>;
+  <span class="property">max-width</span>: <span class="value">1200px</span>;
+  <span class="property">margin</span>: <span class="value">0 auto</span>;
+  <span class="property">padding</span>: <span class="value">1rem</span>;
+}
+
+<span class="selector">h1</span> {
+  <span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">2rem</span>, <span class="value">5vw</span>, <span class="value">3rem</span>);
+  <span class="property">margin-bottom</span>: <span class="value">2rem</span>;
+}
+
+<span class="selector">.product-grid</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="function">repeat</span>(<span class="value">auto-fit</span>, <span class="function">minmax</span>(<span class="value">min(280px, 100%)</span>, <span class="value">1fr</span>));
+  <span class="property">gap</span>: <span class="value">1.5rem</span>;
+}
+
+<span class="selector">.card</span> {
+  <span class="property">background</span>: <span class="value">#fff</span>;
+  <span class="property">border-radius</span>: <span class="value">12px</span>;
+  <span class="property">overflow</span>: <span class="value">hidden</span>;
+  <span class="property">box-shadow</span>: <span class="value">0 4px 12px rgba(0,0,0,0.1)</span>;
+}
+
+<span class="selector">.card img</span> {
+  <span class="property">width</span>: <span class="value">100%</span>;
+  <span class="property">height</span>: <span class="value">200px</span>;
+  <span class="property">object-fit</span>: <span class="value">cover</span>;
+}
+
+<span class="selector">.card-body</span> {
+  <span class="property">padding</span>: <span class="value">1rem</span>;
+}
+
+<span class="selector">.price</span> {
+  <span class="property">font-size</span>: <span class="value">1.25rem</span>;
+  <span class="property">font-weight</span>: <span class="value">bold</span>;
+  <span class="property">color</span>: <span class="value">#0ea5e9</span>;
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    // Loading animation
+    const loadingScreen = document.getElementById('loading-screen');
+    const progressFill = document.getElementById('progressFill');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressMessage = document.getElementById('progressMessage');
+    
+    let progress = 0;
+    const loadingMessages = [
+      'Memuat materi Responsive Design...',
+      'Menyiapkan modul...',
+      'Mengoptimasi tampilan...',
+      'Hampir selesai...',
+      'Selamat datang!'
+    ];
+    
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15 + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(progressInterval);
+        
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => {
+            loadingScreen.remove();
+          }, 600);
+        }, 500);
+      }
+      
+      if (progressFill) {
+        progressFill.style.width = progress + '%';
+      }
+      if (progressStatus) {
+        progressStatus.textContent = Math.round(progress) + '%';
+      }
+      if (progressMessage) {
+        const msgIndex = Math.min(Math.floor(progress / 25), loadingMessages.length - 1);
+        progressMessage.textContent = loadingMessages[msgIndex];
+      }
+    }, 200);
+
+    // Theme toggle
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") {
+      htmlEl.setAttribute("data-theme", "light");
+    }
+    themeToggle?.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    // Mobile menu
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle?.addEventListener("click", () => {
+      mobileMenu.classList.toggle("open");
+    });
+
+    // Lesson card toggle
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const card = header.parentElement;
+        card.classList.toggle("open");
+      });
+    });
+
+    // Copy code
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || block.querySelector("pre")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Tersalin!";
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

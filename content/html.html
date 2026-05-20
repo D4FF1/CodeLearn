@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML - CodeLearn (dengan Penjelasan Lengkap)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ===== STYLE SAMA PERSIS DENGAN ASLI ===== */
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #00d9a0;
+      --accent-secondary: #ff7b54;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(0, 217, 160, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --card-hover: rgba(246, 248, 250, 1);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --glow: 0 0 40px rgba(0, 217, 160, 0.2);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+      font-family: var(--font-display);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    /* ===== LOADING SCREEN ===== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .loader-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .loader-logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #000;
+      animation: logoPulse 2s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(0, 217, 160, 0.4);
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 217, 160, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(0, 217, 160, 0.6); }
+    }
+
+    .loader-logo-text {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: -0.5px;
+    }
+
+    .loader-logo-text span {
+      color: var(--accent);
+    }
+
+    .loader-terminal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      min-width: 320px;
+      max-width: 90vw;
+      box-shadow: var(--shadow);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-dot.red { background: #ff5f56; }
+    .terminal-dot.yellow { background: #ffbd2e; }
+    .terminal-dot.green { background: #27c93f; }
+
+    .terminal-title {
+      margin-left: 12px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+    }
+
+    .terminal-code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--fg);
+    }
+
+    .terminal-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateX(-10px);
+      animation: typeLine 0.5s ease forwards;
+    }
+
+    .terminal-line:nth-child(1) { animation-delay: 0.3s; }
+    .terminal-line:nth-child(2) { animation-delay: 0.8s; }
+    .terminal-line:nth-child(3) { animation-delay: 1.3s; }
+    .terminal-line:nth-child(4) { animation-delay: 1.8s; }
+    .terminal-line:nth-child(5) { animation-delay: 2.3s; }
+
+    @keyframes typeLine {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .terminal-prompt {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .terminal-tag { color: #ff7b54; }
+    .terminal-attr { color: #79c0ff; }
+    .terminal-string { color: #a5d6ff; }
+    .terminal-comment { color: #8b949e; }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background: var(--accent);
+      margin-left: 4px;
+      animation: cursorBlink 1s step-end infinite;
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .loader-progress {
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      border-radius: 2px;
+      width: 0%;
+      animation: progressAnim 3s ease-in-out forwards;
+    }
+
+    @keyframes progressAnim {
+      0% { width: 0%; }
+      20% { width: 25%; }
+      40% { width: 45%; }
+      60% { width: 70%; }
+      80% { width: 85%; }
+      100% { width: 100%; }
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .progress-status {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .loader-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: floatParticle 8s ease-in-out infinite;
+    }
+
+    .particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; animation-duration: 6s; }
+    .particle:nth-child(2) { left: 20%; top: 80%; animation-delay: 1s; animation-duration: 8s; }
+    .particle:nth-child(3) { left: 80%; top: 30%; animation-delay: 2s; animation-duration: 7s; }
+    .particle:nth-child(4) { left: 70%; top: 70%; animation-delay: 0.5s; animation-duration: 9s; }
+    .particle:nth-child(5) { left: 50%; top: 50%; animation-delay: 1.5s; animation-duration: 5s; }
+    .particle:nth-child(6) { left: 30%; top: 60%; animation-delay: 3s; animation-duration: 7s; }
+    .particle:nth-child(7) { left: 90%; top: 40%; animation-delay: 2.5s; animation-duration: 6s; }
+    .particle:nth-child(8) { left: 15%; top: 45%; animation-delay: 0.8s; animation-duration: 8s; }
+
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+      25% { transform: translateY(-30px) translateX(10px); opacity: 0.6; }
+      50% { transform: translateY(-20px) translateX(-15px); opacity: 0.4; }
+      75% { transform: translateY(-40px) translateX(5px); opacity: 0.5; }
+    }
+
+    .loader-bg {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.3;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .loader-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.15;
+      animation: orbFloat 10s ease-in-out infinite;
+    }
+
+    .loader-orb-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent);
+      top: -100px;
+      right: -100px;
+    }
+
+    .loader-orb-2 {
+      width: 250px;
+      height: 250px;
+      background: var(--accent-secondary);
+      bottom: -80px;
+      left: -80px;
+      animation-delay: -5s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    .bg-effects {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .grid-pattern {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+    }
+
+    .gradient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+    }
+
+    .orb-1 {
+      width: 400px; height: 400px;
+      background: var(--accent);
+      top: -100px; right: -100px;
+      opacity: 0.15;
+    }
+
+    .orb-2 {
+      width: 300px; height: 300px;
+      background: var(--accent-secondary);
+      bottom: -50px; left: -50px;
+      opacity: 0.1;
+    }
+
+    .orb-3 {
+      width: 200px; height: 200px;
+      background: var(--accent);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.08;
+    }
+
+    /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .page-hero {
+      min-height: 50vh;
+      display: flex; align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+
+    .page-hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .page-hero h1 .highlight { color: var(--accent); }
+
+    .page-hero p {
+      font-size: 1.1rem;
+      color: var(--fg-muted);
+      margin-bottom: 32px;
+      max-width: 550px;
+      margin-left: auto; margin-right: auto;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 32px;
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px; height: 28px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .lesson-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .lesson-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .lesson-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+    }
+
+    .lesson-card.open { border-color: var(--accent); }
+
+    .lesson-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+
+    .lesson-number {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
+      color: #000;
+    }
+
+    .lesson-title {
+      font-size: 1.1rem; font-weight: 600;
+      color: var(--fg);
+    }
+
+    .lesson-toggle {
+      color: var(--fg-muted);
+      transition: transform 0.3s ease;
+    }
+
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+
+    .lesson-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+
+    .lesson-card.open .lesson-body { max-height: 2000px; }
+
+    .lesson-content {
+      padding: 0 24px 24px;
+    }
+
+    .lesson-text {
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .explanation {
+      margin-bottom: 1rem;
+      background: rgba(0, 217, 160, 0.05);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .explanation strong {
+      color: var(--accent);
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .code-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-lang {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    .code-copy {
+      padding: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--fg);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .code-copy:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .code-content {
+      padding: 16px;
+      overflow-x: auto;
+    }
+
+    .code-content pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    .info-box {
+      background: rgba(0, 217, 160, 0.08);
+      border: 1px solid rgba(0, 217, 160, 0.2);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--fg-muted);
+    }
+
+    .info-box strong { color: var(--accent); }
+
+    .info-box ul { margin: 8px 0 0 20px; }
+
+    .info-box li { margin-bottom: 4px; }
+
+    .tag { color: #ff7b54; }
+    .attr { color: #79c0ff; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .value { color: #a5d6ff; }
+    .number { color: #f0883e; }
+    .keyword { color: #ff7b54; }
+    .function { color: #d2a8ff; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+      .page-hero { padding: 100px 16px 40px; }
+      .lesson-header { padding: 16px; }
+      .lesson-content { padding: 0 16px 16px; }
+      .loader-terminal { min-width: auto; width: 90vw; }
+      .terminal-code { font-size: 0.75rem; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-container { padding: 0 16px; }
+      .lesson-info { flex-wrap: wrap; }
+      .loader-logo-text { font-size: 1.4rem; }
+    }
+
+    .try-section { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; }
+    .try-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); font-family: var(--font-display); }
+    .try-btn:hover { background: var(--accent-secondary); transform: translateY(-1px); }
+    .try-btn svg { width: 14px; height: 14px; }
+    .try-container { display: none; margin-top: 12px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .try-container.open { display: block; }
+    .try-tabs { display: flex; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .try-tab { padding: 8px 14px; font-size: 0.78rem; font-weight: 600; color: var(--fg-muted); cursor: pointer; border: none; background: none; font-family: var(--font-mono); transition: var(--transition); white-space: nowrap; }
+    .try-tab:hover { color: var(--fg); }
+    .try-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .try-editor-wrap { display: none; }
+    .try-editor-wrap.active { display: block; }
+    .try-editor-wrap textarea { width: 100%; min-height: 80px; padding: 12px; background: var(--code-bg); color: var(--fg); border: none; resize: vertical; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.5; outline: none; }
+    .try-toolbar { display: flex; gap: 6px; padding: 8px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
+    .try-run, .try-reset { padding: 5px 12px; font-size: 0.78rem; font-weight: 600; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: var(--font-display); transition: var(--transition); }
+    .try-run { background: var(--accent); color: #000; border-color: var(--accent); }
+    .try-run:hover { background: #00c090; }
+    .try-reset { background: var(--card); color: var(--fg); }
+    .try-reset:hover { border-color: var(--accent); }
+    .try-preview { background: #fff; min-height: 100px; max-height: 250px; overflow: auto; padding: 12px; border-top: 1px solid var(--border); }
+    .try-preview iframe { width: 100%; min-height: 100px; border: none; background: #fff; }
+    .try-error { padding: 8px 12px; background: rgba(248, 81, 73, 0.1); border: 1px solid var(--error); border-radius: 6px; color: var(--error); font-size: 0.82rem; font-family: var(--font-mono); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader-bg"></div>
+    <div class="loader-orb loader-orb-1"></div>
+    <div class="loader-orb loader-orb-2"></div>
+    <div class="loader-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <div class="loader-container">
+      <div class="loader-logo">
+        <div class="loader-logo-icon">CL</div>
+        <div class="loader-logo-text">Code<span>Learn</span></div>
+      </div>
+      
+      <div class="loader-terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <span class="terminal-title">loading.html</span>
+        </div>
+        <div class="terminal-code">
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span class="terminal-tag">&lt;!</span><span class="terminal-attr">DOCTYPE</span> <span class="terminal-string">html</span><span class="terminal-tag">&gt;</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span class="terminal-tag">&lt;html</span> <span class="terminal-attr">lang</span>=<span class="terminal-string">"id"</span><span class="terminal-tag">&gt;</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span class="terminal-comment">// Loading modules...</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span class="terminal-comment">// Initializing lessons...</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span style="color: var(--accent);">Ready!</span><span class="cursor"></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="loader-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+          <span>Memuat konten...</span>
+          <span class="progress-status" id="progressStatus">0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">
+        <span class="dot"></span>
+        25 Lessons + Penjelasan
+      </div>
+      <h1>Belajar <span class="highlight">HTML</span></h1>
+      <p>Pelajari fondasi web: sintaks HTML, semantic elements, forms, media, dan accessibility. Setiap materi dilengkapi penjelasan mendalam.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1 -->
+<div data-topic="html-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info">
+          <div class="lesson-number">1</div>
+          <h3 class="lesson-title">Pengenalan & Dasar Dokumen HTML</h3>
+        </div>
+        <div class="lesson-toggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Setiap halaman web dimulai dari struktur HTML. DOCTYPE adalah deklarasi yang memberitahu browser bahwa dokumen ini menggunakan HTML versi terbaru (HTML5). Tag-tag seperti <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, dan <code>&lt;body&gt;</code> membentuk kerangka dasar yang harus dipahami dengan benar.</p>
+          <div class="explanation">
+            <strong>Penjelasan Detail:</strong> Dokumen HTML selalu diawali dengan <code>&lt;!DOCTYPE html&gt;</code> agar browser tidak masuk ke mode aneh (quirks mode). Elemen <code>&lt;html&gt;</code> adalah akar, sedangkan <code>&lt;head&gt;</code> berisi metadata (judul, charset, viewport) yang tidak terlihat. <code>&lt;body&gt;</code> adalah wadah semua konten yang tampil. Pastikan selalu menyertakan <code>meta charset="UTF-8"</code> untuk mendukung huruf Indonesia.
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">HTML</span>
+              <button class="code-copy" onclick="copyCode(this)">Salin</button>
+            </div>
+            <div class="code-content">
+              <pre><code><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="string">"id"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;head&gt;</span>
+    <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;title&gt;</span>Judul Halaman Web Saya<span class="tag">&lt;/title&gt;</span>
+  <span class="tag">&lt;/head&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Selamat Datang di Website Saya!<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;p&gt;</span>Ini adalah paragraf pertama saya.<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></code></pre>
+            </div>
+          </div>
+          <div class="info-box">
+            <strong>Penjelasan Setiap Elemen:</strong>
+            <ul>
+              <li><code>&lt;!DOCTYPE html&gt;</code> — WAJIB di baris paling atas.</li>
+              <li><code>&lt;html lang="id"&gt;</code> — Elemen root, atribut lang penting untuk aksesibilitas.</li>
+              <li><code>&lt;head&gt;</code> — Metadata, tidak tampil.</li>
+              <li><code>&lt;meta charset="UTF-8"&gt;</code> — Mendukung karakter unik.</li>
+              <li><code>&lt;meta name="viewport"&gt;</code> — Responsif di HP.</li>
+              <li><code>&lt;title&gt;</code> — Judul di tab browser.</li>
+              <li><code>&lt;body&gt;</code> — Area konten yang terlihat.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2 -->
+<div data-topic="html-headings">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info">
+          <div class="lesson-number">2</div>
+          <h3 class="lesson-title">Headings (h1-h6), Paragraf, HR, BR</h3>
+        </div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Heading Tags <code>&lt;h1&gt;</code> sampai <code>&lt;h6&gt;</code> menunjukkan tingkatan hierarki dokumen. H1 adalah yang paling penting, biasanya judul utama halaman.</p>
+          <div class="explanation">
+            <strong>Penjelasan:</strong> Heading bukan hanya untuk memperbesar teks, tetapi untuk memberikan struktur logis. Google dan pembaca layar menggunakan heading untuk memahami alur konten. Hanya boleh ada satu <code>&lt;h1&gt;</code> per halaman. Gunakan <code>&lt;h2&gt;</code> untuk sub-bab, <code>&lt;h3&gt;</code> untuk sub-sub, dst. Jangan melompat (misal dari H2 langsung ke H4).
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="tag">&lt;h1&gt;</span>Judul Utama<span class="tag">&lt;/h1&gt;</span>
+<span class="tag">&lt;h2&gt;</span>Sub Bagian<span class="tag">&lt;/h2&gt;</span>
+<span class="tag">&lt;p&gt;</span>Paragraf dengan <span class="tag">&lt;strong&gt;</span>tebal<span class="tag">&lt;/strong&gt;</span> dan <span class="tag">&lt;em&gt;</span>miring<span class="tag">&lt;/em&gt;</span>.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;hr&gt;</span>
+<span class="tag">&lt;p&gt;</span>Garis pemisah di atas.<span class="tag">&lt;br&gt;</span>Baris baru.<span class="tag">&lt;/p&gt;</span></code></pre></div>
+          </div>
+          <div class="info-box"><strong>Kesalahan Umum:</strong> Memakai heading berdasarkan ukuran, bukan tujuan. Jangan gunakan <code>&lt;br&gt;</code> beruntun untuk memberi jarak.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3 -->
+<div data-topic="html-semantic">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">Struktur & Elemen Semantik HTML5</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Elemen semantik adalah tags yang menjelaskan MAKSUD dari konten, bukan hanya tampilannya.</p>
+          <div class="explanation">
+            <strong>Penjelasan:</strong> <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;footer&gt;</code> memberikan makna struktural. <code>&lt;main&gt;</code> hanya boleh satu per halaman. <code>&lt;article&gt;</code> untuk konten yang bisa berdiri sendiri. Ini meningkatkan SEO dan aksesibilitas.
+          </div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;header&gt;</span>...<span class="tag">&lt;/header&gt;</span>
+  <span class="tag">&lt;nav&gt;</span>...<span class="tag">&lt;/nav&gt;</span>
+  <span class="tag">&lt;main&gt;</span>
+    <span class="tag">&lt;article&gt;</span>...<span class="tag">&lt;/article&gt;</span>
+    <span class="tag">&lt;aside&gt;</span>...<span class="tag">&lt;/aside&gt;</span>
+  <span class="tag">&lt;/main&gt;</span>
+  <span class="tag">&lt;footer&gt;</span>...<span class="tag">&lt;/footer&gt;</span>
+<span class="tag">&lt;/body&gt;</span></code></pre></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4 -->
+<div data-topic="html-comments">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Komentar & Organisasi Kode</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <p class="lesson-text">Komentar dalam HTML adalah teks yang tidak ditampilkan browser, berguna untuk dokumentasi.</p>
+        <div class="explanation"><strong>Penjelasan:</strong> Gunakan <code>&lt;!-- ... --&gt;</code> untuk memberi catatan pada kode. Komentar dapat digunakan untuk menonaktifkan sementara bagian kode. Pastikan tidak meninggalkan komentar yang berisi informasi sensitif.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="comment">&lt;!-- Ini komentar, tidak tampil di browser --&gt;</span>
+<span class="comment">&lt;!-- TODO: perbaiki navigasi --&gt;</span>
+<span class="tag">&lt;div&gt;</span>Konten aktif<span class="tag">&lt;/div&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5 -->
+<div data-topic="html-links">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Links (a, href, target, rel)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <p class="lesson-text">Element <code>&lt;a&gt;</code> (anchor) menghubungkan halaman ke halaman lain.</p>
+        <div class="explanation"><strong>Penjelasan:</strong> Atribut <code>href</code> adalah tujuan. Gunakan <code>target="_blank"</code> untuk membuka di tab baru, selalu sertakan <code>rel="noopener noreferrer"</code> untuk keamanan. <code>mailto:</code> dan <code>tel:</code> untuk email dan telepon.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"https://google.com"</span> <span class="attr">target</span>=<span class="string">"_blank"</span> <span class="attr">rel</span>=<span class="string">"noopener"</span><span class="tag">&gt;</span>Google<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"#footer"</span><span class="tag">&gt;</span>Ke footer<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"mailto:admin@example.com"</span><span class="tag">&gt;</span>Email<span class="tag">&lt;/a&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6 -->
+<div data-topic="html-images">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">Images (img, src, alt, figure/figcaption)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <p class="lesson-text">Element <code>&lt;img&gt;</code> menampilkan gambar. Atribut <code>alt</code> WAJIB untuk aksesibilitas.</p>
+        <div class="explanation"><strong>Penjelasan:</strong> <code>src</code> adalah sumber gambar. <code>alt</code> memberikan deskripsi untuk screen reader. Gunakan <code>loading="lazy"</code> untuk performa. <code>&lt;figure&gt;</code> dan <code>&lt;figcaption&gt;</code> untuk mengelompokkan gambar dengan keterangan.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"foto.jpg"</span> <span class="attr">alt</span>=<span class="string">"Deskripsi gambar"</span> <span class="attr">loading</span>=<span class="string">"lazy"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;figure&gt;</span>
+  <span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"chart.png"</span> <span class="attr">alt</span>=<span class="string">"Grafik penjualan"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;figcaption&gt;</span>Grafik 2024<span class="tag">&lt;/figcaption&gt;</span>
+<span class="tag">&lt;/figure&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7 -->
+<div data-topic="html-lists">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Lists (ul/ol/li, Description Lists dl/dt/dd)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <p class="lesson-text">List adalah cara menampilkan kumpulan item. Ada unordered (bullet), ordered (nomor), dan description list.</p>
+        <div class="explanation"><strong>Penjelasan:</strong> <code>&lt;ul&gt;</code> untuk daftar tanpa urutan, <code>&lt;ol&gt;</code> untuk daftar berurutan (bisa diubah type-nya: 1, A, a, I). <code>&lt;dl&gt;</code> digunakan untuk pasangan istilah-definisi.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;ul&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Apel<span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Pisang<span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ul&gt;</span>
+
+<span class="tag">&lt;ol</span> <span class="attr">type</span>=<span class="string">"A"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Langkah 1<span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Langkah 2<span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ol&gt;</span>
+
+<span class="tag">&lt;dl&gt;</span>
+  <span class="tag">&lt;dt&gt;</span>HTML<span class="tag">&lt;/dt&gt;</span>
+  <span class="tag">&lt;dd&gt;</span>HyperText Markup Language<span class="tag">&lt;/dd&gt;</span>
+<span class="tag">&lt;/dl&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8 -->
+<div data-topic="html-tables">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Tables (table, thead/tbody/tfoot, colspan/rowspan)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <p class="lesson-text">Tabel untuk menampilkan data tabular secara terstruktur.</p>
+        <div class="explanation"><strong>Penjelasan:</strong> Jangan gunakan tabel untuk layout halaman. Gunakan <code>&lt;th&gt;</code> untuk header, <code>colspan</code> dan <code>rowspan</code> untuk menggabungkan sel. Atribut <code>scope</code> pada th membantu aksesibilitas.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;table&gt;</span>
+  <span class="tag">&lt;thead&gt;</span>
+    <span class="tag">&lt;tr&gt;</span>
+      <span class="tag">&lt;th&gt;</span>Nama<span class="tag">&lt;/th&gt;</span>
+      <span class="tag">&lt;th&gt;</span>Skor<span class="tag">&lt;/th&gt;</span>
+    <span class="tag">&lt;/tr&gt;</span>
+  <span class="tag">&lt;/thead&gt;</span>
+  <span class="tag">&lt;tbody&gt;</span>
+    <span class="tag">&lt;tr&gt;</span>
+      <span class="tag">&lt;td&gt;</span>Andi<span class="tag">&lt;/td&gt;</span>
+      <span class="tag">&lt;td&gt;</span>90<span class="tag">&lt;/td&gt;</span>
+    <span class="tag">&lt;/tr&gt;</span>
+  <span class="tag">&lt;/tbody&gt;</span>
+<span class="tag">&lt;/table&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9 -->
+<div data-topic="html-forms">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Forms (form, label, input, textarea, select)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <p class="lesson-text">Form adalah mekanisme utama interaksi user dengan website.</p>
+        <div class="explanation"><strong>Penjelasan:</strong> Setiap input harus memiliki <code>&lt;label&gt;</code> yang terhubung dengan atribut <code>for</code>. Atribut <code>name</code> penting karena menjadi nama data saat dikirim ke server. Gunakan <code>method="POST"</code> untuk data sensitif.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;form</span> <span class="attr">action</span>=<span class="string">"/proses"</span> <span class="attr">method</span>=<span class="string">"post"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"nama"</span><span class="tag">&gt;</span>Nama:<span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">id</span>=<span class="string">"nama"</span> <span class="attr">name</span>=<span class="string">"nama"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span><span class="tag">&gt;</span>Kirim<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 10 -->
+<div data-topic="html-input-types">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Input Types Lengkap</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Memilih tipe input yang tepat meningkatkan UX: <code>email</code> menampilkan keyboard dengan @, <code>tel</code> memunculkan numeric keypad di HP, <code>number</code> memiliki tombol naik/turun, <code>date</code> menampilkan kalender. <code>checkbox</code> untuk pilihan banyak, <code>radio</code> untuk pilihan tunggal.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"email"</span> <span class="attr">placeholder</span>=<span class="string">"email@contoh.com"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"number"</span> <span class="attr">min</span>=<span class="string">"1"</span> <span class="attr">max</span>=<span class="string">"100"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"date"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"checkbox"</span> <span class="attr">id</span>=<span class="string">"setuju"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"radio"</span> <span class="attr">name</span>=<span class="string">"gender"</span> <span class="attr">value</span>=<span class="string">"L"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">accept</span>=<span class="string">"image/*"</span><span class="tag">&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11 -->
+<div data-topic="html-attributes">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">Atribut Universal (id, class, style, data-*)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> <code>id</code> harus unik dalam satu halaman. <code>class</code> bisa digunakan banyak elemen. <code>data-*</code> untuk menyimpan data custom yang bisa diakses via JavaScript (element.dataset). <code>hidden</code> menyembunyikan elemen.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"main"</span> <span class="attr">class</span>=<span class="string">"box"</span> <span class="attr">data-user-id</span>=<span class="string">"123"</span><span class="tag">&gt;</span>Konten<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;p</span> <span class="attr">contenteditable</span>=<span class="string">"true"</span><span class="tag">&gt;</span>Bisa diedit<span class="tag">&lt;/p&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12 -->
+<div data-topic="html-validation">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">Form Validation (required, pattern, minlength)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> HTML5 menyediakan validasi bawaan: <code>required</code> (tidak boleh kosong), <code>minlength</code>/<code>maxlength</code>, <code>pattern</code> (regex), <code>min</code>/<code>max</code> untuk number. Browser akan menampilkan pesan error dan mencegah submit.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">required</span> <span class="attr">minlength</span>=<span class="string">"3"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"email"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">pattern</span>=<span class="string">"[A-Za-z]{3,}"</span> <span class="attr">title</span>=<span class="string">"Minimal 3 huruf"</span><span class="tag">&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13 -->
+<div data-topic="html-buttons">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Buttons (button, submit, reset)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> <code>&lt;button&gt;</code> lebih fleksibel daripada <code>&lt;input type="button"&gt;</code> karena bisa berisi HTML. <code>type="submit"</code> untuk mengirim form, <code>type="reset"</code> untuk mereset, <code>type="button"</code> untuk tombol biasa yang dikontrol JavaScript.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"button"</span><span class="tag">&gt;</span>Klik Saya<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span><span class="tag">&gt;</span>Simpan<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"reset"</span><span class="tag">&gt;</span>Reset Form<span class="tag">&lt;/button&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14 -->
+<div data-topic="html-media">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Media (audio, video, source, poster)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Gunakan <code>&lt;audio&gt;</code> dan <code>&lt;video&gt;</code> untuk menyematkan media. Atribut <code>controls</code> menampilkan panel play/pause. <code>poster</code> untuk thumbnail video. Sediakan multiple source untuk kompatibilitas browser.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;audio</span> <span class="attr">controls</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">src</span>=<span class="string">"lagu.mp3"</span> <span class="attr">type</span>=<span class="string">"audio/mpeg"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/audio&gt;</span>
+
+<span class="tag">&lt;video</span> <span class="attr">controls</span> <span class="attr">width</span>=<span class="string">"400"</span> <span class="attr">poster</span>=<span class="string">"thumb.jpg"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">src</span>=<span class="string">"video.mp4"</span> <span class="attr">type</span>=<span class="string">"video/mp4"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/video&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15 -->
+<div data-topic="html-iframe">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Iframe &amp; Security (sandbox)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> <code>&lt;iframe&gt;</code> menyematkan halaman lain. Atribut <code>sandbox</code> membatasi kemampuan iframe untuk keamanan. Selalu berikan <code>title</code> untuk aksesibilitas.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;iframe</span> 
+  <span class="attr">src</span>=<span class="string">"https://example.com"</span> 
+  <span class="attr">width</span>=<span class="string">"600"</span> 
+  <span class="attr">height</span>=<span class="string">"400"</span>
+  <span class="attr">title</span>=<span class="string">"Contoh iframe"</span>
+  <span class="attr">sandbox</span>=<span class="string">"allow-same-origin allow-scripts"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/iframe&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 16 -->
+<div data-topic="html-special">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">Special Elements (div/span, strong/em, code/pre, kbd)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> <code>&lt;div&gt;</code> block-level untuk grouping, <code>&lt;span&gt;</code> inline untuk styling. <code>&lt;strong&gt;</code> untuk penting (bold), <code>&lt;em&gt;</span> untuk penekanan (miring). <code>&lt;code&gt;</code> untuk potongan kode, <code>&lt;pre&gt;</code> untuk teks praformat. <code>&lt;kbd&gt;</code> untuk input keyboard.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;p&gt;</span>Tekan <span class="tag">&lt;kbd&gt;</span>Ctrl+S<span class="tag">&lt;/kbd&gt;</span> untuk menyimpan.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;pre&gt;&lt;code&gt;</span>function hello() { 
+  console.log("Halo"); 
+}<span class="tag">&lt;/code&gt;&lt;/pre&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 17 -->
+<div data-topic="html-layout">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Layout Dasar (semantic wrappers)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Gunakan elemen semantik untuk membuat kerangka layout: <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;footer&gt;</code>. Ini membantu SEO dan aksesibilitas.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;header&gt;</span>...<span class="tag">&lt;/header&gt;</span>
+  <span class="tag">&lt;nav&gt;</span>...<span class="tag">&lt;/nav&gt;</span>
+  <span class="tag">&lt;main&gt;</span>
+    <span class="tag">&lt;section&gt;</span>...<span class="tag">&lt;/section&gt;</span>
+  <span class="tag">&lt;/main&gt;</span>
+  <span class="tag">&lt;footer&gt;</span>...<span class="tag">&lt;/footer&gt;</span>
+<span class="tag">&lt;/body&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 18 -->
+<div data-topic="html-accessibility">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">Accessibility (alt, label, heading order, landmarks)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Aksesibilitas membuat web dapat digunakan oleh semua orang. Pastikan: semua gambar punya <code>alt</code>, semua input punya <code>&lt;label&gt;</code>, heading berurutan (h1 ke h2 ke h3), dan gunakan landmark (main, nav, dll).</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"icon.png"</span> <span class="attr">alt</span>=<span class="string">"Ikon pencarian"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"email"</span><span class="tag">&gt;</span>Email:<span class="tag">&lt;/label&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"email"</span> <span class="attr">id</span>=<span class="string">"email"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">aria-label</span>=<span class="string">"Tutup dialog"</span><span class="tag">&gt;</span>X<span class="tag">&lt;/button&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 19 -->
+<div data-topic="html-meta">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">19</div><h3 class="lesson-title">Meta Tags (charset, description, og basic)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Meta tag memberikan informasi ke browser dan mesin pencari. <code>description</code> digunakan oleh Google untuk snippet hasil pencarian. Open Graph (og:) mengontrol tampilan saat link dibagikan di media sosial.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;meta</span> <span class="attr">name</span>=<span class="string">"description"</span> <span class="attr">content</span>=<span class="string">"Belajar HTML dari dasar"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;meta</span> <span class="attr">property</span>=<span class="string">"og:title"</span> <span class="attr">content</span>=<span class="string">"Judul Website"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;meta</span> <span class="attr">property</span>=<span class="string">"og:image"</span> <span class="attr">content</span>=<span class="string">"https://domain/preview.jpg"</span><span class="tag">&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 20 -->
+<div data-topic="html-entities">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">20</div><h3 class="lesson-title">HTML Character Entities</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Karakter seperti &lt;, &gt;, &amp;, &quot;, &copy; memiliki arti khusus di HTML. Gunakan entity: <code>&amp;lt;</code> untuk &lt;, <code>&amp;gt;</code> untuk &gt;, <code>&amp;amp;</code> untuk &amp;, <code>&amp;copy;</code> untuk &copy;. <code>&amp;nbsp;</code> adalah spasi non-breaking.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code>&amp;lt; = &lt;
+&amp;gt; = &gt;
+&amp;amp; = &amp;
+&amp;copy; = &copy;
+&amp;nbsp; = spasi non-breaking</code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 21 -->
+<div data-topic="html-paths">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">21</div><h3 class="lesson-title">Path Relative vs Absolute (href, src)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Absolute path mencakup domain lengkap (https://example.com/gambar.jpg). Relative path berdasarkan lokasi file saat ini: <code>gambar.jpg</code> (satu folder), <code>images/gambar.jpg</code> (subfolder), <code>../gambar.jpg</code> (folder parent). Root-relative dimulai dengan slash: <code>/assets/logo.png</code>.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="comment">&lt;!-- Absolute --&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"https://domain.com/foto.jpg"</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- Relative --&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"foto.jpg"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="string">"../assets/icon.png"</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- Root-relative --&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"/produk/sepatu.html"</span><span class="tag">&gt;</span>Produk<span class="tag">&lt;/a&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 22 -->
+<div data-topic="html-data-attrs">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">22</div><h3 class="lesson-title">Custom Data Attribute (data-*)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Atribut <code>data-*</code> menyimpan data kustom pada elemen HTML. Contoh: <code>data-product-id="123"</code>. Di JavaScript dapat diakses via <code>element.dataset.productId</code>. Berguna untuk menyimpan data sementara.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"product"</span> <span class="attr">data-id</span>=<span class="string">"123"</span> <span class="attr">data-price</span>=<span class="string">"50000"</span><span class="tag">&gt;</span>
+  Sepatu
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="tag">&lt;button</span> <span class="attr">data-action</span>=<span class="string">"delete"</span> <span class="attr">data-item-id</span>=<span class="string">"5"</span><span class="tag">&gt;</span>
+  Hapus
+<span class="tag">&lt;/button&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 23 -->
+<div data-topic="html-responsive-img">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">23</div><h3 class="lesson-title">Responsive Images Basics (srcset, sizes)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> <code>srcset</code> menyediakan beberapa versi gambar untuk lebar layar berbeda. <code>sizes</code> memberi tahu browser perkiraan lebar gambar pada berbagai breakpoint. Browser otomatis memilih gambar terbaik.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;img</span>
+  <span class="attr">src</span>=<span class="string">"small.jpg"</span>
+  <span class="attr">srcset</span>=<span class="string">"medium.jpg 800w, large.jpg 1200w"</span>
+  <span class="attr">sizes</span>=<span class="string">"(max-width: 600px) 480px, 800px"</span>
+  <span class="attr">alt</span>=<span class="string">"Pemandangan"</span><span class="tag">&gt;</span></code></pre></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 24 -->
+<div data-topic="html-progressive">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">24</div><h3 class="lesson-title">Progressive Enhancement (konsep)</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Progressive enhancement adalah strategi membangun website dengan konten inti (HTML) terlebih dahulu yang dapat diakses di semua perangkat, kemudian menambahkan lapisan CSS untuk tampilan, dan JS untuk interaktivitas. Ini memastikan website tetap berfungsi meskipun CSS/JS gagal dimuat.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="comment">&lt;!-- Layer 1: konten (selalu work) --&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"page.html"</span><span class="tag">&gt;</span>Link<span class="tag">&lt;/a&gt;</span>
+
+<span class="comment">&lt;!-- Layer 2: CSS (enhancement) --&gt;</span>
+<span class="comment">&lt;!-- Layer 3: JavaScript (interaktivitas) --&gt;</span></code></pre></div></div>
+        <div class="info-box"><strong>Prinsip:</strong> HTML dulu (struktur dan konten), kemudian CSS (presentasi), terakhir JavaScript (behavior). Website harus tetap usable tanpa CSS/JS.</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 25 -->
+<div data-topic="html-mini-project">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header"><div class="lesson-info"><div class="lesson-number">25</div><h3 class="lesson-title">Praktik: Bikin Landing Sederhana</h3></div><div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+      <div class="lesson-body"><div class="lesson-content">
+        <div class="explanation"><strong>Penjelasan:</strong> Gunakan semua elemen yang telah dipelajari: struktur semantik, heading, paragraf, gambar, list, form, dan link. Buatlah halaman landing sederhana dengan header, hero section, fitur, dan footer.</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HTML</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div><div class="code-content"><pre><code><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="string">"id"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>Landing Page Saya<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;header&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Produk Hebat<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;nav&gt;</span>
+      <span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"#fitur"</span><span class="tag">&gt;</span>Fitur<span class="tag">&lt;/a&gt;</span>
+      <span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"#kontak"</span><span class="tag">&gt;</span>Kontak<span class="tag">&lt;/a&gt;</span>
+    <span class="tag">&lt;/nav&gt;</span>
+  <span class="tag">&lt;/header&gt;</span>
+  
+  <span class="tag">&lt;main&gt;</span>
+    <span class="tag">&lt;section&gt;</span>
+      <span class="tag">&lt;h2&gt;</span>Solusi Terbaik untuk Anda<span class="tag">&lt;/h2&gt;</span>
+      <span class="tag">&lt;p&gt;</span>Bergabunglah sekarang dan nikmati manfaatnya.<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"#"</span><span class="tag">&gt;</span>Daftar Gratis<span class="tag">&lt;/a&gt;</span>
+    <span class="tag">&lt;/section&gt;</span>
+    
+    <span class="tag">&lt;section</span> <span class="attr">id</span>=<span class="string">"fitur"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h2&gt;</span>Fitur Unggulan<span class="tag">&lt;/h2&gt;</span>
+      <span class="tag">&lt;ul&gt;</span>
+        <span class="tag">&lt;li&gt;</span>Cepat dan Efisien<span class="tag">&lt;/li&gt;</span>
+        <span class="tag">&lt;li&gt;</span>Mudah Digunakan<span class="tag">&lt;/li&gt;</span>
+        <span class="tag">&lt;li&gt;</span>Aman dan Terpercaya<span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;/ul&gt;</span>
+    <span class="tag">&lt;/section&gt;</span>
+  <span class="tag">&lt;/main&gt;</span>
+  
+  <span class="tag">&lt;footer&gt;</span>
+    <span class="tag">&lt;p&gt;</span>&amp;copy; 2025 Produk Hebat. All rights reserved.<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/footer&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></code></pre></div></div>
+        <div class="info-box">
+          <strong>Ceklist Proyek:</strong>
+          <ul>
+            <li>DOCTYPE dan struktur dasar HTML</li>
+            <li>Semantic elements (header, main, footer, nav, section)</li>
+            <li>Heading yang terstruktur (h1, h2)</li>
+            <li>Links untuk navigasi</li>
+            <li>List untuk fitur</li>
+            <li>Character entity untuk copyright</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    // Loading animation
+    const loadingScreen = document.getElementById('loading-screen');
+    const progressFill = document.getElementById('progressFill');
+    const progressStatus = document.getElementById('progressStatus');
+    
+    let progress = 0;
+    const loadingMessages = [
+      'Memuat konten...',
+      'Menyiapkan modul...',
+      'Mengoptimasi tampilan...',
+      'Hampir selesai...',
+      'Selamat datang!'
+    ];
+    
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15 + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(progressInterval);
+        
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => {
+            loadingScreen.remove();
+          }, 600);
+        }, 500);
+      }
+      
+      if (progressFill) {
+        progressFill.style.width = progress + '%';
+      }
+      if (progressStatus) {
+        progressStatus.textContent = Math.round(progress) + '%';
+      }
+      
+      const progressText = document.querySelector('.progress-text span');
+      if (progressText) {
+        const msgIndex = Math.min(Math.floor(progress / 25), loadingMessages.length - 1);
+        progressText.textContent = loadingMessages[msgIndex];
+      }
+    }, 200);
+
+    // Theme toggle
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") {
+      htmlEl.setAttribute("data-theme", "light");
+    }
+    themeToggle?.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    // Mobile menu
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle?.addEventListener("click", () => {
+      mobileMenu.classList.toggle("open");
+    });
+
+    // Lesson card toggle
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const card = header.parentElement;
+        card.classList.toggle("open");
+      });
+    });
+
+    // Copy code
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || block.querySelector("pre")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Tersalin!";
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    }
+
+    // Hide loading screen
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+      }, 3000);
+    });
+  </script>
+</body>
+</html>

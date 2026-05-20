@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database - CodeLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-secondary: #0d1117;
+      --fg: #e6edf3;
+      --fg-muted: #7d8590;
+      --accent: #f59e0b;
+      --accent-secondary: #ef4444;
+      --card: rgba(22, 27, 34, 0.8);
+      --card-hover: rgba(33, 38, 45, 0.9);
+      --border: rgba(240, 246, 252, 0.1);
+      --code-bg: #161b22;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 40px rgba(245, 158, 11, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f3f6;
+      --bg-secondary: #ffffff;
+      --fg: #1f2328;
+      --fg-muted: #656d76;
+      --card: rgba(255, 255, 255, 0.9);
+      --border: rgba(31, 35, 40, 0.15);
+      --code-bg: #f6f8fa;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { font-family: var(--font-display); background: var(--bg); color: var(--fg); line-height: 1.7; overflow-x: hidden; }
+
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.5s ease, visibility 0.5s ease; }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; color: var(--fg-muted); }
+
+    .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .grid-pattern { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; }
+    .gradient-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; opacity: 0.15; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent-secondary); bottom: -50px; left: -50px; opacity: 0.1; }
+
+            /* ===== NAVBAR STYLING ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(6, 8, 13, 0.95);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    /* Navigation Links Container */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-links > li {
+      position: relative;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--fg);
+      background: var(--card);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Arrow */
+    .nav-dropdown-arrow {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links li:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      min-width: 180px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .nav-links li:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-dropdown a {
+      display: block;
+      padding: 10px 14px;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+
+    .nav-dropdown a:hover {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .nav-dropdown a.active {
+      color: var(--accent);
+      background: rgba(0, 217, 160, 0.1);
+    }
+
+    /* Dropdown Divider */
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* Dropdown Section Label */
+    .dropdown-label {
+      padding: 8px 14px 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Nav Actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+      width: 40px;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover,
+    .mobile-toggle:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobile-toggle span {
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(6, 8, 13, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      z-index: 999;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .mobile-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 16px;
+      color: var(--fg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    .page-hero { min-height: 50vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 60px; position: relative; }
+    .page-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; }
+    .page-hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 100px; font-size: 0.85rem; color: var(--accent); margin-bottom: 24px; }
+    .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 20px; }
+    .page-hero h1 .highlight { color: var(--accent); }
+    .page-hero p { font-size: 1.1rem; color: var(--fg-muted); margin-bottom: 32px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .lesson-grid { display: grid; gap: 16px; }
+    .lesson-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); }
+    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--glow); }
+    .lesson-card.open { border-color: var(--accent); }
+    .lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; }
+    .lesson-info { display: flex; align-items: center; gap: 16px; }
+    .lesson-number { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; }
+    .lesson-title { font-size: 1.1rem; font-weight: 600; }
+    .lesson-toggle { color: var(--fg-muted); transition: transform 0.3s ease; }
+    .lesson-card.open .lesson-toggle { transform: rotate(180deg); }
+    .lesson-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .lesson-card.open .lesson-body { max-height: 3500px; }
+    .lesson-content { padding: 0 24px 24px; }
+    .lesson-text { color: var(--fg-muted); margin-bottom: 16px; font-size: 0.95rem; }
+
+    .explanation { margin-bottom: 1rem; background: rgba(245, 158, 11, 0.05); padding: 12px 16px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.95rem; line-height: 1.6; }
+    .explanation strong { color: var(--accent); }
+
+    .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 16px 0; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border); }
+    .code-lang { font-size: 0.8rem; font-weight: 600; color: var(--accent); font-family: var(--font-mono); }
+    .code-copy { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg); font-size: 0.8rem; cursor: pointer; }
+    .code-copy:hover { background: var(--accent); color: #000; }
+    .code-content { padding: 16px; overflow-x: auto; }
+    .code-content pre { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.6; white-space: pre; }
+
+    .info-box { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: var(--radius); padding: 16px; margin-top: 16px; font-size: 0.9rem; color: var(--fg-muted); }
+    .info-box strong { color: var(--accent); }
+    .info-box ul { margin: 8px 0 0 20px; }
+
+    .keyword { color: #ff7b54; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; font-style: italic; }
+    .property { color: #d2a8ff; }
+    .number { color: #f0883e; }
+    .function { color: #d2a8ff; }
+    .type { color: #7ee787; }
+    .operator { color: #ff7b72; }
+
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+    .comparison-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .comparison-card h4 { color: var(--accent); margin-bottom: 8px; font-size: 1rem; }
+    .comparison-card ul { list-style: none; }
+    .comparison-card li { padding: 4px 0; color: var(--fg-muted); font-size: 0.9rem; }
+
+    .diagram { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; overflow-x: auto; }
+    .diagram pre { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.4; color: var(--fg); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Memuat materi Database...</div>
+  </div>
+
+  <div class="bg-effects">
+    <div class="grid-pattern"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <div class="logo-icon">CL</div>
+        <span>CodeLearn</span>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="../index.html">
+            Home
+          </a>
+        </li>
+        
+        <!-- Dropdown: Frontend -->
+        <li>
+          <a href="#">
+            Frontend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <div class="dropdown-label">Markup & Style</div>
+            <a href="html.html">HTML</a>
+            <a href="css.html">CSS</a>
+            <a href="responsive.html">Responsive Design</a>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-label">Programming</div>
+            <a href="js.html">JavaScript</a>
+            <a href="framework.html">Framework Frontend</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: Backend -->
+        <li>
+          <a href="#">
+            Backend
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="api.html">API</a>
+            <a href="beckend.html">Backend Dev</a>
+            <a href="database.html">Database</a>
+          </div>
+        </li>
+
+        <!-- Dropdown: DevOps -->
+        <li>
+          <a href="#">
+            DevOps
+            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown">
+            <a href="git.html">Git & GitHub</a>
+            <a href="deployment.html">Deployment</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Frontend</div>
+      <a href="html.html">HTML</a>
+      <a href="css.html">CSS</a>
+      <a href="responsive.html">Responsive Design</a>
+      <a href="js.html">JavaScript</a>
+      <a href="framework.html">Framework Frontend</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">Backend</div>
+      <a href="api.html">API</a>
+      <a href="beckend.html">Backend Development</a>
+      <a href="database.html">Database</a>
+    </div>
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-title">DevOps</div>
+      <a href="git.html">Git & GitHub</a>
+      <a href="deployment.html">Deployment</a>
+    </div>
+  </div>
+
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="page-hero-badge">18 Lessons</div>
+      <h1>Belajar <span class="highlight">Database</span></h1>
+      <p>Kuasai penyimpanan data: SQL, NoSQL, database design, ORM, dan best practices mengelola data aplikasi.</p>
+    </div>
+  </section>
+
+  <div class="main-content">
+
+<!-- LESSON 1: Apa itu Database -->
+<div data-topic="db-intro">
+  <div class="lesson-grid">
+    <div class="lesson-card open">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">1</div><h3 class="lesson-title">Apa itu Database?</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Database adalah sistem penyimpanan data yang terorganisir, memungkinkan aplikasi menyimpan, mengambil, dan mengelola informasi secara efisien.</p>
+          <div class="explanation">
+            <strong>Komponen Database:</strong><br>
+            1. <strong>DBMS (Database Management System)</strong> — Software untuk mengelola database<br>
+            2. <strong>Schema</strong> — Struktur tabel dan relasi<br>
+            3. <strong>Data</strong> — Informasi yang disimpan<br>
+            4. <strong>Query Language</strong> — Bahasa untuk berinteraksi dengan data (SQL)
+          </div>
+          <div class="diagram">
+            <pre>
+APPLICATION LAYER              DATABASE LAYER
+─────────────────              ──────────────
+                               ┌──────────────────┐
+    ─── Query Request ───────► │                  │
+                               │      DBMS        │
+    ◄── Data Response ──────── │  (PostgreSQL)    │
+                               │                  │
+                               ├────────┬─────────┤
+                               │ Tables │ Indexes │
+                               ├────────┼─────────┤
+                               │ Users  │ Posts   │
+                               └────────┴─────────┘
+            </pre>
+          </div>
+          <div class="info-box">
+            <strong>Mengapa Perlu Database?</strong><br>
+            - Persistensi data (tidak hilang saat restart)<br>
+            - Query yang powerful<br>
+            - Concurrency (banyak user akses bersamaan)<br>
+            - Data integrity dan consistency<br>
+            - Security dan access control
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 2: SQL vs NoSQL -->
+<div data-topic="db-sql-nosql">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">2</div><h3 class="lesson-title">SQL vs NoSQL Database</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Ada dua kategori utama database: SQL (Relational) dan NoSQL (Non-Relational). Pilih berdasarkan kebutuhan aplikasi.</p>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>SQL (Relational)</h4>
+              <ul>
+                <li>Structured data</li>
+                <li>Fixed schema</li>
+                <li>ACID compliant</li>
+                <li>Complex queries (JOIN)</li>
+                <li>Vertical scaling</li>
+                <li>PostgreSQL, MySQL, SQLite</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>NoSQL (Non-Relational)</h4>
+              <ul>
+                <li>Flexible schema</li>
+                <li>JSON-like documents</li>
+                <li>Horizontal scaling</li>
+                <li>High performance</li>
+                <li>Unstructured data</li>
+                <li>MongoDB, Redis, DynamoDB</li>
+              </ul>
+            </div>
+          </div>
+          <div class="explanation">
+            <strong>Kapan Pilih Apa?</strong><br>
+            <strong>SQL:</strong> Aplikasi dengan data terstruktur, membutuhkan transaksi, relasi kompleks (e-commerce, banking, ERP)<br>
+            <strong>NoSQL:</strong> Data tidak terstruktur, real-time analytics, content management, IoT, high write throughput
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 3: SQL Basics -->
+<div data-topic="db-sql-basics">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">3</div><h3 class="lesson-title">SQL Basics: SELECT, INSERT, UPDATE, DELETE</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">SQL (Structured Query Language) adalah bahasa standar untuk mengelola database relasional.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- SELECT: Mengambil data</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users;
+<span class="keyword">SELECT</span> name, email <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> age <span class="operator">></span> <span class="number">18</span>;
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users 
+<span class="keyword">WHERE</span> city <span class="operator">=</span> <span class="string">'Jakarta'</span> 
+<span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> <span class="number">10</span> <span class="keyword">OFFSET</span> <span class="number">0</span>;
+
+<span class="comment">-- INSERT: Menambah data</span>
+<span class="keyword">INSERT INTO</span> users (name, email, age)
+<span class="keyword">VALUES</span> (<span class="string">'John Doe'</span>, <span class="string">'john@email.com'</span>, <span class="number">25</span>);
+
+<span class="comment">-- Multiple insert</span>
+<span class="keyword">INSERT INTO</span> users (name, email)
+<span class="keyword">VALUES</span> 
+  (<span class="string">'Alice'</span>, <span class="string">'alice@email.com'</span>),
+  (<span class="string">'Bob'</span>, <span class="string">'bob@email.com'</span>);
+
+<span class="comment">-- UPDATE: Mengubah data</span>
+<span class="keyword">UPDATE</span> users 
+<span class="keyword">SET</span> email <span class="operator">=</span> <span class="string">'newemail@example.com'</span>, age <span class="operator">=</span> <span class="number">26</span>
+<span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;
+
+<span class="comment">-- DELETE: Menghapus data</span>
+<span class="keyword">DELETE FROM</span> users <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;
+<span class="keyword">DELETE FROM</span> users <span class="keyword">WHERE</span> last_login <span class="operator"><</span> <span class="string">'2023-01-01'</span>;</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Warning:</strong> Selalu gunakan WHERE clause pada UPDATE dan DELETE. Tanpa WHERE, semua baris akan terpengaruh!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 4: Table Creation -->
+<div data-topic="db-table-creation">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">4</div><h3 class="lesson-title">Membuat Table & Data Types</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Table adalah struktur dasar penyimpanan di database relasional. Setiap kolom memiliki tipe data spesifik.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- Membuat tabel users</span>
+<span class="keyword">CREATE TABLE</span> users (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span>,
+  email <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">UNIQUE NOT NULL</span>,
+  password <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">NOT NULL</span>,
+  age <span class="type">INTEGER</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>,
+  is_active <span class="type">BOOLEAN</span> <span class="keyword">DEFAULT TRUE</span>,
+  balance <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">0.00</span>,
+  created_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT CURRENT_TIMESTAMP</span>,
+  updated_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="comment">-- Data Types di PostgreSQL</span>
+<span class="comment">-- INTEGER, BIGINT, SMALLINT  → Angka bulat</span>
+<span class="comment">-- DECIMAL(precision, scale)   → Angka desimal (uang)</span>
+<span class="comment">-- VARCHAR(n), TEXT            → Teks</span>
+<span class="comment">-- BOOLEAN                     → true/false</span>
+<span class="comment">-- DATE, TIME, TIMESTAMP       → Waktu</span>
+<span class="comment">-- JSONB                       → JSON data</span>
+<span class="comment">-- UUID                        → Unique identifier</span>
+
+<span class="comment">-- Menambah kolom</span>
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD COLUMN</span> phone <span class="type">VARCHAR</span>(<span class="number">20</span>);
+
+<span class="comment">-- Menghapus kolom</span>
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">DROP COLUMN</span> phone;
+
+<span class="comment">-- Menghapus tabel</span>
+<span class="keyword">DROP TABLE IF EXISTS</span> users;</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 5: Relationships -->
+<div data-topic="db-relationships">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">5</div><h3 class="lesson-title">Relationships: One-to-One, One-to-Many, Many-to-Many</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Relasi antar tabel adalah inti dari database relasional. Memahami jenis relasi sangat penting untuk desain database yang baik.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- ONE-TO-ONE: User punya satu profile</span>
+<span class="keyword">CREATE TABLE</span> users (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  name <span class="type">VARCHAR</span>(<span class="number">100</span>)
+);
+
+<span class="keyword">CREATE TABLE</span> profiles (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  user_id <span class="type">INTEGER</span> <span class="keyword">UNIQUE REFERENCES</span> users(id),
+  bio <span class="type">TEXT</span>,
+  avatar_url <span class="type">VARCHAR</span>(<span class="number">255</span>)
+);
+
+<span class="comment">-- ONE-TO-MANY: User punya banyak posts</span>
+<span class="keyword">CREATE TABLE</span> posts (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  user_id <span class="type">INTEGER REFERENCES</span> users(id),  <span class="comment">-- Foreign key</span>
+  title <span class="type">VARCHAR</span>(<span class="number">255</span>),
+  content <span class="type">TEXT</span>
+);
+
+<span class="comment">-- MANY-TO-MANY: Students <-> Courses</span>
+<span class="keyword">CREATE TABLE</span> students (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  name <span class="type">VARCHAR</span>(<span class="number">100</span>)
+);
+
+<span class="keyword">CREATE TABLE</span> courses (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  name <span class="type">VARCHAR</span>(<span class="number">100</span>)
+);
+
+<span class="keyword">CREATE TABLE</span> enrollments (  <span class="comment">-- Junction table</span>
+  student_id <span class="type">INTEGER REFERENCES</span> students(id),
+  course_id <span class="type">INTEGER REFERENCES</span> courses(id),
+  enrolled_at <span class="type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+  <span class="keyword">PRIMARY KEY</span> (student_id, course_id)
+);</code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+ONE-TO-ONE                ONE-TO-MANY               MANY-TO-MANY
+────────────              ────────────              ────────────
+┌───────┐    ┌─────────┐  ┌───────┐    ┌───────┐   ┌───────┐   ┌───────────┐   ┌───────┐
+│ User  │───►│ Profile │  │ User  │───►│ Post  │   │Student│──►│Enrollment │◄──│ Course│
+│  id   │    │ user_id │  │  id   │    │user_id│   │  id   │   │student_id│   │  id   │
+└───────┘    └─────────┘  └───────┘    └───────┘   └───────┘   │course_id │   └───────┘
+     │                       │ │          │ │                   └───────────┘
+     └───────────────────────┘ └──────────┘ └─────────────────────────┘
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 6: JOINs -->
+<div data-topic="db-joins">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">6</div><h3 class="lesson-title">JOIN: Menggabungkan Tabel</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">JOIN digunakan untuk menggabungkan data dari dua atau lebih tabel berdasarkan kolom yang berhubungan.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- INNER JOIN: Data yang ada di kedua tabel</span>
+<span class="keyword">SELECT</span> users.name, posts.title
+<span class="keyword">FROM</span> users
+<span class="keyword">INNER JOIN</span> posts <span class="keyword">ON</span> users.id <span class="operator">=</span> posts.user_id;
+
+<span class="comment">-- LEFT JOIN: Semua dari kiri, cocokan dari kanan</span>
+<span class="keyword">SELECT</span> users.name, posts.title
+<span class="keyword">FROM</span> users
+<span class="keyword">LEFT JOIN</span> posts <span class="keyword">ON</span> users.id <span class="operator">=</span> posts.user_id;
+<span class="comment">-- User tanpa post tetap muncul (posts.title = NULL)</span>
+
+<span class="comment">-- RIGHT JOIN: Semua dari kanan</span>
+<span class="keyword">SELECT</span> users.name, posts.title
+<span class="keyword">FROM</span> users
+<span class="keyword">RIGHT JOIN</span> posts <span class="keyword">ON</span> users.id <span class="operator">=</span> posts.user_id;
+
+<span class="comment">-- FULL OUTER JOIN: Semua dari keduanya</span>
+<span class="keyword">SELECT</span> users.name, posts.title
+<span class="keyword">FROM</span> users
+<span class="keyword">FULL OUTER JOIN</span> posts <span class="keyword">ON</span> users.id <span class="operator">=</span> posts.user_id;
+
+<span class="comment">-- Multiple JOINs</span>
+<span class="keyword">SELECT</span> 
+  users.name,
+  posts.title,
+  comments.content
+<span class="keyword">FROM</span> users
+<span class="keyword">JOIN</span> posts <span class="keyword">ON</span> users.id <span class="operator">=</span> posts.user_id
+<span class="keyword">JOIN</span> comments <span class="keyword">ON</span> posts.id <span class="operator">=</span> comments.post_id;
+
+<span class="comment">-- Self JOIN: Tabel bergabung dengan dirinya sendiri</span>
+<span class="keyword">SELECT</span> e1.name <span class="keyword">AS</span> employee, e2.name <span class="keyword">AS</span> manager
+<span class="keyword">FROM</span> employees e1
+<span class="keyword">LEFT JOIN</span> employees e2 <span class="keyword">ON</span> e1.manager_id <span class="operator">=</span> e2.id;</code></pre></div>
+          </div>
+          <div class="diagram">
+            <pre>
+     INNER JOIN          LEFT JOIN           RIGHT JOIN         FULL OUTER JOIN
+    ┌───────────┐       ┌───────────┐       ┌───────────┐       ┌───────────┐
+   ╱─┴─╲       ╱─┴─╲   ╱───╲       ╱─┴─╲   ╱─┴─╲       ╱───╲   ╱───╲       ╱───╲
+  │  A  │∩│  B  │ │  │  A  │⊂│  B  │ │  │  A  │⊃│  B  │ │  │  A  │∪│  B  │
+   ╲─┬─╱       ╲─┬─╱   ╲───╱       ╲─┬─╱   ╲─┬─╱       ╲───╱   ╲───╱       ╲───╱
+    └───────────┘       └───────────┘       └───────────┘       └───────────┘
+    Hanya yang         Semua dari A        Semua dari B        Semua dari
+    cocok keduanya     + yang cocok B      + yang cocok A      A dan B
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 7: Aggregation -->
+<div data-topic="db-aggregation">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">7</div><h3 class="lesson-title">Aggregation: GROUP BY, COUNT, SUM, AVG</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Fungsi agregasi digunakan untuk menghitung nilai berdasarkan sekumpulan baris data.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- COUNT: Menghitung jumlah baris</span>
+<span class="keyword">SELECT</span> <span class="function">COUNT</span>(*) <span class="keyword">AS</span> total_users <span class="keyword">FROM</span> users;
+<span class="keyword">SELECT</span> <span class="function">COUNT</span>(email) <span class="keyword">AS</span> users_with_email <span class="keyword">FROM</span> users;
+<span class="keyword">SELECT</span> <span class="function">COUNT</span>(<span class="keyword">DISTINCT</span> city) <span class="keyword">AS</span> unique_cities <span class="keyword">FROM</span> users;
+
+<span class="comment">-- SUM, AVG, MIN, MAX</span>
+<span class="keyword">SELECT</span> 
+  <span class="function">SUM</span>(balance) <span class="keyword">AS</span> total_balance,
+  <span class="function">AVG</span>(balance) <span class="keyword">AS</span> avg_balance,
+  <span class="function">MIN</span>(age) <span class="keyword">AS</span> youngest,
+  <span class="function">MAX</span>(age) <span class="keyword">AS</span> oldest
+<span class="keyword">FROM</span> users;
+
+<span class="comment">-- GROUP BY: Mengelompokkan data</span>
+<span class="keyword">SELECT</span> city, <span class="function">COUNT</span>(*) <span class="keyword">AS</span> user_count
+<span class="keyword">FROM</span> users
+<span class="keyword">GROUP BY</span> city;
+
+<span class="comment">-- GROUP BY dengan multiple columns</span>
+<span class="keyword">SELECT</span> city, is_active, <span class="function">COUNT</span>(*) <span class="keyword">AS</span> count
+<span class="keyword">FROM</span> users
+<span class="keyword">GROUP BY</span> city, is_active;
+
+<span class="comment">-- HAVING: Filter setelah GROUP BY (bukan WHERE!)</span>
+<span class="keyword">SELECT</span> city, <span class="function">COUNT</span>(*) <span class="keyword">AS</span> user_count
+<span class="keyword">FROM</span> users
+<span class="keyword">GROUP BY</span> city
+<span class="keyword">HAVING</span> <span class="function">COUNT</span>(*) <span class="operator">></span> <span class="number">10</span>
+<span class="keyword">ORDER BY</span> user_count <span class="keyword">DESC</span>;
+
+<span class="comment">-- Contoh kompleks: Stats per user</span>
+<span class="keyword">SELECT</span> 
+  users.name,
+  <span class="function">COUNT</span>(posts.id) <span class="keyword">AS</span> post_count,
+  <span class="function">SUM</span>(posts.views) <span class="keyword">AS</span> total_views,
+  <span class="function">AVG</span>(posts.views) <span class="keyword">AS</span> avg_views
+<span class="keyword">FROM</span> users
+<span class="keyword">LEFT JOIN</span> posts <span class="keyword">ON</span> users.id <span class="operator">=</span> posts.user_id
+<span class="keyword">GROUP BY</span> users.id, users.name
+<span class="keyword">ORDER BY</span> total_views <span class="keyword">DESC</span>;</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 8: Indexes -->
+<div data-topic="db-indexes">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">8</div><h3 class="lesson-title">Indexes: Speed Up Queries</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Index adalah struktur data yang mempercepat pencarian data. Tanpa index, database harus scan seluruh tabel (sequential scan).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- Membuat index</span>
+<span class="keyword">CREATE INDEX</span> idx_users_email <span class="keyword">ON</span> users(email);
+<span class="keyword">CREATE INDEX</span> idx_users_city <span class="keyword">ON</span> users(city);
+
+<span class="comment">-- Composite index (multiple columns)</span>
+<span class="keyword">CREATE INDEX</span> idx_users_city_active <span class="keyword">ON</span> users(city, is_active);
+
+<span class="comment">-- Unique index</span>
+<span class="keyword">CREATE UNIQUE INDEX</span> idx_users_email_unique <span class="keyword">ON</span> users(email);
+
+<span class="comment">-- Partial index (conditional)</span>
+<span class="keyword">CREATE INDEX</span> idx_active_users <span class="keyword">ON</span> users(email)
+<span class="keyword">WHERE</span> is_active <span class="operator">=</span> <span class="keyword">TRUE</span>;
+
+<span class="comment">-- Lihat indexes</span>
+<span class="keyword">\di</span>  <span class="comment">-- PostgreSQL</span>
+
+<span class="comment">-- Hapus index</span>
+<span class="keyword">DROP INDEX</span> idx_users_city;
+
+<span class="comment">-- Check query execution plan</span>
+<span class="keyword">EXPLAIN ANALYZE</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> email <span class="operator">=</span> <span class="string">'test@email.com'</span>;
+<span class="comment">-- Index Scan vs Sequential Scan</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Kapan Perlu Index?</strong><br>
+            - Kolom yang sering di-WHERE clause<br>
+            - Kolom yang sering di-JOIN<br>
+            - Kolom yang sering di-ORDER BY<br>
+            <br>
+            <strong>Trade-offs:</strong><br>
+            - Index memperlambat INSERT/UPDATE/DELETE<br>
+            - Index menggunakan storage tambahan<br>
+            - Jangan index semua kolom!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 9: Transactions -->
+<div data-topic="db-transactions">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">9</div><h3 class="lesson-title">Transactions & ACID</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Transaction adalah grup operasi yang dijalankan sebagai satu unit. ACID properties menjamin keandalan data.</p>
+          <div class="explanation">
+            <strong>ACID Properties:</strong><br>
+            - <strong>Atomicity</strong> — Semua operasi berhasil, atau tidak sama sekali<br>
+            - <strong>Consistency</strong> — Data selalu dalam state valid<br>
+            - <strong>Isolation</strong> — Transaksi paralel tidak saling mengganggu<br>
+            - <strong>Durability</strong> — Data yang di-commit permanen tersimpan
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- Contoh: Transfer uang antar rekening</span>
+<span class="keyword">BEGIN</span>;  <span class="comment">-- Start transaction</span>
+
+<span class="comment">-- Kurangi saldo pengirim</span>
+<span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">100</span>
+<span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;
+
+<span class="comment">-- Tambah saldo penerima</span>
+<span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> <span class="number">100</span>
+<span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">2</span>;
+
+<span class="comment">-- Commit jika semua berhasil</span>
+<span class="keyword">COMMIT</span>;
+
+<span class="comment">-- Atau ROLLBACK jika ada error</span>
+<span class="comment">-- ROLLBACK;</span>
+
+<span class="comment">-- Dengan SAVEPOINT</span>
+<span class="keyword">BEGIN</span>;
+<span class="keyword">INSERT INTO</span> orders (user_id) <span class="keyword">VALUES</span> (<span class="number">1</span>);
+<span class="keyword">SAVEPOINT</span> order_created;
+
+<span class="keyword">INSERT INTO</span> order_items <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'Product A'</span>);
+<span class="comment">-- Jika error, bisa rollback ke savepoint</span>
+<span class="keyword">ROLLBACK TO</span> order_created;
+
+<span class="keyword">COMMIT</span>;</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 10: Node.js + PostgreSQL -->
+<div data-topic="db-node-postgres">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">10</div><h3 class="lesson-title">Connecting Node.js to PostgreSQL</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Menghubungkan aplikasi Node.js dengan PostgreSQL menggunakan pg (node-postgres) driver.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install pg</span>
+<span class="keyword">const</span> { Pool } = <span class="function">require</span>(<span class="string">'pg'</span>);
+
+<span class="comment">// Connection pool (recommended)</span>
+<span class="keyword">const</span> pool = <span class="keyword">new</span> <span class="function">Pool</span>({
+  <span class="property">host</span>: process.env.<span class="property">DB_HOST</span>,
+  <span class="property">port</span>: process.env.<span class="property">DB_PORT</span> || <span class="number">5432</span>,
+  <span class="property">database</span>: process.env.<span class="property">DB_NAME</span>,
+  <span class="property">user</span>: process.env.<span class="property">DB_USER</span>,
+  <span class="property">password</span>: process.env.<span class="property">DB_PASSWORD</span>,
+  <span class="property">max</span>: <span class="number">20</span>,  <span class="comment">// Max connections in pool</span>
+  <span class="property">idleTimeoutMillis</span>: <span class="number">30000</span>,
+  <span class="property">connectionTimeoutMillis</span>: <span class="number">2000</span>
+});
+
+<span class="comment">// Simple query</span>
+<span class="keyword">const</span> result = <span class="keyword">await</span> pool.<span class="function">query</span>(<span class="string">'SELECT * FROM users WHERE id = $1'</span>, [<span class="number">1</span>]);
+console.<span class="function">log</span>(result.<span class="property">rows</span>);
+
+<span class="comment">// Parameterized query (PREVENT SQL INJECTION!)</span>
+<span class="keyword">const</span> text = <span class="string">'INSERT INTO users(name, email) VALUES($1, $2) RETURNING *'</span>;
+<span class="keyword">const</span> values = [<span class="string">'John'</span>, <span class="string">'john@email.com'</span>];
+<span class="keyword">const</span> res = <span class="keyword">await</span> pool.<span class="function">query</span>(text, values);
+
+<span class="comment">// Transaction</span>
+<span class="keyword">const</span> client = <span class="keyword">await</span> pool.<span class="function">connect</span>();
+<span class="keyword">try</span> {
+  <span class="keyword">await</span> client.<span class="function">query</span>(<span class="string">'BEGIN'</span>);
+  
+  <span class="keyword">await</span> client.<span class="function">query</span>(<span class="string">'UPDATE accounts SET balance = balance - $1 WHERE id = $2'</span>, [<span class="number">100</span>, <span class="number">1</span>]);
+  <span class="keyword">await</span> client.<span class="function">query</span>(<span class="string">'UPDATE accounts SET balance = balance + $1 WHERE id = $2'</span>, [<span class="number">100</span>, <span class="number">2</span>]);
+  
+  <span class="keyword">await</span> client.<span class="function">query</span>(<span class="string">'COMMIT'</span>);
+} <span class="keyword">catch</span> (err) {
+  <span class="keyword">await</span> client.<span class="function">query</span>(<span class="string">'ROLLBACK'</span>);
+  <span class="keyword">throw</span> err;
+} <span class="keyword">finally</span> {
+  client.<span class="function">release</span>();
+}</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 11: ORM Prisma -->
+<div data-topic="db-orm">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">11</div><h3 class="lesson-title">ORM: Prisma</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">ORM (Object-Relational Mapping) memungkinkan berinteraksi dengan database menggunakan code, bukan raw SQL. Prisma adalah ORM modern untuk Node.js.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install prisma --save-dev</span>
+<span class="comment">// npx prisma init</span>
+
+<span class="comment">// prisma/schema.prisma</span>
+model User {
+  id        Int      <span class="property">@id</span> <span class="property">@default</span>(autoincrement())
+  email     String   <span class="property">@unique</span>
+  name      String?
+  posts     Post[]
+  createdAt DateTime <span class="property">@default</span>(now())
+}
+
+model Post {
+  id        Int      <span class="property">@id</span> <span class="property">@default</span>(autoincrement())
+  title     String
+  content   String?
+  author    User     <span class="property">@relation</span>(fields: [authorId], references: [id])
+  authorId  Int
+}
+
+<span class="comment">// Query dengan Prisma Client</span>
+<span class="keyword">const</span> { PrismaClient } = <span class="function">require</span>(<span class="string">'@prisma/client'</span>);
+<span class="keyword">const</span> prisma = <span class="keyword">new</span> <span class="function">PrismaClient</span>();
+
+<span class="comment">// Create</span>
+<span class="keyword">const</span> user = <span class="keyword">await</span> prisma.user.<span class="function">create</span>({
+  <span class="property">data</span>: {
+    name: <span class="string">'John'</span>,
+    email: <span class="string">'john@email.com'</span>
+  }
+});
+
+<span class="comment">// Read</span>
+<span class="keyword">const</span> users = <span class="keyword">await</span> prisma.user.<span class="function">findMany</span>({
+  <span class="property">where</span>: { name: { <span class="property">contains</span>: <span class="string">'John'</span> } },
+  <span class="property">include</span>: { posts: <span class="keyword">true</span> },
+  <span class="property">orderBy</span>: { createdAt: <span class="string">'desc'</span> }
+});
+
+<span class="comment">// Update</span>
+<span class="keyword">await</span> prisma.user.<span class="function">update</span>({
+  <span class="property">where</span>: { id: <span class="number">1</span> },
+  <span class="property">data</span>: { name: <span class="string">'Updated Name'</span> }
+});
+
+<span class="comment">// Delete</span>
+<span class="keyword">await</span> prisma.user.<span class="function">delete</span>({ <span class="property">where</span>: { id: <span class="number">1</span> } });</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Kelebihan Prisma:</strong><br>
+            - Type-safe dengan TypeScript<br>
+            - Auto-generated client<br>
+            - Migration system built-in<br>
+            - Intellisense di VS Code<br>
+            - Visual database browser (Prisma Studio)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 12: MongoDB -->
+<div data-topic="db-mongodb">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">12</div><h3 class="lesson-title">MongoDB: NoSQL Database</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">MongoDB adalah database NoSQL document-based. Data disimpan dalam format BSON (binary JSON), fleksibel tanpa fixed schema.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// Install: npm install mongoose</span>
+<span class="keyword">const</span> mongoose = <span class="function">require</span>(<span class="string">'mongoose'</span>);
+
+<span class="comment">// Connect</span>
+<span class="keyword">await</span> mongoose.<span class="function">connect</span>(process.env.<span class="property">MONGODB_URI</span>);
+
+<span class="comment">// Define Schema</span>
+<span class="keyword">const</span> userSchema = <span class="keyword">new</span> mongoose.<span class="function">Schema</span>({
+  name: { <span class="property">type</span>: String, <span class="property">required</span>: <span class="keyword">true</span> },
+  email: { <span class="property">type</span>: String, <span class="property">required</span>: <span class="keyword">true</span>, <span class="property">unique</span>: <span class="keyword">true</span> },
+  age: { <span class="property">type</span>: Number, <span class="property">min</span>: <span class="number">0</span> },
+  tags: [String],
+  address: {
+    street: String,
+    city: String,
+    country: String
+  }
+}, { <span class="property">timestamps</span>: <span class="keyword">true</span> });
+
+<span class="keyword">const</span> User = mongoose.<span class="function">model</span>(<span class="string">'User'</span>, userSchema);
+
+<span class="comment">// CRUD Operations</span>
+<span class="comment">// Create</span>
+<span class="keyword">const</span> user = <span class="keyword">await</span> User.<span class="function">create</span>({
+  name: <span class="string">'John Doe'</span>,
+  email: <span class="string">'john@email.com'</span>,
+  tags: [<span class="string">'developer'</span>, <span class="string">'designer'</span>]
+});
+
+<span class="comment">// Read</span>
+<span class="keyword">const</span> users = <span class="keyword">await</span> User.<span class="function">find</span>({ age: { $gte: <span class="number">18</span> } })
+  .<span class="function">sort</span>({ createdAt: <span class="number">-1</span> })
+  .<span class="function">limit</span>(<span class="number">10</span>);
+
+<span class="comment">// Update</span>
+<span class="keyword">await</span> User.<span class="function">findByIdAndUpdate</span>(id, { name: <span class="string">'New Name'</span> }, { <span class="property">new</span>: <span class="keyword">true</span> });
+
+<span class="comment">// Delete</span>
+<span class="keyword">await</span> User.<span class="function">findByIdAndDelete</span>(id);</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 13: Database Migration -->
+<div data-topic="db-migration">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">13</div><h3 class="lesson-title">Database Migrations</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Migration adalah cara version control untuk database. Setiap perubahan schema dicatat sebagai file yang bisa dijalankan ulang.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># Prisma Migrations</span>
+npx prisma migrate dev <span class="property">--name</span> init
+npx prisma migrate dev <span class="property">--name</span> add_user_avatar
+npx prisma migrate deploy  <span class="comment"># Production</span>
+
+<span class="comment"># Knex.js Migrations</span>
+npx knex migrate:make create_users_table
+npx knex migrate:latest
+npx knex migrate:rollback
+
+<span class="comment"># Sequelize Migrations</span>
+npx sequelize-cli migration:generate --name create-users
+npx sequelize-cli db:migrate
+npx sequelize-cli db:migrate:undo:all</code></pre></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript (Knex Migration)</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">// migrations/20240101000000_create_users.js</span>
+<span class="keyword">exports</span>.<span class="property">up</span> = <span class="keyword">function</span>(knex) {
+  <span class="keyword">return</span> knex.schema.<span class="function">createTable</span>(<span class="string">'users'</span>, table => {
+    table.<span class="function">increments</span>(<span class="string">'id'</span>).<span class="function">primary</span>();
+    table.<span class="function">string</span>(<span class="string">'name'</span>, <span class="number">100</span>).<span class="function">notNullable</span>();
+    table.<span class="function">string</span>(<span class="string">'email'</span>, <span class="number">255</span>).<span class="function">unique</span>().<span class="function">notNullable</span>();
+    table.<span class="function">timestamps</span>(<span class="keyword">true</span>, <span class="keyword">true</span>);
+  });
+};
+
+<span class="keyword">exports</span>.<span class="property">down</span> = <span class="keyword">function</span>(knex) {
+  <span class="keyword">return</span> knex.schema.<span class="function">dropTableIfExists</span>(<span class="string">'users'</span>);
+};</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 14: Backup & Restore -->
+<div data-topic="db-backup">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">14</div><h3 class="lesson-title">Backup & Restore</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Backup sangat penting untuk recovery data. Gunakan tools yang disediakan DBMS.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment"># PostgreSQL Backup</span>
+<span class="comment"># Full database backup</span>
+pg_dump <span class="property">-U</span> postgres <span class="property">-d</span> mydb <span class="property">-F</span> c <span class="property">-f</span> backup.dump
+
+<span class="comment"># SQL format (human readable)</span>
+pg_dump <span class="property">-U</span> postgres <span class="property">-d</span> mydb > backup.sql
+
+<span class="comment"># Backup specific tables</span>
+pg_dump <span class="property">-U</span> postgres <span class="property">-d</span> mydb <span class="property">-t</span> users <span class="property">-t</span> posts > tables_backup.sql
+
+<span class="comment"># Restore</span>
+pg_restore <span class="property">-U</span> postgres <span class="property">-d</span> mydb backup.dump
+psql <span class="property">-U</span> postgres <span class="property">-d</span> mydb <span class="property">-f</span> backup.sql
+
+<span class="comment"># MongoDB Backup</span>
+mongodump <span class="property">--uri</span>=<span class="string">"mongodb://localhost:27017/mydb"</span> <span class="property">--out</span>=./backup
+
+<span class="comment"># MongoDB Restore</span>
+mongorestore <span class="property">--uri</span>=<span class="string">"mongodb://localhost:27017/mydb"</span> ./backup/mydb
+
+<span class="comment"># MySQL Backup</span>
+mysqldump <span class="property">-u</span> root <span class="property">-p</span> mydb > backup.sql
+
+<span class="comment"># MySQL Restore</span>
+mysql <span class="property">-u</span> root <span class="property">-p</span> mydb < backup.sql</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 15: Performance -->
+<div data-topic="db-performance">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">15</div><h3 class="lesson-title">Performance Optimization</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Optimasi performa database sangat penting untuk aplikasi dengan traffic tinggi.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- ANALYZE query execution</span>
+<span class="keyword">EXPLAIN ANALYZE</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> email <span class="operator">=</span> <span class="string">'test@email.com'</span>;
+
+<span class="comment">-- Avoid SELECT *</span>
+<span class="comment">-- Bad</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users;
+
+<span class="comment">-- Good</span>
+<span class="keyword">SELECT</span> id, name, email <span class="keyword">FROM</span> users;
+
+<span class="comment">-- Use LIMIT for pagination</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> posts <span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">20</span> <span class="keyword">OFFSET</span> <span class="number">0</span>;
+
+<span class="comment">-- Use EXISTS instead of IN for subqueries</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users u
+<span class="keyword">WHERE EXISTS</span> (<span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> posts p <span class="keyword">WHERE</span> p.user_id <span class="operator">=</span> u.id);
+
+<span class="comment">-- Batch inserts</span>
+<span class="keyword">INSERT INTO</span> users (name, email) <span class="keyword">VALUES</span>
+  (<span class="string">'User 1'</span>, <span class="string">'user1@email.com'</span>),
+  (<span class="string">'User 2'</span>, <span class="string">'user2@email.com'</span>),
+  (<span class="string">'User 3'</span>, <span class="string">'user3@email.com'</span>);
+
+<span class="comment">-- Connection pooling configuration</span>
+<span class="comment">-- Di aplikasi: gunakan pool, bukan single connection</span></code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Tips Optimasi:</strong><br>
+            - Index kolom yang sering di-query<br>
+            - Hindari N+1 query problem<br>
+            - Gunakan connection pooling<br>
+            - Monitor slow queries<br>
+            - Denormalize jika perlu (untuk read-heavy)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 16: Security -->
+<div data-topic="db-security">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">16</div><h3 class="lesson-title">Database Security</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Keamanan database mencakup akses control, encryption, dan perlindungan dari serangan.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- Create limited user (principle of least privilege)</span>
+<span class="keyword">CREATE USER</span> app_user <span class="keyword">WITH PASSWORD</span> <span class="string">'secure_password'</span>;
+
+<span class="comment">-- Grant specific permissions only</span>
+<span class="keyword">GRANT SELECT, INSERT, UPDATE, DELETE ON</span> users <span class="keyword">TO</span> app_user;
+<span class="keyword">GRANT USAGE, SELECT ON SEQUENCE</span> users_id_seq <span class="keyword">TO</span> app_user;
+
+<span class="comment">-- Revoke unnecessary permissions</span>
+<span class="keyword">REVOKE ALL ON</span> users <span class="keyword">FROM PUBLIC</span>;
+
+<span class="comment">-- Row Level Security (PostgreSQL)</span>
+<span class="keyword">ALTER TABLE</span> posts <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+<span class="keyword">CREATE POLICY</span> user_posts_policy <span class="keyword">ON</span> posts
+  <span class="keyword">USING</span> (user_id <span class="operator">=</span> current_user_id());
+
+<span class="comment">-- Parameterized queries prevent SQL injection</span>
+<span class="comment">-- BAD (SQL Injection vulnerable!)</span>
+<span class="keyword">const</span> query = <span class="string">`SELECT * FROM users WHERE id = ${userId}`</span>;
+
+<span class="comment">-- GOOD (Parameterized)</span>
+<span class="keyword">const</span> query = <span class="string">'SELECT * FROM users WHERE id = $1'</span>;
+<span class="keyword">const</span> result = <span class="keyword">await</span> pool.<span class="function">query</span>(query, [userId]);</code></pre></div>
+          </div>
+          <div class="info-box">
+            <strong>Security Checklist:</strong><br>
+            - Jangan root/superuser di aplikasi<br>
+            - Encrypt sensitive data (passwords, credit cards)<br>
+            - Gunakan SSL untuk connection<br>
+            - Backup encryption<br>
+            - Regular security updates
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 17: Choosing Database -->
+<div data-topic="db-choose">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">17</div><h3 class="lesson-title">Memilih Database yang Tepat</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>PostgreSQL</h4>
+              <ul>
+                <li>ACID compliant</li>
+                <li>Complex queries</li>
+                <li>JSON support</li>
+                <li>Great for: Apps with complex data</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>MySQL</h4>
+              <ul>
+                <li>Most popular</li>
+                <li>Easy to start</li>
+                <li>Good performance</li>
+                <li>Great for: Web apps, CMS</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>MongoDB</h4>
+              <ul>
+                <li>Flexible schema</li>
+                <li>Horizontal scaling</li>
+                <li>JSON documents</li>
+                <li>Great for: Real-time, content</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h4>Redis</h4>
+              <ul>
+                <li>In-memory</li>
+                <li>Extremely fast</li>
+                <li>Key-value store</li>
+                <li>Great for: Cache, sessions</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LESSON 18: Mini Project -->
+<div data-topic="db-mini-project">
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-info"><div class="lesson-number">18</div><h3 class="lesson-title">Praktik: Database Design untuk E-commerce</h3></div>
+        <div class="lesson-toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-content">
+          <p class="lesson-text">Desain database sederhana untuk aplikasi e-commerce dengan users, products, orders.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy" onclick="copyCode(this)">Salin</button></div>
+            <div class="code-content"><pre><code><span class="comment">-- Users table</span>
+<span class="keyword">CREATE TABLE</span> users (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span>,
+  email <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">UNIQUE NOT NULL</span>,
+  password <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">NOT NULL</span>,
+  created_at <span class="type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="comment">-- Products table</span>
+<span class="keyword">CREATE TABLE</span> products (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  name <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">NOT NULL</span>,
+  description <span class="type">TEXT</span>,
+  price <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>,
+  stock <span class="type">INTEGER DEFAULT</span> <span class="number">0</span>,
+  created_at <span class="type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="comment">-- Orders table</span>
+<span class="keyword">CREATE TABLE</span> orders (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  user_id <span class="type">INTEGER REFERENCES</span> users(id),
+  total <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>,
+  status <span class="type">VARCHAR</span>(<span class="number">50</span>) <span class="keyword">DEFAULT</span> <span class="string">'pending'</span>,
+  created_at <span class="type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="comment">-- Order items (many-to-many: orders <-> products)</span>
+<span class="keyword">CREATE TABLE</span> order_items (
+  id <span class="type">SERIAL PRIMARY KEY</span>,
+  order_id <span class="type">INTEGER REFERENCES</span> orders(id) <span class="keyword">ON DELETE CASCADE</span>,
+  product_id <span class="type">INTEGER REFERENCES</span> products(id),
+  quantity <span class="type">INTEGER NOT NULL</span>,
+  price <span class="type">DECIMAL</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>
+);
+
+<span class="comment">-- Create indexes for performance</span>
+<span class="keyword">CREATE INDEX</span> idx_orders_user <span class="keyword">ON</span> orders(user_id);
+<span class="keyword">CREATE INDEX</span> idx_order_items_order <span class="keyword">ON</span> order_items(order_id);
+<span class="keyword">CREATE INDEX</span> idx_products_price <span class="keyword">ON</span> products(price);</code></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const htmlEl = document.documentElement;
+    if (localStorage.getItem("theme") === "light") htmlEl.setAttribute("data-theme", "light");
+    themeToggle.addEventListener("click", () => {
+      if (htmlEl.getAttribute("data-theme") === "light") {
+        htmlEl.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        htmlEl.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    const mobileToggle = document.getElementById("mobileToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileToggle.addEventListener("click", () => mobileMenu.classList.toggle("open"));
+
+    document.querySelectorAll(".lesson-header").forEach(header => {
+      header.addEventListener("click", () => header.parentElement.classList.toggle("open"));
+    });
+
+    function copyCode(btn) {
+      const block = btn.closest(".code-block");
+      const code = block.querySelector("code")?.textContent || "";
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = original, 2000);
+      });
+    }
+
+    function hideLoading() {
+      const loading = document.getElementById("loading-screen");
+      if (loading) {
+        loading.classList.add("hidden");
+        setTimeout(() => loading.remove(), 500);
+      }
+    }
+
+    function initLoading() {
+      const minDisplayTime = 1200;
+      const startTime = Date.now();
+      const readyHandler = () => {
+        const elapsedTime = Date.now() - startTime;
+        setTimeout(hideLoading, Math.max(0, minDisplayTime - elapsedTime));
+      };
+      if (document.readyState === "complete") readyHandler();
+      else window.addEventListener("load", readyHandler);
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initLoading);
+    else initLoading();
+  </script>
+</body>
+</html>
