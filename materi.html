@@ -312,6 +312,18 @@
   </div>
 
   <script>
+    // Live time (Waktu Sekarang)
+    const liveTimeEl = document.getElementById('liveTime');
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const formatTime = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+
+    if (liveTimeEl) {
+      liveTimeEl.textContent = formatTime(new Date());
+      setInterval(() => {
+        liveTimeEl.textContent = formatTime(new Date());
+      }, 1000);
+    }
+
     const navbar = document.getElementById('navbar');
     const mobileToggle = document.getElementById('mobileToggle');
     const mobileMenu = document.getElementById('mobileMenu');

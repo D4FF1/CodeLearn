@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    .lang-switcher{display:flex;align-items:center;gap:8px;}
+    .lang-select{background: var(--card);border: 1px solid var(--border);color: var(--fg);padding: 8px 12px;border-radius: 10px;font-weight: 600;cursor:pointer;font-family: var(--font-display);font-size: 0.85rem;transition: var(--transition);}
+    .lang-select:hover{background: var(--card-hover);border-color: var(--accent);}
+
     :root {
       --bg: #06080d;
       --bg-secondary: #0d1117;
@@ -1022,64 +1026,53 @@
 
   <nav class="navbar" id="navbar">
     <div class="nav-container">
-      <a href="index.html" class="nav-logo">
+      <a href="#" class="nav-logo">
         <div class="logo-icon">CL</div>
-        <span>CodeLearn</span>
+        <span data-i18n="site_name">CodeLearn</span>
       </a>
 
       <ul class="nav-links">
-        <li>
-          <a href="index.html">Home</a>
-        </li>
+        <li><a href="#" data-i18n="nav_home">Home</a></li>
         
         <li>
-          <a href="#">
-            Frontend
-            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </a>
+          <a href="#" data-i18n="nav_frontend">Frontend</a>
           <div class="nav-dropdown">
-            <div class="dropdown-label">Markup & Style</div>
+            <div class="dropdown-label" data-i18n="dropdown_markup">Markup & Style</div>
             <a href="content/html.html">HTML</a>
             <a href="content/css.html">CSS</a>
-            <a href="content/responsive.html">Responsive Design</a>
+            <a href="content/responsive.html" data-i18n="dropdown_responsive">Responsive Design</a>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-label">Programming</div>
+            <div class="dropdown-label" data-i18n="dropdown_programming">Programming</div>
             <a href="content/js.html">JavaScript</a>
-            <a href="content/framework.html">Framework Frontend</a>
+            <a href="content/framework.html" data-i18n="dropdown_framework">Framework Frontend</a>
           </div>
         </li>
 
         <li>
-          <a href="#">
-            Backend
-            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </a>
+          <a href="#" data-i18n="nav_backend">Backend</a>
           <div class="nav-dropdown">
             <a href="content/api.html">API</a>
-            <a href="content/beckend.html">Backend Dev</a>
-            <a href="content/database.html">Database</a>
+            <a href="content/beckend.html" data-i18n="dropdown_backend_dev">Backend Dev</a>
+            <a href="content/database.html" data-i18n="dropdown_database">Database</a>
           </div>
         </li>
 
         <li>
-          <a href="#">
-            DevOps
-            <svg class="nav-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </a>
+          <a href="#" data-i18n="nav_devops">DevOps</a>
           <div class="nav-dropdown">
             <a href="content/git.html">Git & GitHub</a>
-            <a href="content/deployment.html">Deployment</a>
+            <a href="content/deployment.html" data-i18n="dropdown_deployment">Deployment</a>
           </div>
         </li>
       </ul>
 
       <div class="nav-actions">
+        <div class="lang-switcher">
+          <select id="langSelect" class="lang-select">
+            <option value="id">🇮🇩 Indonesia</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+        </div>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"/>
@@ -1105,23 +1098,23 @@
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-section">
-      <div class="mobile-menu-title">Frontend</div>
+      <div class="mobile-menu-title" data-i18n="mobile_frontend">Frontend</div>
       <a href="content/html.html">HTML</a>
       <a href="content/css.html">CSS</a>
-      <a href="content/responsive.html">Responsive Design</a>
+      <a href="content/responsive.html" data-i18n="mobile_responsive">Responsive Design</a>
       <a href="content/js.html">JavaScript</a>
-      <a href="content/framework.html">Framework Frontend</a>
+      <a href="content/framework.html" data-i18n="mobile_framework">Framework Frontend</a>
     </div>
     <div class="mobile-menu-section">
-      <div class="mobile-menu-title">Backend</div>
+      <div class="mobile-menu-title" data-i18n="mobile_backend">Backend</div>
       <a href="content/api.html">API</a>
-      <a href="content/beckend.html">Backend Development</a>
-      <a href="content/database.html">Database</a>
+      <a href="content/beckend.html" data-i18n="mobile_backend_dev">Backend Development</a>
+      <a href="content/database.html" data-i18n="mobile_database">Database</a>
     </div>
     <div class="mobile-menu-section">
-      <div class="mobile-menu-title">DevOps</div>
+      <div class="mobile-menu-title" data-i18n="mobile_devops">DevOps</div>
       <a href="content/git.html">Git & GitHub</a>
-      <a href="content/deployment.html">Deployment</a>
+      <a href="content/deployment.html" data-i18n="mobile_deployment">Deployment</a>
     </div>
   </div>
 
@@ -1132,17 +1125,17 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
-        Platform Belajar Web Development
+        <span data-i18n="hero_badge">Platform Belajar Web Development</span>
       </div>
-      <h1>Belajar Web Development <span class="highlight">dari Dasar</span></h1>
-      <p>Tutorial lengkap dari HTML, CSS, JavaScript hingga Backend dan Deployment. Pelajari skill yang dibutuhkan industri dengan materi terstruktur dan mudah dipahami.</p>
+      <h1><span data-i18n="hero_title_part1">Belajar Web Development</span> <span class="highlight" data-i18n="hero_title_part2">dari Dasar</span></h1>
+      <p data-i18n="hero_desc">Tutorial lengkap dari HTML, CSS, JavaScript hingga Backend dan Deployment. Pelajari skill yang dibutuhkan industri dengan materi terstruktur dan mudah dipahami.</p>
       <div class="hero-buttons">
         <a href="content/html.html" class="btn btn-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
           </svg>
-          Mulai Belajar
+          <span data-i18n="btn_start">Mulai Belajar</span>
         </a>
         <a href="#courses" class="btn btn-secondary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1150,21 +1143,21 @@
             <line x1="3" y1="9" x2="21" y2="9"/>
             <line x1="9" y1="21" x2="9" y2="9"/>
           </svg>
-          Lihat Kursus
+          <span data-i18n="btn_courses">Lihat Kursus</span>
         </a>
       </div>
       <div class="hero-stats">
         <div class="stat-item">
           <div class="stat-value">8+</div>
-          <div class="stat-label">Materi Lengkap</div>
+          <div class="stat-label" data-i18n="stat_materials">Materi Lengkap</div>
         </div>
         <div class="stat-item">
           <div class="stat-value">150+</div>
-          <div class="stat-label">Lessons</div>
+          <div class="stat-label" data-i18n="stat_lessons">Lessons</div>
         </div>
         <div class="stat-item">
           <div class="stat-value">Free</div>
-          <div class="stat-label">100% Gratis</div>
+          <div class="stat-label" data-i18n="stat_free">100% Gratis</div>
         </div>
       </div>
     </div>
@@ -1173,8 +1166,8 @@
   <!-- Courses Section -->
   <section class="section" id="courses">
     <div class="section-header">
-      <h2 class="section-title">Materi Pembelajaran</h2>
-      <p class="section-desc">Pelajari teknologi web modern dengan kurikulum yang terstruktur dari dasar hingga mahir.</p>
+      <h2 class="section-title" data-i18n="courses_title">Materi Pembelajaran</h2>
+      <p class="section-desc" data-i18n="courses_desc">Pelajari teknologi web modern dengan kurikulum yang terstruktur dari dasar hingga mahir.</p>
     </div>
 
     <div class="course-grid">
@@ -1185,16 +1178,10 @@
           </svg>
         </div>
         <h3>HTML</h3>
-        <p>Pelajari struktur dasar website dengan HTML5, semantic elements, forms, dan accessibility.</p>
+        <p data-i18n="html_desc">Pelajari struktur dasar website dengan HTML5, semantic elements, forms, dan accessibility.</p>
         <div class="course-meta">
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            25 Lessons
-          </span>
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            3 Jam
-          </span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 25 Lessons</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 3 Jam</span>
         </div>
       </a>
 
@@ -1205,16 +1192,10 @@
           </svg>
         </div>
         <h3>CSS</h3>
-        <p>Kuasai styling website dengan CSS3, Flexbox, Grid, Animations, dan Responsive Design.</p>
+        <p data-i18n="css_desc">Kuasai styling website dengan CSS3, Flexbox, Grid, Animations, dan Responsive Design.</p>
         <div class="course-meta">
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            20 Lessons
-          </span>
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            4 Jam
-          </span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 20 Lessons</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 4 Jam</span>
         </div>
       </a>
 
@@ -1225,16 +1206,10 @@
           </svg>
         </div>
         <h3>JavaScript</h3>
-        <p>Pelajari programming dengan JavaScript: DOM, Events, Async, API, dan modern ES6+.</p>
+        <p data-i18n="js_desc">Pelajari programming dengan JavaScript: DOM, Events, Async, API, dan modern ES6+.</p>
         <div class="course-meta">
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            25 Lessons
-          </span>
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            5 Jam
-          </span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 25 Lessons</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 5 Jam</span>
         </div>
       </a>
 
@@ -1245,16 +1220,10 @@
           </svg>
         </div>
         <h3>Git & GitHub</h3>
-        <p>Kuasai version control dengan Git: branching, merge, pull request, dan collaboration.</p>
+        <p data-i18n="git_desc">Kuasai version control dengan Git: branching, merge, pull request, dan collaboration.</p>
         <div class="course-meta">
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            20 Lessons
-          </span>
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            2 Jam
-          </span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 20 Lessons</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 2 Jam</span>
         </div>
       </a>
 
@@ -1264,17 +1233,11 @@
             <path d="M12 1.85c-.27 0-.55.07-.78.2l-7.44 4.3c-.48.28-.78.8-.78 1.36v8.58c0 .56.3 1.08.78 1.36l1.95 1.12c.95.46 1.27.47 1.71.47 1.4 0 2.21-.85 2.21-2.33V8.44c0-.12-.1-.22-.22-.22H8.5c-.13 0-.23.1-.23.22v8.47c0 .66-.68 1.31-1.77.76L4.45 16.5c-.07-.04-.11-.11-.11-.19V7.73c0-.08.04-.16.11-.19l7.44-4.3c.06-.04.14-.04.21 0l7.44 4.3c.07.03.11.11.11.19v8.58c0 .08-.04.15-.11.19l-7.44 4.29c-.07.04-.15.04-.22 0l-1.88-1.12c-.06-.03-.13-.04-.19-.01-.53.3-.63.34-1.13.51-.12.04-.31.11.07.32l2.48 1.47c.24.14.5.21.78.21s.54-.07.78-.21l7.44-4.29c.48-.28.78-.8.78-1.36V7.71c0-.56-.3-1.08-.78-1.36l-7.44-4.3c-.23-.13-.5-.2-.78-.2z"/>
           </svg>
         </div>
-        <h3>Backend Development</h3>
-        <p>Pelajari Node.js, Express.js, REST API, Authentication, dan best practices.</p>
+        <h3 data-i18n="backend_title">Backend Development</h3>
+        <p data-i18n="backend_desc">Pelajari Node.js, Express.js, REST API, Authentication, dan best practices.</p>
         <div class="course-meta">
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            18 Lessons
-          </span>
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            4 Jam
-          </span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 18 Lessons</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 4 Jam</span>
         </div>
       </a>
 
@@ -1284,17 +1247,11 @@
             <path d="M22.2 14.4L21 13.7c.1-.4.1-.8.1-1.3l-.1-1.3 1.2-.7c.4-.2.5-.6.3-1l-.7-1.2c-.2-.4-.6-.5-1-.3l-1.2.7c-.4-.3-.8-.5-1.2-.7l-.1-1.4c0-.4-.4-.8-.9-.8h-1.4c-.5 0-.9.4-.9.8l-.1 1.4c-.4.2-.8.4-1.2.7l-1.2-.7c-.4-.2-.8-.1-1 .3l-.7 1.2c-.2.4-.1.8.3 1l1.2.7v1.3l-.1 1.3-1.2.7c-.4.2-.5.6-.3 1l.7 1.2c.2.4.6.5 1 .3l1.2-.7c.4.3.8.5 1.2.7l.1 1.4c0 .4.4.8.9.8h1.4c.5 0 .9-.4.9-.8l.1-1.4c.4-.2.8-.4 1.2-.7l1.2.7c.4.2.8.1 1-.3l.7-1.2c.2-.4.1-.8-.3-1zM16 13.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM5.5 2C3.6 2 2 3.6 2 5.5S3.6 9 5.5 9 9 7.4 9 5.5 7.4 2 5.5 2zm0 5C4.7 7 4 6.3 4 5.5S4.7 4 5.5 4 7 4.7 7 5.5 6.3 7 5.5 7z"/>
           </svg>
         </div>
-        <h3>Deployment</h3>
-        <p>Pelajari cara deploy aplikasi: Vercel, Netlify, Docker, CI/CD, dan cloud platforms.</p>
+        <h3 data-i18n="deployment_title">Deployment</h3>
+        <p data-i18n="deployment_desc">Pelajari cara deploy aplikasi: Vercel, Netlify, Docker, CI/CD, dan cloud platforms.</p>
         <div class="course-meta">
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            18 Lessons
-          </span>
-          <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            3 Jam
-          </span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 18 Lessons</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 3 Jam</span>
         </div>
       </a>
     </div>
@@ -1302,10 +1259,128 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <p>CodeLearn - Belajar Web Development dengan materi lengkap dan terstruktur.</p>
+    <p data-i18n="footer_text">CodeLearn - Belajar Web Development dengan materi lengkap dan terstruktur.</p>
+    <p style="margin-top: 8px; color: var(--fg-muted); font-family: var(--font-mono); font-size: 0.85rem;">
+      <span data-i18n="current_time">Waktu Sekarang</span>: <span id="liveTime">--:--:--</span>
+    </p>
   </footer>
 
   <script>
+    // ===== MULTI LANGUAGE SYSTEM =====
+    const translations = {
+      id: {
+        site_name: "CodeLearn",
+        nav_home: "Home",
+        nav_frontend: "Frontend",
+        nav_backend: "Backend",
+        nav_devops: "DevOps",
+        dropdown_markup: "Markup & Style",
+        dropdown_responsive: "Responsive Design",
+        dropdown_programming: "Programming",
+        dropdown_framework: "Framework Frontend",
+        dropdown_backend_dev: "Backend Dev",
+        dropdown_database: "Database",
+        dropdown_deployment: "Deployment",
+        mobile_frontend: "Frontend",
+        mobile_responsive: "Responsive Design",
+        mobile_framework: "Framework Frontend",
+        mobile_backend: "Backend",
+        mobile_backend_dev: "Backend Development",
+        mobile_database: "Database",
+        mobile_devops: "DevOps",
+        mobile_deployment: "Deployment",
+        hero_badge: "Platform Belajar Web Development",
+        hero_title_part1: "Belajar Web Development",
+        hero_title_part2: "dari Dasar",
+        hero_desc: "Tutorial lengkap dari HTML, CSS, JavaScript hingga Backend dan Deployment. Pelajari skill yang dibutuhkan industri dengan materi terstruktur dan mudah dipahami.",
+        btn_start: "Mulai Belajar",
+        btn_courses: "Lihat Kursus",
+        stat_materials: "Materi Lengkap",
+        stat_lessons: "Lessons",
+        stat_free: "100% Gratis",
+        courses_title: "Materi Pembelajaran",
+        courses_desc: "Pelajari teknologi web modern dengan kurikulum yang terstruktur dari dasar hingga mahir.",
+        html_desc: "Pelajari struktur dasar website dengan HTML5, semantic elements, forms, dan accessibility.",
+        css_desc: "Kuasai styling website dengan CSS3, Flexbox, Grid, Animations, dan Responsive Design.",
+        js_desc: "Pelajari programming dengan JavaScript: DOM, Events, Async, API, dan modern ES6+.",
+        git_desc: "Kuasai version control dengan Git: branching, merge, pull request, dan collaboration.",
+        backend_title: "Backend Development",
+        backend_desc: "Pelajari Node.js, Express.js, REST API, Authentication, dan best practices.",
+        deployment_title: "Deployment",
+        deployment_desc: "Pelajari cara deploy aplikasi: Vercel, Netlify, Docker, CI/CD, dan cloud platforms.",
+        footer_text: "CodeLearn - Belajar Web Development dengan materi lengkap dan terstruktur.",
+        current_time: "Waktu Sekarang"
+      },
+      en: {
+        site_name: "CodeLearn",
+        nav_home: "Home",
+        nav_frontend: "Frontend",
+        nav_backend: "Backend",
+        nav_devops: "DevOps",
+        dropdown_markup: "Markup & Style",
+        dropdown_responsive: "Responsive Design",
+        dropdown_programming: "Programming",
+        dropdown_framework: "Frontend Framework",
+        dropdown_backend_dev: "Backend Dev",
+        dropdown_database: "Database",
+        dropdown_deployment: "Deployment",
+        mobile_frontend: "Frontend",
+        mobile_responsive: "Responsive Design",
+        mobile_framework: "Frontend Framework",
+        mobile_backend: "Backend",
+        mobile_backend_dev: "Backend Development",
+        mobile_database: "Database",
+        mobile_devops: "DevOps",
+        mobile_deployment: "Deployment",
+        hero_badge: "Web Development Learning Platform",
+        hero_title_part1: "Learn Web Development",
+        hero_title_part2: "from Scratch",
+        hero_desc: "Complete tutorials from HTML, CSS, JavaScript to Backend and Deployment. Learn industry-required skills with structured and easy-to-understand materials.",
+        btn_start: "Start Learning",
+        btn_courses: "View Courses",
+        stat_materials: "Complete Materials",
+        stat_lessons: "Lessons",
+        stat_free: "100% Free",
+        courses_title: "Learning Materials",
+        courses_desc: "Learn modern web technologies with a structured curriculum from basics to advanced.",
+        html_desc: "Learn basic website structure with HTML5, semantic elements, forms, and accessibility.",
+        css_desc: "Master website styling with CSS3, Flexbox, Grid, Animations, and Responsive Design.",
+        js_desc: "Learn programming with JavaScript: DOM, Events, Async, API, and modern ES6+.",
+        git_desc: "Master version control with Git: branching, merge, pull requests, and collaboration.",
+        backend_title: "Backend Development",
+        backend_desc: "Learn Node.js, Express.js, REST API, Authentication, and best practices.",
+        deployment_title: "Deployment",
+        deployment_desc: "Learn how to deploy applications: Vercel, Netlify, Docker, CI/CD, and cloud platforms.",
+        footer_text: "CodeLearn - Learn Web Development with complete and structured materials.",
+        current_time: "Current Time"
+      }
+    };
+
+    // Apply language to all elements with data-i18n attribute
+    function applyLanguage(lang) {
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+            element.placeholder = translations[lang][key];
+          } else {
+            element.innerHTML = translations[lang][key];
+          }
+        }
+      });
+      localStorage.setItem('preferred_language', lang);
+    }
+
+    // Initialize language selector
+    const langSelect = document.getElementById('langSelect');
+    const savedLang = localStorage.getItem('preferred_language') || 'id';
+    langSelect.value = savedLang;
+    applyLanguage(savedLang);
+
+    langSelect.addEventListener('change', (e) => {
+      applyLanguage(e.target.value);
+    });
+
     // ===== LOADING SCREEN ANIMATION =====
     (function() {
       const loadingScreen = document.getElementById('loadingScreen');
@@ -1372,12 +1447,10 @@
 
       // Run loading sequence
       async function runLoadingSequence() {
-        // Step 1: First command
         await showLine('line1');
         await typeText(cmd1, 'npm run start', 60);
         setProgress(20);
 
-        // Step 2: Status line
         await new Promise(r => setTimeout(r, 300));
         await showLine('line2');
         await typeText(statusText, "'loading...'", 40);
@@ -1386,7 +1459,6 @@
         markDone(checkAssets, assetText);
         setProgress(50);
 
-        // Step 3: Import line
         await new Promise(r => setTimeout(r, 300));
         await showLine('line3');
         setProgress(70);
@@ -1394,7 +1466,6 @@
         markDone(checkData, dataText);
         setProgress(85);
 
-        // Step 4: Ready line
         await new Promise(r => setTimeout(r, 300));
         await showLine('line4');
         await typeText(readyText, 'true', 40);
@@ -1402,12 +1473,10 @@
         await new Promise(r => setTimeout(r, 300));
         markDone(checkReady, readyCheckText);
 
-        // Hide loading screen
         await new Promise(r => setTimeout(r, 600));
         loadingScreen.classList.add('hidden');
       }
 
-      // Start loading when DOM ready
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', runLoadingSequence);
       } else {
@@ -1461,15 +1530,17 @@
       }
     });
 
-    // Set active state based on current page
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    
-    document.querySelectorAll(".nav-dropdown a, .mobile-menu a").forEach(link => {
-      const href = link.getAttribute("href");
-      if (href === currentPage) {
-        link.classList.add("active");
-      }
-    });
+    // Live time (Waktu Sekarang)
+    const liveTimeEl = document.getElementById('liveTime');
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const formatTime = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+
+    if (liveTimeEl) {
+      liveTimeEl.textContent = formatTime(new Date());
+      setInterval(() => {
+        liveTimeEl.textContent = formatTime(new Date());
+      }, 1000);
+    }
   </script>
 </body>
 </html>
