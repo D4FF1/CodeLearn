@@ -378,6 +378,351 @@
       .nav-links { display: none; }
       .mobile-toggle { display: flex; }
     }
+
+    /* ===== FOOTER STYLES ===== */
+.site-footer {
+  position: relative;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: 80px 24px 30px;
+  margin-top: auto;
+  overflow: hidden;
+}
+
+/* Background Effects */
+.footer-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0.08;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+  pointer-events: none;
+}
+
+.footer-glow-orb {
+  position: absolute;
+  bottom: -150px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 217, 160, 0.08) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Grid Layout */
+.footer-content {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1.6fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+/* Column Styles */
+.footer-col h4.footer-heading {
+  color: var(--fg);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  position: relative;
+  padding-left: 14px;
+}
+
+.footer-col h4.footer-heading::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* Brand Column */
+.footer-logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.logo-box {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #000;
+  font-size: 1rem;
+}
+
+.brand-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.footer-desc {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+.system-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(0, 217, 160, 0.05);
+  border: 1px solid rgba(0, 217, 160, 0.2);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulseStatus 2s infinite;
+}
+
+@keyframes pulseStatus {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Links */
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: var(--fg-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.footer-links a .arrow {
+  opacity: 0;
+  transform: translateX(-5px);
+  color: var(--accent);
+  transition: var(--transition);
+  font-family: var(--font-mono);
+  font-weight: bold;
+}
+
+.footer-links a:hover {
+  color: var(--fg);
+  transform: translateX(4px);
+}
+
+.footer-links a:hover .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Terminal Newsletter */
+.newsletter-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.newsletter-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+}
+
+.newsletter-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 8px;
+}
+
+.newsletter-text {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  margin-bottom: 20px;
+}
+
+.terminal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: var(--transition);
+}
+
+.input-group:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 217, 160, 0.1);
+}
+
+.prompt {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  margin-right: 10px;
+  user-select: none;
+}
+
+.terminal-form input {
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  width: 100%;
+  outline: none;
+}
+
+.terminal-form input::placeholder {
+  color: rgba(125, 133, 144, 0.5);
+}
+
+.btn-run {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.btn-run:hover {
+  background: var(--accent-secondary);
+  transform: translateY(-2px);
+}
+
+.form-feedback {
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--success);
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.form-feedback.show {
+  height: 20px;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+/* Bottom Bar */
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.copyright {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+.social-icons {
+  display: flex;
+  gap: 12px;
+}
+
+.social-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.social-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0, 217, 160, 0.05);
+  transform: translateY(-3px);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+}
   </style>
 </head>
 <body>
@@ -436,7 +781,7 @@
           </a>
           <div class="nav-dropdown">
             <a href="api.html">API</a>
-            <a href="beckend.html">Backend Dev</a>
+            <a href="backend.html">Backend Dev</a>
             <a href="database.html">Database</a>
           </div>
         </li>
@@ -492,7 +837,7 @@
     <div class="mobile-menu-section">
       <div class="mobile-menu-title">Backend</div>
       <a href="api.html">API</a>
-      <a href="beckend.html">Backend Development</a>
+      <a href="backend.html">Backend Development</a>
       <a href="database.html">Database</a>
     </div>
     <div class="mobile-menu-section">
@@ -1505,6 +1850,100 @@ app.<span class="function">listen</span>(<span class="number">3000</span>, () =>
 
   </div>
 
+  <!-- ===== FOOTER SECTION ===== -->
+<footer class="site-footer">
+  <!-- Background Decorative Elements -->
+  <div class="footer-grid-bg"></div>
+  <div class="footer-glow-orb"></div>
+
+  <div class="footer-container">
+    <div class="footer-content">
+      
+      <!-- Kolom 1: Brand -->
+      <div class="footer-col footer-brand-col">
+        <a href="#" class="footer-logo-wrapper">
+          <div class="logo-box">CL</div>
+          <span class="brand-text">CodeLearn</span>
+        </a>
+        <p class="footer-desc">
+          Platform belajar web development modern dengan kurikulum terstruktur. Dari HTML dasar hingga Deployment production.
+        </p>
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span class="status-text">System Operational</span>
+        </div>
+      </div>
+
+      <!-- Kolom 2: Learning Links -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Learning</h4>
+        <ul class="footer-links">
+          <li><a href="html.html"><span class="arrow">→</span> HTML5 Structure</a></li>
+          <li><a href="css.html"><span class="arrow">→</span> CSS3 Styling</a></li>
+          <li><a href="js.html"><span class="arrow">→</span> JavaScript ES6+</a></li>
+          <li><a href="react.html"><span class="arrow">→</span> React & Vue</a></li>
+        </ul>
+      </div>
+
+      <!-- Kolom 3: Resources -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Resources</h4>
+        <ul class="footer-links">
+          <li><a href="#"><span class="arrow">→</span> Documentation</a></li>
+          <li><a href="#"><span class="arrow">→</span> Community Forum</a></li>
+          <li><a href="#"><span class="arrow">→</span> Career Guide</a></li>
+          <li><a href="#"><span class="arrow">→</span> Open Source</a></li>
+        </ul>
+      </div>
+
+      <!-- Kolom 4: Terminal Newsletter -->
+      <div class="footer-col">
+        <div class="newsletter-card">
+          <div class="newsletter-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span>Weekly Digest</span>
+          </div>
+          <p class="newsletter-text">Dapatkan snippet coding terbaru.</p>
+          
+          <form class="terminal-form" id="newsletterForm">
+            <div class="input-group">
+              <span class="prompt">user@codelearn:~$</span>
+              <input type="email" placeholder="subscribe_email..." required>
+            </div>
+            <button type="submit" class="btn-run">
+              <span>RUN</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 12 19 12"></polyline><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </form>
+          <div class="form-feedback" id="formFeedback"></div>
+        </div>
+      </div>
+
+    </div> <!-- End Footer Content -->
+
+    <!-- Footer Bottom Bar -->
+    <div class="footer-bottom">
+      <div class="copyright">
+        &copy; <span id="currentYear"></span> CodeLearn. Built with <span style="color:var(--accent)">&lt;/&gt;</span> and Passion.
+      </div>
+      <div class="social-icons">
+        <a href="#" aria-label="GitHub" class="social-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+        </a>
+        <a href="#" aria-label="Twitter" class="social-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+        </a>
+        <a href="#" aria-label="LinkedIn" class="social-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
   <script>
     const themeToggle = document.getElementById("themeToggle");
     const htmlEl = document.documentElement;
@@ -1558,6 +1997,40 @@ app.<span class="function">listen</span>(<span class="number">3000</span>, () =>
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initLoading);
     else initLoading();
+
+    // Update Tahun Copyright
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+// Simulasi Interaksi Newsletter
+const form = document.getElementById('newsletterForm');
+const feedback = document.getElementById('formFeedback');
+const input = form.querySelector('input');
+const btn = form.querySelector('button');
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  // Animasi Loading
+  const originalBtnContent = btn.innerHTML;
+  btn.innerHTML = 'PROCESSING...';
+  btn.style.opacity = '0.7';
+  
+  setTimeout(() => {
+    // Reset
+    btn.innerHTML = originalBtnContent;
+    btn.style.opacity = '1';
+    input.value = '';
+    
+    // Tampilkan Pesan Sukses ala Terminal
+    feedback.textContent = '> Success: User subscribed.';
+    feedback.classList.add('show');
+    
+    // Hilangkan pesan setelah 3 detik
+    setTimeout(() => {
+      feedback.classList.remove('show');
+    }, 3000);
+  }, 1000);
+});
   </script>
 </body>
 </html>
