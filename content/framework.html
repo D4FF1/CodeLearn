@@ -44,11 +44,124 @@
     html { scroll-behavior: smooth; scroll-padding-top: 80px; }
     body { font-family: var(--font-display); background: var(--bg); color: var(--fg); line-height: 1.7; overflow-x: hidden; }
 
-    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.5s ease, visibility 0.5s ease; }
-    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loader { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { margin-top: 16px; color: var(--fg-muted); }
+    /* ===== UPDATED LOADING SCREEN STYLES ===== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Atom Animation Container */
+    .atom-loader {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Nucleus (Center Dot) */
+    .nucleus {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 20px var(--accent);
+      z-index: 2;
+    }
+
+    /* Orbits (Elliptical Paths) */
+    .orbit {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid transparent;
+      border-top-color: var(--accent);
+      border-bottom-color: var(--accent);
+      border-radius: 50%;
+      animation: atom-spin 1.5s linear infinite;
+    }
+
+    .orbit:nth-child(2) {
+      transform: rotate(60deg);
+      animation-delay: -0.5s;
+    }
+    .orbit:nth-child(3) {
+      transform: rotate(-60deg);
+      animation-delay: -1s;
+    }
+
+    @keyframes atom-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Handle rotation for the other 2 orbits */
+    .orbit:nth-child(2) { animation-name: atom-spin-2; }
+    .orbit:nth-child(3) { animation-name: atom-spin-3; }
+
+    @keyframes atom-spin-2 {
+      0% { transform: rotate(60deg); }
+      100% { transform: rotate(420deg); }
+    }
+    @keyframes atom-spin-3 {
+      0% { transform: rotate(-60deg); }
+      100% { transform: rotate(300deg); }
+    }
+
+    /* Loading Text Styling */
+    .loading-content {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .loading-title {
+      font-family: var(--font-mono);
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+    .loading-subtitle {
+      font-family: var(--font-mono);
+      color: var(--fg-muted);
+      font-size: 0.75rem;
+      margin-top: 8px;
+    }
+    .loading-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+    }
+
+    /* Background Grid for Loading Screen */
+    .loading-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.2;
+      z-index: -1;
+    }
+    /* ===== END OF LOADING SCREEN STYLES ===== */
 
     .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
     .grid-pattern { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; }
@@ -377,9 +490,22 @@
   </style>
 </head>
 <body>
+  <!-- ===== UPDATED LOADING SCREEN HTML ===== -->
   <div id="loading-screen">
-    <div class="loader"></div>
-    <div class="loading-text">Memuat materi Framework Frontend...</div>
+    <div class="loading-grid"></div>
+    
+    <!-- Atom Loader Structure -->
+    <div class="atom-loader">
+      <div class="orbit"></div>
+      <div class="orbit"></div>
+      <div class="orbit"></div>
+      <div class="nucleus"></div>
+    </div>
+    
+    <div class="loading-content">
+      <div class="loading-title">INITIALIZING FRAMEWORK</div>
+      <div class="loading-subtitle">Compiling components<span class="loading-dots"></span></div>
+    </div>
   </div>
 
   <div class="bg-effects">
@@ -1414,7 +1540,7 @@
     });
   }
 
-  // LOADING SCREEN - dengan delay minimal 1.2 detik
+  // LOADING SCREEN LOGIC
   function hideLoading() {
     const loading = document.getElementById("loading-screen");
     if (loading) {
@@ -1423,9 +1549,8 @@
     }
   }
 
-  // Tunggu DOM ready, lalu tambah delay 1200ms
   function initLoading() {
-    const minDisplayTime = 1200; // minimal 1.2 detik tampil
+    const minDisplayTime = 1200;
     const startTime = Date.now();
 
     const readyHandler = () => {
@@ -1442,7 +1567,6 @@
     }
   }
 
-  // Mulai saat DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initLoading);
   } else {
